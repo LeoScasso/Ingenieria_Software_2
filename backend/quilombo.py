@@ -1,1 +1,2 @@
-print('jelou uorl')
+print('hola mundo uwu')
+print('bolas')
