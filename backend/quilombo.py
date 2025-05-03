@@ -1,4 +1,5 @@
 print('jelou uorl')
 name = 'jose'
 print(name)
-print('bolas')
+name = 12;
+print(name)
