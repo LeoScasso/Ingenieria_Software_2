@@ -15,6 +15,7 @@ app.register_blueprint(rental_history_bp, url_prefix='/api')
 app.register_blueprint(fleet_bp, url_prefix='/api')
 app.register_blueprint(profile_bp,url_prefix='/api')
 app.secret_key = 'grupo57'
+CORS(app) # This will allow all origins. For production, configure it more securely.
 
 if __name__ == '__main__':
     # The init_db logic (if you had one) would ideally be a separate CLI command or script.

@@ -1,10 +1,10 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import BackgroundLogo from './components/bgLogo/bgLogo';
-import Navbar from './components/navbar/navbar';
-import Home from './components/Home/Home'; // Assuming Home component path
-import Login from './components/auth/Login'; // Assuming Login component path}
-import Footer from './components/footer/footer';
+import React from 'react'
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import Home from './components/Home/Home' // Assuming Home component path
+import Login from './components/auth/Login' // Assuming Login component path}
+import BackgroundLogo from './components/bgLogo/bgLogo'
+import Footer from './components/footer/footer'
+import Navbar from './components/navbar/navbar'
 
 const AppRouter = () => {
   return (
@@ -17,7 +17,7 @@ const AppRouter = () => {
       </Routes>
       <Footer />
     </Router>
-  );
-};
+  )
+}
 
-export default AppRouter; 
+export default AppRouter
