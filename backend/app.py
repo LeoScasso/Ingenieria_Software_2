@@ -1,12 +1,20 @@
 from flask import Flask
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
+# Import Blueprints
+from app.controllers.hello_controller import hello_bp
+from app.controllers.auth_controller import auth_bp
+# db_utils is used by controllers, not directly here anymore unless for app-level setup
 
-@app.route('/api/hello')
-def hello():
-    return 'Hello world!'
+app = Flask(__name__)
+CORS(app) # This will allow all origins. For production, configure it more securely.
+
+# Register Blueprints
+app.register_blueprint(hello_bp, url_prefix='/api')
+app.register_blueprint(auth_bp, url_prefix='/api') # All auth routes will be under /api
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # The init_db logic (if you had one) would ideally be a separate CLI command or script.
+    # Example: Flask CLI command `flask init-db`
+    app.run(debug=True, port=5000)
+
