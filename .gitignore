@@ -19,7 +19,6 @@ backend/app/storage/*.json
 backend/app/storage/*.csv
 
 # archivos de configuración o debugging
-*.db
 .DS_Store
 .idea/
 .vscode/
