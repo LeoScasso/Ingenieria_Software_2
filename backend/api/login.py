@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import Table, select
-from db import engine, metadata
+from app.db import engine, metadata
 
 auth_bp = Blueprint('auth', __name__)
 
