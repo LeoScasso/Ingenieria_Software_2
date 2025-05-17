@@ -1,6 +1,5 @@
 import HeroSection from './heroSection';
 import FleetSection from './fleetSection';
-import Footer from '../footer/footer';
 
 const Home = () => {
   return (
