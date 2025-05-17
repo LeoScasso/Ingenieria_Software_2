@@ -7,7 +7,8 @@ from api.rental_history import rental_history_bp
 from api.fleet import fleet_bp
 from api.profile import profile_bp
 app = Flask(__name__)
-CORS(app) # This will allow all origins. For production, configure it more securely.
+app.secret_key = 'grupo57'
+CORS(app)  # This will allow all origins. For production, configure it more securely.
 
 # Register Blueprints
 app.register_blueprint(authentication_bp, url_prefix='/api') # All auth routes will be under /api
@@ -18,7 +19,5 @@ app.secret_key = 'grupo57'
 CORS(app) # This will allow all origins. For production, configure it more securely.
 
 if __name__ == '__main__':
-    # The init_db logic (if you had one) would ideally be a separate CLI command or script.
-    # Example: Flask CLI command `flask init-db`
     app.run(debug=True, port=5000)
 
