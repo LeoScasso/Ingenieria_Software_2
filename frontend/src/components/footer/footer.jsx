@@ -5,11 +5,11 @@ const Footer = () => {
     <Box sx={{ 
       backgroundColor: 'darkBlue', 
       color: 'white', 
-      py: 3,
+      py: 1,
       display: 'flex',
       alignItems: 'flex-start', // Alineación arriba para mejor distribución
       justifyContent: 'space-between',
-      px: 4
+      px: 1
     }}>
       {/* Bloque izquierdo (logo y textos) */}
       <Stack 
