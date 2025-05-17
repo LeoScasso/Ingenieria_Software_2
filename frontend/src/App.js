@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './App.css';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { theme } from './theme/theme';
+import AppRouter from './router';
+import { Box } from '@mui/material'
 
 function App() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fetch('http://localhost:5000/api/hello')
-      .then(response => response.text())
-      .then(data => setMessage(data));
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Landing Page</h1>
-        <p>{message}</p>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box className="App" sx={{
+        height: '100vh'
+      }}>
+        <AppRouter />
+      </Box>
+    </ThemeProvider>
   );
 }
 
