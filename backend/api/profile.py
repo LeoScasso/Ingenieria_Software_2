@@ -30,7 +30,7 @@ def profile():
                 'name' : result.name,
                 'last_name' : result.last_name,
                 'dni' : result.dni,
-                'mail' : result.mail,
+                'email' : result.email,
                 'phone_number' : result.phone_number
             }
         elif role == 'employee':
@@ -41,14 +41,14 @@ def profile():
                 'name' : result.name,
                 'last_name' : result.last_name,
                 'dni' : result.dni,
-                'mail' : result.mail,
+                'email' : result.email,
                 'phone_number' : result.phone_number,
                 'branch_name' : branch.name
             }
         else:
             data = {
                 'name' : result.name,
-                'mail' : result.mail
+                'email' : result.email
             }
         return jsonify(data)
 
