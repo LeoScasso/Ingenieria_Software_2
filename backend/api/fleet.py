@@ -138,6 +138,6 @@ def get_vehicles():
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
             )
     with engine.connect() as conn:
-        result = conn.execute(stmt).fetchall
+        result = conn.execute(stmt).fetchall()
     vehicles_list = [dict(row) for row in result]
     return jsonify(vehicles_list)
