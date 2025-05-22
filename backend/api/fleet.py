@@ -9,7 +9,7 @@ vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_conditions = Table('vehicle_conditions', metadata, autoload_with=engine)
 vehicle_categories = Table('vehicle_categories', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
-cancelations_policies = Table('cancelations_policies', metadata, autoload_with=engine)
+cancelation_policies = Table('cancelation_policies', metadata, autoload_with=engine)
 
 
 @fleet_bp.route('/vehicle_registration', methods=['POST'])
@@ -39,7 +39,7 @@ def vehicle_registration():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancelations_policies).where(cancelations_policies.c.name == data.get('policy'))
+        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('policy'))
         policy = conn.execute(stmt).fetchone()
 
         vehicle.update({
@@ -86,7 +86,7 @@ def update_vehicle():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancelations_policies).where(cancelations_policies.c.name == data.get('policy'))
+        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('policy'))
         policy = conn.execute(stmt).fetchone()
 
         new_fields = {
@@ -115,14 +115,14 @@ def get_vehicles():
             vehicle_brands.c.name.label('brand'),
             vehicle_categories.c.name.label('category'),
             vehicle_conditions.c.name.label('condition'),
-            cancelations_policies.c.name.label('policy'),
+            cancelation_policies.c.name.label('policy'),
             vehicle_models.c.year
             ).select_from(
                 vehicles
                 .join(vehicle_models, vehicles.c.model_id == vehicle_models.c.model_id)
                 .join(vehicle_categories, vehicles.c.category_id == vehicle_categories.c.category_id)
                 .join(vehicle_conditions, vehicles.c.condition == vehicle_conditions.c.condition_id)
-                .join(cancelations_policies, vehicles.c.cancelation_policy_id == cancelations_policies.c.policy_id)
+                .join(cancelation_policies, vehicles.c.cancelation_policy_id == cancelation_policies.c.policy_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
             )
     with engine.connect() as conn:
