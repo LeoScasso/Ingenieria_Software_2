@@ -8,7 +8,7 @@ vehicles = Table('vehicles', metadata, autoload_with=engine)
 vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_conditions = Table('vehicle_conditions', metadata, autoload_with=engine)
 vehicle_categories = Table('vehicle_categories', metadata, autoload_with=engine)
-cancellations_policies = Table('cancellations_policies', metadata, autoload_with=engine)
+cancelations_policies = Table('cancelations_policies', metadata, autoload_with=engine)
 
 
 @fleet_bp.route('/vehicle_registration', methods=['POST'])
@@ -19,7 +19,7 @@ def vehicle_registration():
         'number_plate' : data.get('number_plate'),
         'capacity' : data.get('capacity'),
         'price_per_day' : data.get('price_per_day'),
-        'minimun_rentat_days' : data.get('minimun_rentat_days')
+        'minimun_rental_days' : data.get('minimun_rental_days')
     }
 
     with engine.connect() as conn:
@@ -38,13 +38,13 @@ def vehicle_registration():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancellations_policies).where(cancellations_policies.c.name == data.get('policy'))
+        stmt = select(cancelations_policies).where(cancelations_policies.c.name == data.get('policy'))
         policy = conn.execute(stmt).fetchone()
 
         vehicle.update({
             'model_id' : model.model_id,
-            'cancellation_policy_id' : policy.policy_id,
-            'category_number' :category.category_id,
+            'cancelation_policy_id' : policy.policy_id,
+            'category_id' :category.category_id,
             'condition' : condition.condition_id
         })
 
