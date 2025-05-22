@@ -14,11 +14,15 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    errores = []
 
-    if not email or not password:
-        return {
-            jsonify({"message": "mail and password are required"})
-        }
+    if not email:
+        errores.append("Email requerido")
+    if not password:
+        errores.append("Contraseña requerida")
+
+    if errores:
+        return jsonify({"message": " / ".join(errores)}), 400
 
     user_sources = [
         (users, 'user', 'user_id'),
@@ -36,7 +40,7 @@ def login():
                     'message': 'Sesión iniciada correctamente',
                     'user_id': session['user_id'],
                     'user_role': session['user_role']
-                })
+                }), 200
     
     return {'error': 'Email o contraseña incorrectos'}
 
@@ -44,5 +48,4 @@ def login():
 @authentication_bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()    
-    return jsonify({'message': 'Sesión cerrada correctamente'})
-
+    return jsonify({'message': 'Sesión cerrada correctamente'}), 200
