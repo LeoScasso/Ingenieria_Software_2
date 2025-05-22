@@ -42,7 +42,7 @@ def login():
                     'user_role': session['user_role']
                 }), 200
     
-    return {'error': 'Email o contraseña incorrectos'}
+    return jsonify({'error': 'Email o contraseña incorrectos'}), 400
 
 
 @authentication_bp.route('/logout', methods=['POST'])

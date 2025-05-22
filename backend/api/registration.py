@@ -33,6 +33,6 @@ def registration():
             return jsonify({
                 'message':'Error, el email ya se encuentra registrado!'
             })
-        elif # Verificar contraseña?
+        # Verificar contraseña?
 
 
