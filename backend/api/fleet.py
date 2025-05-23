@@ -16,22 +16,61 @@ cancelation_policies = Table('cancelation_policies', metadata, autoload_with=eng
 def vehicle_registration():
     data = request.get_json()
 
+    data_check = {
+            'number_plate' : data.get('number_plate'),
+            'capacity' : data.get('capacity'),
+            'price_per_day' : data.get('price_per_day'),
+            'minimum_rental_days' : data.get('minimum_rental_days'),
+            'category' : data.get('category'),
+            'condition' : data.get('condition'),
+            'cancelation_policy' : data.get('cancelation_policy'),
+            'model' : data.get('model'),
+            'year' : data.get('year'),
+            'brand' : data.get('brand')
+        }
+
+    if any(value is None for value in data_check.values()):
+        return jsonify({
+            'message':'Error, faltan campos que completar'
+        })
+
     vehicle = {
         'number_plate' : data.get('number_plate'),
         'capacity' : data.get('capacity'),
         'price_per_day' : data.get('price_per_day'),
-        'minimum_rental_days' : data.get('minimum_rental_days')
+        'minimum_rental_days' : data.get('minimum_rental_days'),
     }
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
 
-        stmt = select(vehicle_models).where(
+        stmt_model = select(vehicle_models).where(
             and_(
                 vehicle_models.c.name == data.get('model'),
                 vehicle_models.c.year == data.get('year')
             )
         )
-        model = conn.execute(stmt).fetchone()
+        model = conn.execute(stmt_model).fetchone()
+
+        if not model:
+            stmt = select(vehicle_brands).where(vehicle_brands.c.name == data.get('brand'))
+            brand = conn.execute(stmt).fetchone()
+            if not brand:
+                new_brand = {
+                    'name': data.get('brand')
+                }
+                ins = insert(vehicle_brands).values(new_brand).returning(vehicle_brands.c.brand_id)
+                brand_id = conn.execute(ins).scalar()
+            else:
+                brand_id = brand.brand_id
+            new_model = {
+                'name': data.get('model'),
+                'year': data.get('year'),
+                'brand_id': brand_id
+            }
+            ins = insert(vehicle_models).values(new_model).returning(vehicle_models.c.model_id)
+            model_id = conn.execute(ins).scalar()
+        else:
+            model_id = model.model_id
 
         stmt = select(vehicle_categories).where(vehicle_categories.c.name == data.get('category'))
         category = conn.execute(stmt).fetchone()
@@ -39,11 +78,11 @@ def vehicle_registration():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('policy'))
+        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('cancelation_policy'))
         policy = conn.execute(stmt).fetchone()
 
         vehicle.update({
-            'model_id' : model.model_id,
+            'model_id' : model_id,
             'cancelation_policy_id' : policy.policy_id,
             'category_id' :category.category_id,
             'condition' : condition.condition_id
@@ -51,7 +90,7 @@ def vehicle_registration():
 
         stmt = insert(vehicles).values(vehicle)
         conn.execute(stmt)
-        conn.commit()
+        return jsonify({'message':'vehículo registrado con exito'}),200
 
 
 @fleet_bp.route('/categories', methods=['GET'])
@@ -103,6 +142,7 @@ def update_vehicle():
         stmt = update(vehicles).where(vehicles.c.number_plate == number_plate).values(new_fields)
         conn.execute(stmt)
         conn.commit()
+        return jsonify({ 'vehiculo editado con exito'}),200
 
 @fleet_bp.route('/get_vehicles',methods=['GET'])
 def get_vehicles():
