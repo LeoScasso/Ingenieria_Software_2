@@ -4,7 +4,7 @@ import Form from '../common/Form'
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    mail: '',
+    email: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -44,7 +44,7 @@ const Login = () => {
 
   const fields = [
     {
-      name: 'mail',
+      name: 'email',
       label: 'Correo Electrónico',
       type: 'email',
       value: formData.mail,
