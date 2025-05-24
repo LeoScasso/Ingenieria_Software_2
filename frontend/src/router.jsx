@@ -5,6 +5,7 @@ import Login from './components/auth/Login' // Assuming Login component path}
 import BackgroundLogo from './components/bgLogo/bgLogo'
 import Footer from './components/footer/footer'
 import Navbar from './components/navbar/navbar'
+import RegistrationForm from './components/registration/RegistrationForm' // Assuming RegistrationForm component path
 
 const AppRouter = () => {
   return (
@@ -14,6 +15,7 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<RegistrationForm />} />
       </Routes>
       <Footer />
     </Router>
