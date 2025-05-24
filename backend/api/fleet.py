@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, and_, update, join
+from sqlalchemy import Table, select, insert, and_, update, join, in_, or_
 from app.db import engine, metadata
+from datetime import datetime
 
 fleet_bp = Blueprint('fleet', __name__)
 
@@ -10,7 +11,8 @@ vehicle_conditions = Table('vehicle_conditions', metadata, autoload_with=engine)
 vehicle_categories = Table('vehicle_categories', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 cancelation_policies = Table('cancelation_policies', metadata, autoload_with=engine)
-
+branches = Table('branches', metadata, autoload_with=engine)
+reservations = Table('reservations', metadata, autoload_with=engine)
 
 @fleet_bp.route('/vehicle_registration', methods=['POST'])
 def vehicle_registration():
@@ -106,6 +108,17 @@ def get_categories():
 
 @fleet_bp.route('/update_vehicle', methods=['PUT'])
 def update_vehicle():
+    """ datos del request:
+        number_plate
+        model
+        year
+        category
+        condition
+        policy
+        capacity
+        price_per_day
+        minimum_rental_days
+    """
     data = request.get_json()
     number_plate = data.get('number_plate')
 
@@ -169,3 +182,53 @@ def get_vehicles():
         result = conn.execute(stmt).fetchall()
     vehicles_list = [dict(row) for row in result]
     return jsonify(vehicles_list)
+
+@fleet_bp.route('get_avaible_vehicles', methods=['GET'])
+def get_avaible_vehicles():
+    data = request.get_json()
+
+    branch = data.get('branch')
+    pickup_datetime = datetime.strptime(data.get('pickup_datetime'), '%Y-%m-%d').date()
+    return_datetime = datetime.strptime(data.get('return_datetime'), '%Y-%m-%d').date()
+    days =  (return_datetime - pickup_datetime).days
+    category = data.get('category')
+
+    with engine.begin() as conn:
+        stmt = select(vehicle_categories).where(vehicle_categories.c.name == category)
+        result = conn.execute(stmt).fetchone()
+        category_id = result.category_id
+
+        stmt = select(branches).where(branches.c.name == branch)
+        result = conn.execute(stmt).fetchone()
+        branch_id = result.branch_id
+
+        reserved_vehicles_subq = select(reservations.c.vehicle_id).where(
+            or_(
+                and_(
+                    reservations.c.pickup_datetime <= return_datetime,
+                    reservations.c.return_datetime >= pickup_datetime
+                )
+            )
+        ).subquery()
+        
+        stmt = select(
+            vehicles.c.vehicle_id,
+            vehicles.c.capacity,
+            vehicle_models.c.name.label('model'),
+            vehicle_brands.c.name.label('brand'),
+            vehicle_models.c.year,
+            (vehicles.c.price_per_day * days).label('cost'),
+            cancelation_policies.c.name
+        ).select_from(
+            vehicles
+                .join(vehicle_models, vehicle_models.c.model_id == vehicles.c.model_id)
+                .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
+                .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
+        ).where((vehicles.c.branch_id == branch_id) & (vehicles.c.category_id == category_id) & (vehicles.c.conditon == 1) 
+                & (vehicles.c.minimum_rantal_days <= days) & (~vehicles.c.vehicle_id.in_(reserved_vehicles_subq)))
+        
+        results = conn.execute(stmt).fetchall()
+
+        vehicles_list = [dict(row._mapping) for row in results]
+        return jsonify(vehicles_list)
+
