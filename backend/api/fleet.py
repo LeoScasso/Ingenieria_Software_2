@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, and_, update, join, in_, or_
+from sqlalchemy import Table, select, insert, and_, update, or_
 from app.db import engine, metadata
 from datetime import datetime
 
