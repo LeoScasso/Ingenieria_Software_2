@@ -18,6 +18,7 @@ const CustomForm = ({
   submitButtonText = 'Enviar',
   paperStyles = {},
   formStyles = {},
+  children,
 }) => {
   const theme = useTheme()
 
@@ -53,6 +54,8 @@ const CustomForm = ({
           justifyContent: 'center',
           backgroundColor: theme.palette.slateGray,
           borderRadius: 2,
+          maxWidth: 800,
+          margin: '0 auto',
           ...paperStyles,
         }}
       >
@@ -158,6 +161,11 @@ const CustomForm = ({
           >
             {submitButtonText}
           </Button>
+          {children && (
+            <Box sx={{ mt: 2 }}>
+              {children}
+            </Box>
+          )}
         </Box>
       </Paper>
     </Box>

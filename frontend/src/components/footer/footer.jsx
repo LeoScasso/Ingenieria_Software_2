@@ -37,18 +37,17 @@ const Footer = () => {
           Todos los derechos reservados
         </Typography>
       </Stack>
-      
-      {/* Texto principal centrado */}
+
       <Typography 
         variant="body2" 
         sx={{ 
           flexGrow: 1,
           textAlign: 'center',
           mx: 2,
-          alignSelf: 'center' // Centra verticalmente este elemento
+          alignSelf: 'center'
         }}
       >
-        INFO DE PIE DE PÁGINA + OPCIÓN PARA VER LAS SUCURSALES
+        INFO DE PIE DE PÁGINA
       </Typography>
     </Box>
   );
