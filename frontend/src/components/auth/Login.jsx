@@ -27,7 +27,7 @@ const Login = () => {
       const data = response.data
 
       localStorage.setItem('userId', data.user_id)
-      localStorage.setItem('role', data.role)
+      localStorage.setItem('role', data.user_role)
       alert(data.message)
       navigate('/')
     } catch (error) {
