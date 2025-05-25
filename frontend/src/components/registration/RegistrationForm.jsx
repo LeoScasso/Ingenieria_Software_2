@@ -123,7 +123,7 @@ const RegistrationForm = () => {
 
   return (
     <Form
-      title="Registro de Usuario"
+      title="Formulario de Registro"
       fields={fields}
       onSubmit={handleSubmit}
       submitButtonText="Registrarse"
