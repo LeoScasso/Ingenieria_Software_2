@@ -2,8 +2,12 @@ import React, { useState } from 'react'
 import { Typography, Box, useTheme } from '@mui/material'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
+import { useNavigate } from 'react-router-dom'
+
 
 const RegistrationForm = () => {
+  const navigate = useNavigate()
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -31,6 +35,7 @@ const RegistrationForm = () => {
       const response = await apiClient.post('/registration', formData);
       const data = response.data;
       alert(data.message);
+      navigate('/login');
     } catch (error) {
       if (error.response) {
         console.error('Registration failed - Server responded:', error.response.data);
