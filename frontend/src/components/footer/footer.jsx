@@ -37,18 +37,6 @@ const Footer = () => {
           Todos los derechos reservados
         </Typography>
       </Stack>
-
-      <Typography 
-        variant="body2" 
-        sx={{ 
-          flexGrow: 1,
-          textAlign: 'center',
-          mx: 2,
-          alignSelf: 'center'
-        }}
-      >
-        INFO DE PIE DE PÁGINA
-      </Typography>
     </Box>
   );
 };
