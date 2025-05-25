@@ -54,7 +54,7 @@ const CustomForm = ({
           justifyContent: 'center',
           backgroundColor: theme.palette.slateGray,
           borderRadius: 2,
-          maxWidth: 800,
+          maxWidth: 600,
           margin: '0 auto',
           ...paperStyles,
         }}
