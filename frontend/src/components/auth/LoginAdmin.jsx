@@ -40,6 +40,7 @@ export const LoginAdmin = () => {
       const data = response.data
       localStorage.setItem('userId', data.user_id)
       localStorage.setItem('role', data.user_role)
+      localStorage.setItem('name', data.user_name)
       alert(data.message)
       navigate('/')
     } catch (error) {
