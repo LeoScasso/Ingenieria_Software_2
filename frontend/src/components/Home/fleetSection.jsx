@@ -6,16 +6,29 @@ import {
   Grid,
   Typography,
 } from '@mui/material'
+import { useEffect, useState } from 'react'
+import apiClient from '../../middleware/axios'
 import { theme } from '../../theme/theme'
 
 const FleetSection = () => {
+  const [categories, setCategories] = useState([])
+
+  const getCategories = async () => {
+    const response = await apiClient.get('/categories')
+    console.log(response.data)
+    setCategories(response.data)
+  }
+
+  useEffect(() => {
+    getCategories()
+  }, [])
+
   return (
     <Box sx={{ backgroundColor: theme.palette.slateGray, py: 6, px: 4 }}>
       <Typography
         variant="h5"
         sx={{ color: 'white', mb: 4, textAlign: 'center' }}
       >
-        {' '}
         Nuestra flota de alquiler de vehículos
       </Typography>
 
@@ -26,7 +39,7 @@ const FleetSection = () => {
               <CardMedia
                 component="img"
                 image={'./logoAlquilapp.png'}
-                alt={category.name}
+                alt={category}
                 sx={{
                   height: 160,
                   objectFit: 'contain',
@@ -35,9 +48,8 @@ const FleetSection = () => {
               />
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  {category.name}
+                  {category}
                 </Typography>
-                <Typography variant="body2">{car.description}</Typography>
               </CardContent>
             </Card>
           </Grid>

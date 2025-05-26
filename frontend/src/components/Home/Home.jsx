@@ -1,13 +1,14 @@
-import HeroSection from './heroSection';
-import FleetSection from './fleetSection';
+import { Box } from '@mui/material'
+import FleetSection from './fleetSection'
+import HeroSection from './heroSection'
 
 const Home = () => {
   return (
-    <div>
+    <Box>
       <HeroSection />
       <FleetSection />
-    </div>
-  );
-};
+    </Box>
+  )
+}
 
-export default Home;
+export default Home
