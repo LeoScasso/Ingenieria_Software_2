@@ -32,6 +32,12 @@ export const Navbar = () => {
     }
   }
 
+  const handleClickLogin = () => {
+    window.confirm('¿Querés iniciar sesión como admin?')
+      ? (window.location.href = '/loginAdmin')
+      : (window.location.href = '/login')
+  }
+
   return (
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -68,7 +74,7 @@ export const Navbar = () => {
               {!hideLoginButton && (
                 <Button
                   component={Link}
-                  to="/login"
+                  onClick={handleClickLogin}
                   variant="contained"
                   color="primary"
                   sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
