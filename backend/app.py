@@ -17,7 +17,6 @@ app.register_blueprint(authentication_bp, url_prefix='/api') # All auth routes w
 app.register_blueprint(rental_history_bp, url_prefix='/api')
 app.register_blueprint(fleet_bp, url_prefix='/api')
 app.register_blueprint(profile_bp,url_prefix='/api')
-app.secret_key = 'grupo57'
 
 
 if __name__ == '__main__':
