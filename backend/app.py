@@ -9,7 +9,7 @@ from api.fleet import fleet_bp
 from api.profile import profile_bp
 app = Flask(__name__)
 app.secret_key = 'grupo57'
-CORS(app)  # This will allow all origins. For production, configure it more securely.
+CORS(app, supports_credentials=True)  
 
 # Register Blueprints
 app.register_blueprint(registration_bp, url_prefix='/api')
@@ -18,7 +18,7 @@ app.register_blueprint(rental_history_bp, url_prefix='/api')
 app.register_blueprint(fleet_bp, url_prefix='/api')
 app.register_blueprint(profile_bp,url_prefix='/api')
 app.secret_key = 'grupo57'
-CORS(app) # This will allow all origins. For production, configure it more securely.
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
