@@ -16,7 +16,6 @@ const Footer = () => {
         alignItems: { xs: 'center', sm: 'flex-start' },
         justifyContent: 'space-between',
         px: { xs: 1.5, sm: 2, md: 3 },
-        position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
