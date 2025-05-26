@@ -1,17 +1,36 @@
-import { AppBar, Toolbar, Button, Box } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { AppBar, Box, Button, Toolbar } from '@mui/material'
+import { Link, useLocation } from 'react-router-dom'
 
-const Navbar = () => {
-  const location = useLocation();
-  const hideRegisterButton = location.pathname === '/register';
-  const hideLoginButton = location.pathname === '/login';
+export const Navbar = () => {
+  const location = useLocation()
+  const hideRegisterButton = location.pathname === '/register'
+  const hideLoginButton =
+    location.pathname === '/login' || location.pathname === '/loginAdmin'
+
+  const handleClickLogin = () => {
+    if (window.confirm('¿Querés iniciar como administrador?')) {
+      console.log('Iniciando sesión como administrador')
+      window.location.href = '/loginAdmin'
+    } else {
+      console.log('Iniciando sesión como usuario')
+      window.location.href = '/login'
+    }
+  }
 
   return (
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {/* Logo */}
-        <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/logoAlquilapp.png" alt="Logo" style={{ height: 70, marginRight: 8 }} />
+        <Box
+          component={Link}
+          to="/"
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          <img
+            src="/logoAlquilapp.png"
+            alt="Logo"
+            style={{ height: 70, marginRight: 8 }}
+          />
         </Box>
 
         {/* Botones */}
@@ -19,9 +38,9 @@ const Navbar = () => {
           {!hideLoginButton && (
             <Button
               component={Link}
-              to="/login"
               variant="contained"
               color="primary"
+              onClick={() => handleClickLogin()}
               sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
             >
               Iniciar sesión
@@ -40,7 +59,5 @@ const Navbar = () => {
         </Box>
       </Toolbar>
     </AppBar>
-  );
-};
-
-export default Navbar;
+  )
+}

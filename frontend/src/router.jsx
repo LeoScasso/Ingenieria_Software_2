@@ -2,9 +2,10 @@ import React from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Home from './components/Home/Home' // Assuming Home component path
 import Login from './components/auth/Login' // Assuming Login component path}
+import { LoginAdmin } from './components/auth/LoginAdmin'
 import BackgroundLogo from './components/bgLogo/bgLogo'
 import Footer from './components/footer/footer'
-import Navbar from './components/navbar/navbar'
+import { Navbar } from './components/navbar/navbar'
 import RegistrationForm from './components/registration/RegistrationForm' // Assuming RegistrationForm component path
 
 const AppRouter = () => {
@@ -15,6 +16,7 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/loginAdmin" element={<LoginAdmin />} />
         <Route path="/register" element={<RegistrationForm />} />
       </Routes>
       <Footer />
