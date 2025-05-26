@@ -1,36 +1,36 @@
-import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-const Navbar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const hideRegisterButton = location.pathname === '/register';
-  const hideLoginButton = location.pathname === '/login';
+export const Navbar = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const hideRegisterButton = location.pathname === '/register'
+  const hideLoginButton = location.pathname === '/login'
 
-  const [userName, setUserName] = useState(null);
+  const [userName, setUserName] = useState(null)
 
   useEffect(() => {
-    const storedName = localStorage.getItem('name');
-    setUserName(storedName);
-  }, [location]);
+    const storedName = localStorage.getItem('name')
+    setUserName(storedName)
+  }, [location])
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/logout');
+      const response = await axios.post('http://localhost:5000/api/logout')
 
       // Limpiar local storage
-      localStorage.clear();
-      setUserName(null);
+      localStorage.clear()
+      setUserName(null)
       // Redirigir a la página de inicio
       navigate('/')
       //Alerta de mensaje retornado del back
-      alert(response.data.message);
+      alert(response.data.message)
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error al cerrar sesión:', error)
     }
-  };
+  }
 
   return (
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
