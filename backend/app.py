@@ -9,7 +9,7 @@ from api.fleet import fleet_bp
 from api.profile import profile_bp
 app = Flask(__name__)
 app.secret_key = 'grupo57'
-CORS(app, supports_credentials=True)  
+CORS(app, supports_credentials=True)
 
 # Register Blueprints
 app.register_blueprint(registration_bp, url_prefix='/api')

@@ -33,7 +33,7 @@ def login():
         for table, role, id_field in user_sources:
             stmt = select(table).where(table.c.email == email)
             result = conn.execute(stmt).fetchone()
-            if result and result.password == password:
+            if result and result.password == str(password):
                 session['user_id'] = getattr(result,id_field)
                 session['user_role'] = role
                 session['user_name'] = getattr(result, 'name')

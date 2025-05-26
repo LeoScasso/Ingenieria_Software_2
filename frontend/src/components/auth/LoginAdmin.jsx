@@ -53,7 +53,7 @@ export const LoginAdmin = () => {
       name: 'email',
       label: 'Correo Electrónico',
       type: 'email',
-      value: formData.mail,
+      value: formData.email,
       onChange: handleChange,
       required: true,
       autoComplete: 'email',
