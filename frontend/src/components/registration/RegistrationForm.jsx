@@ -31,6 +31,10 @@ const RegistrationForm = () => {
       alert('Las contraseñas no coinciden')
       return
     }
+    if (formData.password.length < 8){
+      alert('La contraseña debe tener al menos 8 caracteres')
+      return
+    }
     try {
       const response = await apiClient.post('/registration', formData);
       const data = response.data;
