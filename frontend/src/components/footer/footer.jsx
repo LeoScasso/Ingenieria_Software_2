@@ -66,22 +66,6 @@ const Footer = () => {
           Todos los derechos reservados
         </Typography>
       </Stack>
-
-      {/* Texto principal centrado */}
-      <Typography
-        variant="body2"
-        sx={{
-          flexGrow: 1,
-          textAlign: 'center',
-          mx: { xs: 1, sm: 2 },
-          alignSelf: 'center',
-          order: { xs: 1, sm: 2 },
-          fontSize: { xs: '0.8rem', sm: '0.85rem' },
-          lineHeight: { xs: 1.2, sm: 1.4 },
-        }}
-      >
-        INFO DE PIE DE PÁGINA
-      </Typography>
     </Box>
   )
 }
