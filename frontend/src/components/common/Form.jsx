@@ -34,7 +34,7 @@ const CustomForm = ({
       component="main"
       maxWidth="xs"
       sx={{
-        height: '80vh',
+        minHeight: '80vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
