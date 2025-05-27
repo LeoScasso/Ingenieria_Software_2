@@ -42,14 +42,14 @@ const RegistrationForm = () => {
       navigate('/login');
     } catch (error) {
       if (error.response) {
-        console.error('Registration failed - Server responded:', error.response.data);
-        alert('Registro fallido: ' + (error.response.data.message || 'Server error  '));
+        console.error('Registro fallido - Respuesta del servidor:', error.response.data);
+        alert('Registro fallido: ' + (error.response.data.message || 'Error del servidor'));
       } else if (error.request) {
-        console.error('Registration failed - No response:', error.request);
-        alert('Registration error: No response from server.');
+        console.error('Registro fallido - No hubo respuesta:', error.request);
+        alert('Error de registrción: No hubo respuesta del servidor.');
       } else {
         console.error('Registration error - Request setup:', error.message);
-        alert('Registration error: ' + error.message);
+        alert('Error en el registro: ' + error.message);
       }
     }
   }
@@ -67,7 +67,7 @@ const RegistrationForm = () => {
     },
     {
       name: 'password',
-      label: 'Contraseña',
+      label: 'Contraseña (Mínimo 8 caracteres)',
       type: 'password',
       value: formData.password,
       onChange: handleChange,

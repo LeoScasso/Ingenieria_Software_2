@@ -9,6 +9,7 @@ import { Navbar } from './components/navbar/navbar'
 import RegistrationForm from './components/registration/RegistrationForm' // Assuming RegistrationForm component path
 import { Box } from '@mui/material'
 import { theme } from './theme/theme'
+import CarForm from './components/carForm/CarForm' 
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,7 @@ const AppRouter = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/loginAdmin" element={<LoginAdmin />} />
             <Route path="/register" element={<RegistrationForm />} />
+            <Route path="/vehicles/new" element={<CarForm />} />
           </Routes>
         </Box>
         <Footer />
