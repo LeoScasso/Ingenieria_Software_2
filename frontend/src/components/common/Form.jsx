@@ -59,16 +59,17 @@ const CustomForm = ({
             caretColor: theme.palette.beige,
           },
         },
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            borderColor: theme.palette.beanBlue,
-          },
-          '&:hover fieldset': {
-            borderColor: theme.palette.ming,
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: theme.palette.beige,
-          },
+        '& .MuiSelect-select': {
+          color: theme.palette.beige, // o '#fff' si querés blanco blanco
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.beanBlue,
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.ming,
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.beige,
         },
         ...field.sx,
       },
