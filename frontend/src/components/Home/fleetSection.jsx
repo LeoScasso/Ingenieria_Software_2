@@ -19,6 +19,25 @@ const FleetSection = () => {
     setCategories(response.data)
   }
 
+  const getCategoryImage = (category) => {
+    switch (category) {
+      case 'SUV':
+        return './car-suv.svg'
+      case 'Apto discapacitados':
+        return './disabledBadge.webp'
+      case 'Chico':
+        return './smallCar.jpg'
+      case 'Van':
+        return './van.png'
+      case 'Deportivo':
+        return './sportCar.jpg'
+      case 'Mediano':
+        return './mediumCar.jpg'
+      default:
+        return './logoAlquilapp.png'
+    }
+  }
+
   useEffect(() => {
     getCategories()
   }, [])
@@ -38,12 +57,14 @@ const FleetSection = () => {
             <Card sx={{ backgroundColor: '#324151', color: 'white' }}>
               <CardMedia
                 component="img"
-                image={'./logoAlquilapp.png'}
+                image={getCategoryImage(category)}
                 alt={category}
                 sx={{
                   height: 160,
                   objectFit: 'contain',
-                  backgroundColor: '#1c1c1c',
+                  backgroundColor: 'white',
+                  borderRadius: '10px',
+                  p: 2
                 }}
               />
               <CardContent>

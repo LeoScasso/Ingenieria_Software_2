@@ -7,19 +7,27 @@ import BackgroundLogo from './components/bgLogo/bgLogo'
 import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import RegistrationForm from './components/registration/RegistrationForm' // Assuming RegistrationForm component path
+import { Box } from '@mui/material'
+import { theme } from './theme/theme'
+import CarForm from './components/carForm/CarForm' 
 
 const AppRouter = () => {
   return (
     <Router>
       <BackgroundLogo />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/loginAdmin" element={<LoginAdmin />} />
-        <Route path="/register" element={<RegistrationForm />} />
-      </Routes>
-      <Footer />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+        <Navbar />
+        <Box component="main" sx={{ flexGrow: 1, width: '100%', backgroundColor: theme.palette.ming }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/loginAdmin" element={<LoginAdmin />} />
+            <Route path="/register" element={<RegistrationForm />} />
+            <Route path="/vehicles/new" element={<CarForm />} />
+          </Routes>
+        </Box>
+        <Footer />
+      </Box>
     </Router>
   )
 }
