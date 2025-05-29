@@ -11,7 +11,6 @@ vehicle_categories = Table('vehicle_categories', metadata, autoload_with=engine)
 vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 cancelation_policies = Table('cancelation_policies', metadata, autoload_with=engine)
-branches = Table('branches', metadata, autoload_with=engine)
 
 @rental_history_bp.route('/user_rentals', methods=['GET'])
 def user_rentals():
@@ -20,9 +19,6 @@ def user_rentals():
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(
         rentals,
-        reservations.c.pickup_datetime,
-        reservations.c.return_datetime,
-        branches.c.name,
         vehicle_models.c.name.label("model_name"),
         vehicle_models.c.year.label("model_year"),
         vehicle_brands.c.name.label("brand_name"),
@@ -34,9 +30,7 @@ def user_rentals():
         .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
         .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
         .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
-        .join(reservations, reservations.c.reservation_id == rentals.c.reservation_id)
-        .join(branches, branches.c.branch_id == reservations.c.branch_id)
-    ).where(reservations.c.user_id == user_id)
+    ).where(rentals.c.user_id == user_id)
 
     with engine.connect() as conn:
         result = conn.execute(stmt)
@@ -51,7 +45,11 @@ def user_reservations():
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(
-        reservations,
+        reservations.c.reservation_id,
+        reservations.c.user_id,
+        reservations.c.pickup_datetime,
+        reservations.c.cost,
+        reservations.c.is_rented,
         vehicle_categories.c.name.label('vehicle_category')
         ).select_from(
             reservations.join(vehicle_categories,reservations.c.vehicle_category_id == vehicle_categories.c.category_id)
