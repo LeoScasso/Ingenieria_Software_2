@@ -9,6 +9,8 @@ users = Table('users', metadata, autoload_with=engine)
 reservations = Table('reservations',  metadata, autoload_with=engine)
 categories = Table('vehicle_categories', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
+branches = Table('branches', metadata, autoload_with=engine)
+
 
 @reservation_management_bp.route('/cancel_reservation', method=['DELETE'])
 def cancel_reservation():
@@ -28,11 +30,25 @@ def reserve():
     role = session.get('role')
     with engine.connect() as conn:
 
+        pickup_datetime = datetime.strptime(data.get('pickup_datetime'), '%Y-%m-%d').date()
+        return_datetime = datetime.strptime(data.get('return_datetime'), '%Y-%m-%d').date()
+        days =  (return_datetime - pickup_datetime).days
+
+        stmt = select((categories.c.price_per_day * days).label('cost'))
+        cost = conn.execute(stmt).fetchone()
+
+        stmt = select((branches.c.branch_id)).where(branches.c.name == data.get('branch'))
+        branch_id = conn.execute(stmt).fetchone()
+
+        stmt = select(categories.c.category_id).where(categories.c.name == data.get('category'))
+        category_id = conn.execute(stmt).fetchone()
+
         reserve_info = {
-            'cost' : data.get('cost'),
+            'cost' : cost,
+            'branch_id' : branch_id,
             'pickup_datetime' : data.get('pickup_datetime'),
             'return_datetime' : data.get('return_datetime'),
-            'vehicle_id' : data.get('vehicle_id'),
+            'category_id' : category_id,
             'is_rented' : 0
         }
 
@@ -50,5 +66,7 @@ def reserve():
         stmt = insert(reservations).values(reserve_info)
         conn.execute(stmt)
         conn.commit()
+
+    return jsonify({ 'message' : 'se registro su reserva' }), 200
 
             
