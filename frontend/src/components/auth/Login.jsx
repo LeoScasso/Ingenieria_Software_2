@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
+  const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
-    mail: '',
+    email: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -24,8 +27,10 @@ const Login = () => {
       const data = response.data
 
       localStorage.setItem('userId', data.user_id)
-      localStorage.setItem('role', data.role)
+      localStorage.setItem('role', data.user_role)
+      localStorage.setItem('name', data.user_name)
       alert(data.message)
+      navigate('/')
     } catch (error) {
       if (error.response) {
         console.error('Login failed - Server responded:', error.response.data)
@@ -44,7 +49,7 @@ const Login = () => {
 
   const fields = [
     {
-      name: 'mail',
+      name: 'email',
       label: 'Correo Electrónico',
       type: 'email',
       value: formData.mail,

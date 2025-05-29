@@ -1,9 +1,8 @@
-import axios from 'axios';
+import axios from 'axios'
 
-const instance = axios.create({
+const apiClient = axios.create({
   baseURL: 'http://localhost:5000/api', // Points to your backend API base
-  // You can add other default settings here, like headers or timeout
-});
+})
 
 // You can also intercept requests or responses globally if needed
 // instance.interceptors.request.use(config => {
@@ -27,4 +26,4 @@ const instance = axios.create({
 //   return Promise.reject(error);
 // });
 
-export default instance;
+export default apiClient

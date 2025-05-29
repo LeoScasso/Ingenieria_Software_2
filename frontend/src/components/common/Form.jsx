@@ -1,4 +1,7 @@
-import { Visibility, VisibilityOff } from '@mui/icons-material'
+import {
+  Visibility,
+  VisibilityOff
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -8,6 +11,9 @@ import {
   TextField,
   Typography,
   useTheme,
+  MenuItem,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material'
 import React from 'react'
 
@@ -18,6 +24,7 @@ const CustomForm = ({
   submitButtonText = 'Enviar',
   paperStyles = {},
   formStyles = {},
+  children,
 }) => {
   const theme = useTheme()
 
@@ -28,12 +35,128 @@ const CustomForm = ({
     return field.type || 'text'
   }
 
+  const renderField = (field) => {
+    const commonProps = {
+      key: field.name,
+      margin: 'normal',
+      fullWidth: true,
+      required: field.required,
+      id: field.name,
+      label: field.label,
+      name: field.name,
+      value: field.value,
+      onChange: field.onChange,
+      error: field.error,
+      helperText: field.helperText,
+      autoComplete: field.autoComplete,
+      disabled: field.disabled,
+      sx: {
+        input: {
+          color: theme.palette.beige,
+          '&:-webkit-autofill': {
+            WebkitBoxShadow: `0 0 0 100px ${theme.palette.slateGray} inset`,
+            WebkitTextFillColor: theme.palette.beige,
+            caretColor: theme.palette.beige,
+          },
+        },
+        '& .MuiSelect-select': {
+          color: theme.palette.beige, // o '#fff' si querés blanco blanco
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.beanBlue,
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.ming,
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: theme.palette.beige,
+        },
+        ...field.sx,
+      },
+      InputLabelProps: {
+        style: { color: theme.palette.beige },
+      },
+      ...field.additionalProps,
+    }
+
+    // Campos especiales
+    switch (field.type) {
+      case 'select':
+        return (
+          <TextField {...commonProps} select>
+            {(field.options || []).map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        )
+
+      case 'checkbox':
+        return (
+          <FormControlLabel
+            key={field.name}
+            control={
+              <Checkbox
+                checked={!!field.value}
+                onChange={field.onChange}
+                name={field.name}
+                disabled={field.disabled}
+                sx={{ color: theme.palette.beige }}
+              />
+            }
+            label={field.label}
+            sx={{ color: theme.palette.beige }}
+          />
+        )
+
+      case 'textarea':
+        return (
+          <TextField
+            {...commonProps}
+            multiline
+            rows={field.rows || 4}
+          />
+        )
+
+      case 'password':
+        return (
+          <TextField
+            {...commonProps}
+            type={getFieldType(field)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={field.onTogglePassword}
+                    edge="end"
+                    sx={{ color: theme.palette.beige }}
+                  >
+                    {field.showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        )
+
+      default:
+        return (
+          <TextField
+            {...commonProps}
+            type={getFieldType(field)}
+          />
+        )
+    }
+  }
+
   return (
     <Box
       component="main"
       maxWidth="xs"
       sx={{
-        height: '100%',
+        minHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -53,6 +176,8 @@ const CustomForm = ({
           justifyContent: 'center',
           backgroundColor: theme.palette.slateGray,
           borderRadius: 2,
+          maxWidth: 600,
+          margin: '0 auto',
           ...paperStyles,
         }}
       >
@@ -77,70 +202,7 @@ const CustomForm = ({
             width: '100%',
           }}
         >
-          {fields.map((field) => (
-            <TextField
-              key={field.name}
-              margin="normal"
-              required={field.required}
-              fullWidth
-              id={field.name}
-              label={field.label}
-              name={field.name}
-              type={getFieldType(field)}
-              value={field.value}
-              onChange={field.onChange}
-              error={field.error}
-              helperText={field.helperText}
-              autoComplete={field.autoComplete}
-              disabled={field.disabled}
-              InputLabelProps={{
-                style: { color: theme.palette.beige },
-              }}
-              InputProps={{
-                ...(field.type === 'password' && {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={field.onTogglePassword}
-                        edge="end"
-                        sx={{ color: theme.palette.beige }}
-                      >
-                        {field.showPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }),
-              }}
-              sx={{
-                input: {
-                  color: theme.palette.beige,
-                  '&:-webkit-autofill': {
-                    WebkitBoxShadow: `0 0 0 100px ${theme.palette.slateGray} inset`,
-                    WebkitTextFillColor: theme.palette.beige,
-                    caretColor: theme.palette.beige,
-                  },
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: theme.palette.beanBlue,
-                  },
-                  '&:hover fieldset': {
-                    borderColor: theme.palette.ming,
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.beige,
-                  },
-                },
-                ...field.sx,
-              }}
-              {...field.additionalProps}
-            />
-          ))}
+          {fields.map(renderField)}
 
           <Button
             type="submit"
@@ -158,6 +220,8 @@ const CustomForm = ({
           >
             {submitButtonText}
           </Button>
+
+          {children && <Box sx={{ mt: 2 }}>{children}</Box>}
         </Box>
       </Paper>
     </Box>

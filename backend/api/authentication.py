@@ -33,13 +33,15 @@ def login():
         for table, role, id_field in user_sources:
             stmt = select(table).where(table.c.email == email)
             result = conn.execute(stmt).fetchone()
-            if result and result.password == password:
+            if result and result.password == str(password):
                 session['user_id'] = getattr(result,id_field)
                 session['user_role'] = role
+                session['user_name'] = getattr(result, 'name')
                 return jsonify({
                     'message': 'Sesión iniciada correctamente',
                     'user_id': session['user_id'],
-                    'user_role': session['user_role']
+                    'user_role': session['user_role'],
+                    'user_name': session['user_name']
                 }), 200
     
     return jsonify({'error': 'Email o contraseña incorrectos'}), 400
@@ -47,5 +49,5 @@ def login():
 
 @authentication_bp.route('/logout', methods=['POST'])
 def logout():
-    session.clear()    
+    session.clear()
     return jsonify({'message': 'Sesión cerrada correctamente'}), 200

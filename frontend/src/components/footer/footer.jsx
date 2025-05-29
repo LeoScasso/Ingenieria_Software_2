@@ -1,57 +1,72 @@
-import { Typography, Box, Stack } from '@mui/material';
+import { Box, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 const Footer = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   return (
-    <Box sx={{ 
-      backgroundColor: 'darkBlue', 
-      color: 'white', 
-      py: 1,
-      display: 'flex',
-      alignItems: 'flex-start', // Alineación arriba para mejor distribución
-      justifyContent: 'space-between',
-      px: 1
-    }}>
+    <Box
+      component="footer"
+      sx={{
+        backgroundColor: 'darkBlue',
+        color: 'white',
+        py: { xs: 1, sm: 1.5, md: 2 },
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'center', sm: 'flex-start' },
+        justifyContent: 'space-between',
+        px: { xs: 1.5, sm: 2, md: 3 },
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        gap: { xs: 1, sm: 0 },
+        minHeight: { xs: '80px', sm: '100px', md: '120px' },
+      }}
+    >
       {/* Bloque izquierdo (logo y textos) */}
-      <Stack 
-        direction="column" 
-        alignItems="center" 
-        spacing={1} 
-        sx={{ 
+      <Stack
+        direction="column"
+        alignItems="center"
+        spacing={{ xs: 0.5, sm: 0.75, md: 1 }}
+        sx={{
           flexShrink: 0,
-          width: 150 // Ancho fijo para mejor alineación
+          width: { xs: '100%', sm: 150 },
+          order: { xs: 2, sm: 1 },
         }}
       >
-        <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.2 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            textAlign: 'center',
+            lineHeight: { xs: 1, sm: 1.2 },
+            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+          }}
+        >
           Desarrollado por:
         </Typography>
-        <img 
-          src="/chirimbolo.png" 
-          alt="LogoChir" 
-          style={{ 
-            height: 60, 
+        <img
+          src="/chirimbolo.png"
+          alt="LogoChir"
+          style={{
+            height: isMobile ? 40 : 50,
             borderRadius: '50%',
-            objectFit: 'cover'
-          }} 
+            objectFit: 'cover',
+          }}
         />
-        <Typography variant="caption" sx={{ textAlign: 'center', fontSize: '0.7rem' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            textAlign: 'center',
+            fontSize: { xs: '0.65rem', sm: '0.7rem' },
+            lineHeight: { xs: 1, sm: 1.2 },
+          }}
+        >
           Todos los derechos reservados
         </Typography>
       </Stack>
-      
-      {/* Texto principal centrado */}
-      <Typography 
-        variant="body2" 
-        sx={{ 
-          flexGrow: 1,
-          textAlign: 'center',
-          mx: 2,
-          alignSelf: 'center' // Centra verticalmente este elemento
-        }}
-      >
-        INFO DE PIE DE PÁGINA + OPCIÓN PARA VER LAS SUCURSALES
-      </Typography>
     </Box>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

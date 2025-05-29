@@ -1,52 +1,83 @@
-import { Typography, Grid, Card, CardMedia, CardContent, Box } from '@mui/material';
-
-const cars = [
-  {
-    title: 'Sedán económico',
-    description: 'Más espacio en el bolso, para poder trasladarte cómodo a todos lados',
-    image: './logoAlquilapp.png', // reemplazá con la ruta real
-  },
-  {
-    title: 'Sedán grande',
-    description: 'Mayor comodidad y confort, para una conducción agradable a un precio asequible',
-    image: '/logoAlquilapp.png',
-  },
-  {
-    title: 'SUV económico',
-    description: 'Mayor comodidad y confort, para un manejo seguro y agradable',
-    image: '/logoAlquilapp.png',
-  },
-];
+import {
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Grid,
+  Typography,
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import apiClient from '../../middleware/axios'
+import { theme } from '../../theme/theme'
 
 const FleetSection = () => {
+  const [categories, setCategories] = useState([])
+
+  const getCategories = async () => {
+    const response = await apiClient.get('/categories')
+    console.log(response.data)
+    setCategories(response.data)
+  }
+
+  const getCategoryImage = (category) => {
+    switch (category) {
+      case 'SUV':
+        return './car-suv.svg'
+      case 'Apto discapacitados':
+        return './disabledBadge.webp'
+      case 'Chico':
+        return './smallCar.jpg'
+      case 'Van':
+        return './van.png'
+      case 'Deportivo':
+        return './sportCar.jpg'
+      case 'Mediano':
+        return './mediumCar.jpg'
+      default:
+        return './logoAlquilapp.png'
+    }
+  }
+
+  useEffect(() => {
+    getCategories()
+  }, [])
+
   return (
-    <Box sx={{ backgroundColor: '#244f5e', py: 6, px: 4 }}>
-      <Typography variant="h5" sx={{ color: 'white', mb: 4, textAlign: 'center' }}>
+    <Box sx={{ backgroundColor: theme.palette.slateGray, py: 6, px: 4 }}>
+      <Typography
+        variant="h5"
+        sx={{ color: 'white', mb: 4, textAlign: 'center' }}
+      >
         Nuestra flota de alquiler de vehículos
       </Typography>
 
       <Grid container spacing={4} justifyContent="center">
-        {cars.map((car, index) => (
+        {categories.map((category, index) => (
           <Grid item key={index} xs={12} md={4}>
             <Card sx={{ backgroundColor: '#324151', color: 'white' }}>
               <CardMedia
                 component="img"
-                image={car.image}
-                alt={car.title}
-                sx={{ height: 160, objectFit: 'contain', backgroundColor: '#1c1c1c' }}
+                image={getCategoryImage(category)}
+                alt={category}
+                sx={{
+                  height: 160,
+                  objectFit: 'contain',
+                  backgroundColor: 'white',
+                  borderRadius: '10px',
+                  p: 2
+                }}
               />
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  {car.title}
+                  {category}
                 </Typography>
-                <Typography variant="body2">{car.description}</Typography>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
     </Box>
-  );
-};
+  )
+}
 
-export default FleetSection;
+export default FleetSection
