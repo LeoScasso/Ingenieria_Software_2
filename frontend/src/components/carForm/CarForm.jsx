@@ -5,15 +5,15 @@ import Form from '../common/Form'
 import { useNavigate } from 'react-router-dom'
 
 const CarForm = () => {
-  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    last_name: '',
-    dni: '',
-    phone_number: '',
+    'number_plate': '',
+    'category': '',
+    'condition': '',
+    'cancelation_policy': '',
+    'model': '',
+    'year': '',
+    'brand': ''
   })
 
   const handleChange = (e) => {
@@ -55,9 +55,9 @@ const CarForm = () => {
   }
 
   const cancelationPolicies = [
-    '100% devolución',
-    '20% devolución',
-    'Sin devolución'
+    '100% de devolucion',
+    '20% de devolucion',
+    'Sin devolucion'
   ]
 
   const estados = [
@@ -119,9 +119,9 @@ const CarForm = () => {
         onChange: handleChange,
         required: true,
         autoComplete: 'new-category',
-        options: categories.map(category => ({
-            value: category.id,
-            label: category.name
+        options: categories.map(name => ({
+          value: name,
+          label: name
         }))
     },
     {
@@ -134,16 +134,7 @@ const CarForm = () => {
         autoComplete: 'new-year'
     },
     {
-        name: 'minimum_rental_days',
-        label: 'Días Mínimos de Alquiler',
-        type: 'number',
-        value: formData.minimum_rental_days,
-        onChange: handleChange,
-        required: true,
-        autoComplete: 'new-minimum_rental_days'
-    },
-    {
-        name: 'cancellation_policy',
+        name: 'cancelation_policy',
         label: 'Política de Cancelación',
         type: 'select',
         value: formData.cancellation_policy,
@@ -156,7 +147,7 @@ const CarForm = () => {
         name: 'condition',
         label: 'Condición',
         type: 'select',
-        value: formData.description,
+        value: formData.condition,
         onChange: handleChange,
         required: true,
         autoComplete: 'new-description',
