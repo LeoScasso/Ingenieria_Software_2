@@ -28,24 +28,32 @@ const WalletPaymentForm = ({ amount }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    const { card_number, sec_number, titular_name } = formData
+    const tarjeta = tarjetas.find((t) => t.numero === card_number)
 
-    const { wallet_id } = formData
-    const billetera = billeteras.find((b) => b.id === wallet_id)
+    if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
+    if (tarjeta.codigo !== sec_number) return alert('Código incorrecto')
+    if (tarjeta.titular !== titular_name) return alert('Titular incorrecto')
+    if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
 
-    if (!billetera) {
-      alert('El ID ingresado no corresponde a ninguna billetera registrada.')
-      return
+    try {
+      const response = await fetch('/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formDataReserva),
+      })
+
+      if (!response.ok) throw new Error('Error en el servidor')
+
+      const data = await response.json()
+      alert(`¡Pago exitoso! ${data.message}`)
+      navigate('/')
+    } catch (error) {
+      console.error(error)
+      alert('Ocurrió un error al registrar la reserva')
     }
-
-    if (billetera.saldo <= 0) {
-      alert('La billetera no dispone de saldo suficiente.')
-      return
-    }
-
-    alert('¡Pago exitoso!')
-    navigate('/')
   }
 
   const fields = [
