@@ -12,6 +12,7 @@ import { theme } from './theme/theme'
 import CarForm from './components/carForm/CarForm' 
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
 import ReservationForm from './components/reservation/ReservationForm'
+import { Profile } from './components/user/Profile'
 
 const AppRouter = () => {
   return (
@@ -29,6 +30,7 @@ const AppRouter = () => {
             <Route path="/payment/card" element={<CardPaymentForm />} />
             <Route path="/payment/wallet" element={<WalletPaymentForm />} />
             <Route path="/reservation" element={<ReservationForm />} />
+            <Route path='/mi-perfil' element={<Profile />} />
           </Routes>
         </Box>
         <Footer />

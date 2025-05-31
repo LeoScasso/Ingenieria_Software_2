@@ -2,6 +2,7 @@ import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { theme } from '../../theme/theme'
 
 export const Navbar = () => {
   const location = useLocation()
@@ -33,27 +34,43 @@ export const Navbar = () => {
   }
 
   const handleClickLogin = () => {
-    window.confirm('¿Querés iniciar sesión como admin?')
-      ? (window.location.href = '/loginAdmin')
-      : (window.location.href = '/login')
+    window.location.href = '/login'
+  }
+
+  const handleClickProfile = () => {
+    navigate('/mi-perfil')
   }
 
   return (
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Logo */}
-        <Box
-          component={Link}
-          to="/"
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          <img
-            src="/logoAlquilapp.png"
-            alt="Logo"
-            style={{ height: 70, marginRight: 8 }}
-          />
-        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Logo */}
+          <Box
+            component={Link}
+            to="/"
+            sx={{ display: 'flex', alignItems: 'center' }}
+          >
+            <img
+              src="/logoAlquilapp.png"
+              alt="Logo"
+              style={{ height: 70, marginRight: 8 }}
+            />
+          </Box>
 
+          {userName && (
+            <Button
+              variant="contained"
+              onClick={handleClickProfile}
+              sx={{
+                backgroundColor: theme.palette.beige,
+                color: theme.palette.darkBlue,
+              }}
+            >
+              Mi Perfil
+            </Button>
+          )}
+        </Box>
         {/* Saludo o botones */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {userName ? (

@@ -15,7 +15,6 @@ const FleetSection = () => {
 
   const getCategories = async () => {
     const response = await apiClient.get('/categories')
-    console.log(response.data)
     setCategories(response.data)
   }
 

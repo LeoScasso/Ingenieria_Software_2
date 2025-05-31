@@ -15,7 +15,7 @@ branches = Table('branches', metadata, autoload_with=engine)
 
 @rental_history_bp.route('/user_rentals', methods=['GET'])
 def user_rentals():
-    user_id = session.get('user_id')
+    user_id = session['user_id']
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(
@@ -47,7 +47,7 @@ def user_rentals():
 
 @rental_history_bp.route('/user_reservations', methods=['GET'])
 def user_reservations():
-    user_id = session.get('user_id')
+    user_id = session['user_id']
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(

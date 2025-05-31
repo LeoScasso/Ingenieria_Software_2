@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Box, useTheme } from '@mui/material'
+import { Typography } from '@mui/material'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
-import { useNavigate } from 'react-router-dom'
 
 const CarForm = () => {
 
@@ -70,7 +69,6 @@ const CarForm = () => {
 
   const getCategories = async () => {
     const response = await apiClient.get('/categories')
-    console.log(response.data)
     setCategories(response.data)
   }
 
