@@ -34,9 +34,7 @@ export const Navbar = () => {
   }
 
   const handleClickLogin = () => {
-    window.confirm('¿Querés iniciar sesión como admin?')
-      ? (window.location.href = '/loginAdmin')
-      : (window.location.href = '/login')
+    window.location.href = '/login'
   }
 
   const handleClickProfile = () => {
