@@ -26,8 +26,8 @@ def cancel_reservation():
 @reservation_management_bp.route('/reserve', methods=['POST'])
 def reserve():  
     data = request.get_json()
-    user_id = session.get('user_id')
-    role = session.get('role')
+    user_id = session['user_id']
+    role = session['user_role']
     with engine.connect() as conn:
 
         pickup_datetime = datetime.strptime(data.get('pickup_datetime'), '%Y-%m-%d').date()

@@ -10,6 +10,7 @@ from api.profile import profile_bp
 from api.getters import getters_bp
 app = Flask(__name__)
 app.secret_key = 'grupo57'
+app.config['SESSION_COOKIE_SAMETIME'] = 'None'
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 # Register Blueprints
