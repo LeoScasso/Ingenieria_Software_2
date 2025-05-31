@@ -19,7 +19,7 @@ const tarjetas = [
   },
 ]
 
-const CardPaymentForm = () => {
+const CardPaymentForm = ({ amount }) => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
@@ -34,7 +34,6 @@ const CardPaymentForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
     const { card_number, sec_number, titular_name } = formData
     const tarjeta = tarjetas.find((t) => t.numero === card_number)
 
@@ -42,17 +41,14 @@ const CardPaymentForm = () => {
       alert('El número de tarjeta ingresado no es válido')
       return
     }
-
     if (tarjeta.codigo !== sec_number) {
       alert('El código de seguridad ingresado no corresponde a la tarjeta')
       return
     }
-
     if (tarjeta.titular !== titular_name) {
       alert('El nombre de titular ingresado no corresponde a la tarjeta')
       return
     }
-
     if (tarjeta.saldo <= 0) {
       alert('La tarjeta no dispone de saldo suficiente')
       return
@@ -90,24 +86,29 @@ const CardPaymentForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'cc-name',
-    }
+    },
   ]
 
   return (
-    <Form
-      title="Formulario de Pago"
-      fields={fields}
-      onSubmit={handleSubmit}
-      submitButtonText="Pagar"
-    >
-      <Typography
-        variant="body2"
-        color="white"
-        sx={{ textAlign: 'center', mt: 2 }}
+    <>
+      <Form
+        title="Pago con Tarjeta"
+        fields={fields}
+        onSubmit={handleSubmit}
+        submitButtonText="Pagar"
       >
-        Todos los campos son obligatorios
-      </Typography>
-    </Form>
+        <Typography variant="h6" color="white" sx={{ textAlign: 'center', mb: 2 }}>
+            Cantidad a pagar: ${amount}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="white"
+          sx={{ textAlign: 'center', mt: 2 }}
+        >
+          Todos los campos son obligatorios
+        </Typography>
+      </Form>
+    </>
   )
 }
 

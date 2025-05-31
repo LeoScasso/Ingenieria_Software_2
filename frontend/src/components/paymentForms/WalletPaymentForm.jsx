@@ -1,31 +1,27 @@
 import React, { useState } from 'react'
-import { Typography } from '@mui/material'
-import Form from '../common/Form'
 import { useNavigate } from 'react-router-dom'
+import Form from '../common/Form'
+import { Typography } from '@mui/material'
 
 // Simulación de billeteras hardcodeadas
 const billeteras = [
   {
-    numero: '4444',
-    codigo: '123',
+    id: '111',
     titular: 'usuario1',
     saldo: 999999999,
   },
   {
-    numero: '5555',
-    codigo: '999',
+    id: '222',
     titular: 'usuario2',
     saldo: 0,
   },
 ]
 
-const CardPaymentForm = () => {
+const WalletPaymentForm = ({ amount }) => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
-    card_number: '',
-    sec_number: '',
-    titular_name: '',
+    wallet_id: '',
   })
 
   const handleChange = (e) => {
@@ -35,26 +31,16 @@ const CardPaymentForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const { card_number, sec_number, titular_name } = formData
-    const tarjeta = tarjetas.find((t) => t.numero === card_number)
+    const { wallet_id } = formData
+    const billetera = billeteras.find((b) => b.id === wallet_id)
 
-    if (!tarjeta) {
-      alert('El número de tarjeta ingresado no es válido')
+    if (!billetera) {
+      alert('El ID ingresado no corresponde a ninguna billetera registrada.')
       return
     }
 
-    if (tarjeta.codigo !== sec_number) {
-      alert('El código de seguridad ingresado no corresponde a la tarjeta')
-      return
-    }
-
-    if (tarjeta.titular !== titular_name) {
-      alert('El nombre de titular ingresado no corresponde a la tarjeta')
-      return
-    }
-
-    if (tarjeta.saldo <= 0) {
-      alert('La tarjeta no dispone de saldo suficiente')
+    if (billetera.saldo <= 0) {
+      alert('La billetera no dispone de saldo suficiente.')
       return
     }
 
@@ -64,51 +50,34 @@ const CardPaymentForm = () => {
 
   const fields = [
     {
-      name: 'card_number',
-      label: 'Número de Tarjeta',
+      name: 'wallet_id',
+      label: 'ID de la Billetera',
       type: 'text',
-      value: formData.card_number,
+      value: formData.wallet_id,
       onChange: handleChange,
       required: true,
-      autoComplete: 'cc-number',
+      autoComplete: 'wallet-id',
       autoFocus: true,
     },
-    {
-      name: 'sec_number',
-      label: 'Código de Seguridad',
-      type: 'password',
-      value: formData.sec_number,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'cc-csc',
-    },
-    {
-      name: 'titular_name',
-      label: 'Nombre del Titular',
-      type: 'text',
-      value: formData.titular_name,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'cc-name',
-    }
   ]
 
   return (
-    <Form
-      title="Formulario de Pago"
-      fields={fields}
-      onSubmit={handleSubmit}
-      submitButtonText="Pagar"
-    >
-      <Typography
-        variant="body2"
-        color="white"
-        sx={{ textAlign: 'center', mt: 2 }}
+    <>
+      <Form
+        title="Pago con Billetera Virtual"
+        fields={fields}
+        onSubmit={handleSubmit}
+        submitButtonText="Pagar"
       >
-        Todos los campos son obligatorios
-      </Typography>
-    </Form>
+        <Typography variant="h6" color="white" sx={{ textAlign: 'center', mb: 2 }}>
+          Cantidad a pagar: ${amount}
+        </Typography>
+        <Typography variant="body2" color="white" sx={{ textAlign: 'center', mt: 2 }}>
+          Todos los campos son obligatorios
+        </Typography>
+      </Form>
+    </>
   )
 }
 
-export default CardPaymentForm
+export default WalletPaymentForm
