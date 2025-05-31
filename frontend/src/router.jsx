@@ -10,6 +10,8 @@ import RegistrationForm from './components/registration/RegistrationForm' // Ass
 import { Box } from '@mui/material'
 import { theme } from './theme/theme'
 import CarForm from './components/carForm/CarForm' 
+import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
+import ReservationForm from './components/reservation/ReservationForm'
 import { Profile } from './components/user/Profile'
 
 const AppRouter = () => {
@@ -25,6 +27,9 @@ const AppRouter = () => {
             <Route path="/loginAdmin" element={<LoginAdmin />} />
             <Route path="/register" element={<RegistrationForm />} />
             <Route path="/vehicles/new" element={<CarForm />} />
+            <Route path="/payment/card" element={<CardPaymentForm />} />
+            <Route path="/payment/wallet" element={<WalletPaymentForm />} />
+            <Route path="/reservation" element={<ReservationForm />} />
             <Route path='/mi-perfil' element={<Profile />} />
           </Routes>
         </Box>

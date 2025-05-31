@@ -21,7 +21,7 @@ const CustomForm = ({
   title,
   fields,
   onSubmit,
-  submitButtonText = 'Enviar',
+  submitButtonText,
   paperStyles = {},
   formStyles = {},
   children,
@@ -74,6 +74,7 @@ const CustomForm = ({
         ...field.sx,
       },
       InputLabelProps: {
+        shrink: field.type === 'date' ? true : undefined,
         style: { color: theme.palette.beige },
       },
       ...field.additionalProps,
@@ -204,22 +205,24 @@ const CustomForm = ({
         >
           {fields.map(renderField)}
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{
-              mt: 3,
-              mb: 2,
-              backgroundColor: theme.palette.beanBlue,
-              color: theme.palette.beige,
-              '&:hover': {
-                backgroundColor: theme.palette.ming,
-              },
-            }}
-          >
-            {submitButtonText}
-          </Button>
+          {submitButtonText && (
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                backgroundColor: theme.palette.beanBlue,
+                color: theme.palette.beige,
+                '&:hover': {
+                  backgroundColor: theme.palette.ming,
+                },
+              }}
+            >
+              {submitButtonText}
+            </Button>
+          )}
 
           {children && <Box sx={{ mt: 2 }}>{children}</Box>}
         </Box>
