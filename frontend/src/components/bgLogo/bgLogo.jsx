@@ -11,10 +11,10 @@ const BackgroundLogo = () => (
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundSize: '40%',
-      opacity: 0.02,
+      opacity: 0.01,
       pointerEvents: 'none',
     }}
   />
-);
+)
 
-export default BackgroundLogo;
+export default BackgroundLogo
