@@ -11,6 +11,7 @@ import { Box } from '@mui/material'
 import { theme } from './theme/theme'
 import CarForm from './components/carForm/CarForm' 
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
+import ReservationForm from './components/reservation/ReservationForm'
 
 const AppRouter = () => {
   return (
@@ -27,6 +28,7 @@ const AppRouter = () => {
             <Route path="/vehicles/new" element={<CarForm />} />
             <Route path="/payment/card" element={<CardPaymentForm />} />
             <Route path="/payment/wallet" element={<WalletPaymentForm />} />
+            <Route path="/reservation" element={<ReservationForm />} />
           </Routes>
         </Box>
         <Footer />
