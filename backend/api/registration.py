@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from sqlalchemy import Table, select, insert
 from app.db import engine, metadata
 

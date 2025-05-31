@@ -99,3 +99,5 @@ def update_profile():
             stmt = update(admins).where(admins.c.admin_id == user_id).values(data_admin)
             conn.execute(stmt)
         conn.commit()
+        
+        return jsonify({'message': 'Perfil actualizado correctamente'}), 200

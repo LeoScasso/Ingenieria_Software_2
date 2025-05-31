@@ -16,9 +16,13 @@ app.secret_key = 'grupo57'
 app.config['SESSION_COOKIE_SECURE'] = False  # En desarrollo, en producción debería ser True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Cambiado de 'None' a 'Lax'
 
+# Configuración CORS mejorada
 CORS(app, 
      supports_credentials=True, 
-     origins=["http://localhost:3000"])
+     origins=["http://localhost:3000"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+     expose_headers=["Content-Type", "Authorization"])
 
 # Register Blueprints
 app.register_blueprint(registration_bp, url_prefix='/api')
