@@ -74,6 +74,7 @@ const CustomForm = ({
         ...field.sx,
       },
       InputLabelProps: {
+        shrink: field.type === 'date' ? true : undefined,
         style: { color: theme.palette.beige },
       },
       ...field.additionalProps,
