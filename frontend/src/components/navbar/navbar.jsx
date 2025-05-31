@@ -7,8 +7,10 @@ import { theme } from '../../theme/theme'
 export const Navbar = () => {
   const location = useLocation()
   const navigate = useNavigate()
+
   const hideRegisterButton = location.pathname === '/register'
   const hideLoginButton = location.pathname === '/login'
+  const hideProfileButton = location.pathname === '/mi-perfil'
 
   const [userName, setUserName] = useState(null)
 
@@ -21,12 +23,9 @@ export const Navbar = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/logout')
 
-      // Limpiar local storage
       localStorage.clear()
       setUserName(null)
-      // Redirigir a la página de inicio
       navigate('/')
-      //Alerta de mensaje retornado del back
       alert(response.data.message)
     } catch (error) {
       console.error('Error al cerrar sesión:', error)
@@ -35,10 +34,6 @@ export const Navbar = () => {
 
   const handleClickLogin = () => {
     window.location.href = '/login'
-  }
-
-  const handleClickProfile = () => {
-    navigate('/mi-perfil')
   }
 
   return (
@@ -57,20 +52,8 @@ export const Navbar = () => {
               style={{ height: 70, marginRight: 8 }}
             />
           </Box>
-
-          {userName && (
-            <Button
-              variant="contained"
-              onClick={handleClickProfile}
-              sx={{
-                backgroundColor: theme.palette.beige,
-                color: theme.palette.darkBlue,
-              }}
-            >
-              Mi Perfil
-            </Button>
-          )}
         </Box>
+
         {/* Saludo o botones */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {userName ? (
@@ -78,6 +61,20 @@ export const Navbar = () => {
               <Typography sx={{ color: 'white', marginRight: 2 }}>
                 Hola, {userName}!
               </Typography>
+              
+              {(
+                <Button
+                  component={Link}
+                  to="/mi-perfil"
+                  variant="contained"
+                  sx={{
+                    backgroundColor: 'beanBlue',
+                    marginRight: 1
+                  }}
+                >
+                  Mi Perfil
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 onClick={handleLogout}
