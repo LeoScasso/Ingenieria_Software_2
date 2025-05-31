@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { Typography } from '@mui/material'
 import Form from '../common/Form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom' // <--- faltaba esto
 
-// Simulación de tarjetas hardcodeadas
 const tarjetas = [
   {
     numero: '4444',
@@ -19,8 +18,10 @@ const tarjetas = [
   },
 ]
 
-const CardPaymentForm = ({ amount }) => {
+const CardPaymentForm = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const formDataReserva = location.state
 
   const [formData, setFormData] = useState({
     card_number: '',
@@ -32,30 +33,32 @@ const CardPaymentForm = ({ amount }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const { card_number, sec_number, titular_name } = formData
     const tarjeta = tarjetas.find((t) => t.numero === card_number)
 
-    if (!tarjeta) {
-      alert('El número de tarjeta ingresado no es válido')
-      return
-    }
-    if (tarjeta.codigo !== sec_number) {
-      alert('El código de seguridad ingresado no corresponde a la tarjeta')
-      return
-    }
-    if (tarjeta.titular !== titular_name) {
-      alert('El nombre de titular ingresado no corresponde a la tarjeta')
-      return
-    }
-    if (tarjeta.saldo <= 0) {
-      alert('La tarjeta no dispone de saldo suficiente')
-      return
-    }
+    if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
+    if (tarjeta.codigo !== sec_number) return alert('Código incorrecto')
+    if (tarjeta.titular !== titular_name) return alert('Titular incorrecto')
+    if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
 
-    alert('¡Pago exitoso!')
-    navigate('/')
+    try {
+      const response = await fetch('/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formDataReserva),
+      })
+
+      if (!response.ok) throw new Error('Error en el servidor')
+
+      const data = await response.json()
+      alert(`¡Pago exitoso! ${data.message}`)
+      navigate('/')
+    } catch (error) {
+      console.error(error)
+      alert('Ocurrió un error al registrar la reserva')
+    }
   }
 
   const fields = [
@@ -98,7 +101,7 @@ const CardPaymentForm = ({ amount }) => {
         submitButtonText="Pagar"
       >
         <Typography variant="h6" color="white" sx={{ textAlign: 'center', mb: 2 }}>
-            Cantidad a pagar: ${amount}
+          Cantidad a pagar: ${formDataReserva?.cost ?? '—'}
         </Typography>
         <Typography
           variant="body2"
