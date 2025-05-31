@@ -17,6 +17,8 @@ reservations = Table('reservations', metadata, autoload_with=engine)
 @fleet_bp.route('/vehicle_registration', methods=['POST'])
 def vehicle_registration():
     data = request.get_json()
+    
+
 
     data_check = {
             'number_plate' : data.get('number_plate'),
@@ -27,6 +29,8 @@ def vehicle_registration():
             'year' : data.get('year'),
             'brand' : data.get('brand')
         }
+
+    print(data_check)
 
     if any(value is None for value in data_check.values()):
         return jsonify({
@@ -81,7 +85,7 @@ def vehicle_registration():
             'model_id' : model_id,
             'cancelation_policy_id' : policy.policy_id,
             'category_id' :category.category_id,
-            'condition' : condition.condition_id
+            'condition_id' : condition.condition_id
         })
 
         stmt = insert(vehicles).values(vehicle)

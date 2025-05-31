@@ -10,7 +10,7 @@ from api.profile import profile_bp
 from api.getters import getters_bp
 app = Flask(__name__)
 app.secret_key = 'grupo57'
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 # Register Blueprints
 app.register_blueprint(registration_bp, url_prefix='/api')
