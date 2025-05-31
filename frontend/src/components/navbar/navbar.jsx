@@ -2,7 +2,6 @@ import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { theme } from '../../theme/theme'
 
 export const Navbar = () => {
   const location = useLocation()
@@ -32,15 +31,15 @@ export const Navbar = () => {
     }
   }
 
-  const handleClickLogin = () => {
-    window.location.href = '/login'
-  }
-
   return (
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            component={Link}
+            to="/"
+            sx={{ display: 'flex', alignItems: 'center' }}
+          >
             <img
               src="/logoAlquilapp.png"
               alt="Logo"
@@ -112,7 +111,7 @@ export const Navbar = () => {
               {!hideLoginButton && (
                 <Button
                   component={Link}
-                  onClick={handleClickLogin}
+                  to="/login"
                   variant="contained"
                   color="primary"
                   sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}

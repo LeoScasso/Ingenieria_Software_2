@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, and_, update, or_
+from flask import Blueprint, jsonify
+from sqlalchemy import Table, select
 from app.db import engine, metadata
-from datetime import datetime
 
 getters_bp = Blueprint('getters', __name__)
 

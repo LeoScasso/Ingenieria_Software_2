@@ -1,4 +1,5 @@
 import BusinessIcon from '@mui/icons-material/Business'
+import EditIcon from '@mui/icons-material/Edit'
 import EmailIcon from '@mui/icons-material/Email'
 import PersonIcon from '@mui/icons-material/Person'
 import PhoneIcon from '@mui/icons-material/Phone'
@@ -9,17 +10,20 @@ import {
   CardContent,
   CircularProgress,
   Divider,
+  IconButton,
   Stack,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 
 export const Profile = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const theme = useTheme()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const getUser = async () => {
@@ -47,7 +51,7 @@ export const Profile = () => {
           variant="body2"
           color={theme.palette.ming}
           fontWeight="bold"
-          sx={{ minWidth: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}
+          sx={{ minWidth: 80, textTransform: 'none', letterSpacing: 0.5 }}
         >
           {label}:
         </Typography>
@@ -92,7 +96,11 @@ export const Profile = () => {
   const getInitials = () => {
     const firstName = user.name || ''
     const lastName = user.last_name || ''
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+    const initials =
+      firstName && lastName
+        ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+        : 'U'
+    return initials
   }
 
   return (
@@ -114,9 +122,30 @@ export const Profile = () => {
           backgroundColor: theme.palette.beige,
           border: `3px solid ${theme.palette.ming}`,
           borderRadius: 4,
+          position: 'relative',
         }}
       >
         <CardContent sx={{ p: 4 }}>
+          {!user.branch_name && (
+            <IconButton
+              onClick={() => navigate('/editar-perfil')}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                backgroundColor: theme.palette.ming,
+                color: theme.palette.beige,
+                '&:hover': {
+                  backgroundColor: theme.palette.darkBlue,
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          )}
+
           {/* Header con Avatar y Nombre */}
           <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
             <Avatar
