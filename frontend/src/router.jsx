@@ -10,6 +10,7 @@ import RegistrationForm from './components/registration/RegistrationForm' // Ass
 import { Box } from '@mui/material'
 import { theme } from './theme/theme'
 import CarForm from './components/carForm/CarForm' 
+import CardPaymentForm from './components/paymentForms/cardPaymentForm'
 
 const AppRouter = () => {
   return (
@@ -24,6 +25,7 @@ const AppRouter = () => {
             <Route path="/loginAdmin" element={<LoginAdmin />} />
             <Route path="/register" element={<RegistrationForm />} />
             <Route path="/vehicles/new" element={<CarForm />} />
+            <Route path="/payment/card" element={<CardPaymentForm />} />
           </Routes>
         </Box>
         <Footer />
