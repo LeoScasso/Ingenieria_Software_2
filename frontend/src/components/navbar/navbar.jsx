@@ -10,21 +10,21 @@ export const Navbar = () => {
 
   const hideRegisterButton = location.pathname === '/register'
   const hideLoginButton = location.pathname === '/login'
-  const hideProfileButton = location.pathname === '/mi-perfil'
 
   const [userName, setUserName] = useState(null)
+  const [role, setRole] = useState(null)
 
   useEffect(() => {
-    const storedName = localStorage.getItem('name')
-    setUserName(storedName)
+    setUserName(localStorage.getItem('name'))
+    setRole(localStorage.getItem('role')) // <--- leemos el rol del usuario
   }, [location])
 
   const handleLogout = async () => {
     try {
       const response = await axios.post('http://localhost:5000/api/logout')
-
       localStorage.clear()
       setUserName(null)
+      setRole(null)
       navigate('/')
       alert(response.data.message)
     } catch (error) {
@@ -40,12 +40,7 @@ export const Navbar = () => {
     <AppBar position="static" sx={{ backgroundColor: 'darkBlue' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Logo */}
-          <Box
-            component={Link}
-            to="/"
-            sx={{ display: 'flex', alignItems: 'center' }}
-          >
+          <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center' }}>
             <img
               src="/logoAlquilapp.png"
               alt="Logo"
@@ -54,27 +49,56 @@ export const Navbar = () => {
           </Box>
         </Box>
 
-        {/* Saludo o botones */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {userName ? (
             <>
               <Typography sx={{ color: 'white', marginRight: 2 }}>
                 Hola, {userName}!
               </Typography>
-              
-              {(
-                <Button
-                  component={Link}
-                  to="/mi-perfil"
-                  variant="contained"
-                  sx={{
-                    backgroundColor: 'beanBlue',
-                    marginRight: 1
-                  }}
-                >
-                  Mi Perfil
-                </Button>
+
+              {role === 'user' && (
+                <>
+                  <Button
+                    component={Link}
+                    to="/mi-perfil"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Mi Perfil
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/reservation"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Reservar
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Mis Reservas
+                  </Button>
+                </>
               )}
+
+              {role === 'admin' && (
+                <>
+                  {/* Acá agregamos botones que usaría el admin */}
+                  <Button
+                    component={Link}
+                    to="/vehicles/new"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Agregar Vehículo
+                  </Button>
+                </>
+              )}
+
               <Button
                 variant="outlined"
                 onClick={handleLogout}
