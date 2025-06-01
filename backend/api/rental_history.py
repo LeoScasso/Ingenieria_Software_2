@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, session
 from sqlalchemy import Table, select, join, and_
 from app.db import engine, metadata
+from datetime import datetime, timedelta
 
-rental_history_bp = Blueprint('rental_history_bp',__name__)
+rental_history_bp = Blueprint('rental_history_bp', __name__)
 
 rentals = Table('rentals', metadata, autoload_with=engine)
 reservations = Table('reservations', metadata, autoload_with=engine)
@@ -12,12 +13,21 @@ vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 cancelation_policies = Table('cancelation_policies', metadata, autoload_with=engine)
 
-## Ahora la politica de cancelacion esta en categories
+def add_hours(dt_str, hours=3):
+    if not dt_str:
+        return None
+    try:
+        dt = datetime.fromisoformat(dt_str)
+    except ValueError:
+        dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
+    return dt + timedelta(hours=hours)
+
 @rental_history_bp.route('/user_rentals', methods=['GET'])
 def user_rentals():
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
+
     stmt = select(
         rentals,
         reservations,
@@ -27,7 +37,7 @@ def user_rentals():
         vehicle_categories.c.name.label("category_name"),
         cancelation_policies.c.name.label("cancelation_policy_name")
     ).select_from(
-        rentals.join(vehicles,rentals.c.vehicle_id == vehicles.c.vehicle_id)
+        rentals.join(vehicles, rentals.c.vehicle_id == vehicles.c.vehicle_id)
         .join(vehicle_models, vehicle_models.c.model_id == vehicles.c.model_id)
         .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
         .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
@@ -37,8 +47,14 @@ def user_rentals():
 
     with engine.connect() as conn:
         result = conn.execute(stmt)
-    # Mapea las rows en una lista de diccionarios
-    user_rentals = [dict(fila._mapping) for fila in result]
+        user_rentals = [dict(fila._mapping) for fila in result]
+
+    # Ajustamos las fechas sumando horas y convirtiendo a string ISO
+    for rental in user_rentals:
+        if rental.get('pickup_datetime'):
+            rental['pickup_datetime'] = add_hours(rental['pickup_datetime']).isoformat()
+        if rental.get('return_datetime'):
+            rental['return_datetime'] = add_hours(rental['return_datetime']).isoformat()
 
     return jsonify(user_rentals)
 
@@ -47,7 +63,7 @@ def user_reservations():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
-    
+
     stmt = select(
         reservations.c.reservation_id,
         reservations.c.user_id,
@@ -65,5 +81,12 @@ def user_reservations():
     with engine.connect() as conn:
         result = conn.execute(stmt)
         user_reservations = [dict(fila._mapping) for fila in result]
-    
+
+    # Ajustamos fechas acá también
+    for reservation in user_reservations:
+        if reservation.get('pickup_datetime'):
+            reservation['pickup_datetime'] = add_hours(reservation['pickup_datetime']).isoformat()
+        if reservation.get('return_datetime'):
+            reservation['return_datetime'] = add_hours(reservation['return_datetime']).isoformat()
+
     return jsonify(user_reservations)
