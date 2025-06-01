@@ -67,7 +67,7 @@ def update_profile():
             stmt = select(users).where(users.c.user_id == user_id)
             current_user = conn.execute(stmt).fetchone()
             if current_user.password != current_password:
-                return jsonify({'error': 'Contraseña actual incorrecta'}), 401
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
                 
             data_user = {
                 'name' : data.get('name'),
@@ -89,7 +89,7 @@ def update_profile():
             stmt = select(employees).where(employees.c.employee_id == user_id)
             current_employee = conn.execute(stmt).fetchone()
             if not current_employee or current_employee.password != current_password:
-                return jsonify({'error': 'Contraseña actual incorrecta'}), 401
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
             
             stmt = select(branches).where(branches.c.name == data.get('branch'))
             result = conn.execute(stmt).fetchone()
@@ -115,7 +115,7 @@ def update_profile():
             stmt = select(admins).where(admins.c.admin_id == user_id)
             current_admin = conn.execute(stmt).fetchone()
             if not current_admin or current_admin.password != current_password:
-                return jsonify({'error': 'Contraseña actual incorrecta'}), 401
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
                 
             data_admin = {
                 'name' : data.get('name'),

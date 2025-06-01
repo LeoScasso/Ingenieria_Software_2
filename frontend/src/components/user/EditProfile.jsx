@@ -84,7 +84,6 @@ export const EditProfile = () => {
     }
 
     setErrors(newErrors)
-    console.log('Errores de validación:', newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -95,13 +94,18 @@ export const EditProfile = () => {
   const handleSave = async () => {
     if (validateForm()) {
       try {
-        console.log('Datos actualizados:', userData)
-        await apiClient.put('/update_profile', userData)
-        setShowSuccess(true)
-        setTimeout(() => {
-          setShowSuccess(false)
-          navigate('/mi-perfil')
-        }, 2000)
+        await apiClient
+          .put('/update_profile', userData)
+          .then(() => {
+            setShowSuccess(true)
+            setTimeout(() => {
+              navigate('/mi-perfil')
+            }, 300)
+          })
+          .catch((error) => {
+            console.error('Error al guardar:', error.response.data)
+            alert(error.response.data.error)
+          })
       } catch (error) {
         console.error('Error al guardar:', error)
       }
@@ -123,7 +127,6 @@ export const EditProfile = () => {
     const fetchUserData = async () => {
       try {
         const response = await apiClient.get('/my_profile')
-        console.log(response.data)
         setUserData(response.data)
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error)
