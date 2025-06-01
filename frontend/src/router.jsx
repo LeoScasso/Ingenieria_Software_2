@@ -15,6 +15,7 @@ import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import { theme } from './theme/theme'
 import RentalHistory from './components/user/RentalHistory' // Assuming RentalHistory component path
+import EditCarForm from './components/carForm/EditCarForm'
 
 const AppRouter = () => {
   return (
@@ -49,6 +50,7 @@ const AppRouter = () => {
             <Route path="/mi-perfil" element={<Profile />} />
             <Route path="/editar-perfil" element={<EditProfile />} />
             <Route path="/historial-alquileres" element={<RentalHistory />} />
+            <Route path="/vehicles/edit/:id" element={<EditCarForm />} />
           </Routes>
         </Box>
         <Footer />

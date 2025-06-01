@@ -13,6 +13,12 @@ import {
 } from '@mui/material';
 import apiClient from '../../middleware/axios';
 
+const politicas_cancelacion = {
+  1: "100% de devolución",
+  2: "20% de devolución",
+  3: "Sin devolución"
+};
+
 const InfoPaper = ({ children }) => {
   const theme = useTheme();
   return (
@@ -58,7 +64,7 @@ const UserHistory = () => {
         const [rentalRes, reservationRes, categoriesRes] = await Promise.all([
           apiClient.get('/user_rentals'),
           apiClient.get('/user_reservations'),
-          apiClient.get('/get_categories'), // acá traemos las categorías con las políticas
+          apiClient.get('/get_categories'),
         ]);
 
         setRentals(rentalRes.data);
@@ -74,11 +80,43 @@ const UserHistory = () => {
     fetchData();
   }, []);
 
-  // Función para obtener la política según el nombre de la categoría
   const getCancelationPolicy = (categoryName) => {
     const category = categories.find(cat => cat.name === categoryName);
-    return category?.cancelation_policy || 'No disponible';
+    const policyId = category?.cancelation_policy_id;
+    return politicas_cancelacion[policyId] || 'No disponible';
   };
+
+const handleCancelReservation = async (reservation) => {
+  try {
+    // Buscar la categoría correspondiente para obtener la política
+    const category = categories.find(cat => cat.name === reservation.vehicle_category);
+    const cancelation_policy_id = category?.cancelation_policy_id;
+
+    if (!cancelation_policy_id) {
+      alert("No se pudo determinar la política de cancelación para esta reserva.");
+      return;
+    }
+
+    const response = await apiClient.delete('/cancel_reservation', {
+      data: {
+        reservation_id: reservation.reservation_id,
+        total_cost: reservation.cost,
+        cancelation_policy_id: cancelation_policy_id
+      }
+    });
+
+    setReservations(prev =>
+      prev.filter(r => r.reservation_id !== reservation.reservation_id)
+    );
+
+    alert(response.data.message);
+
+  } catch (error) {
+    console.error('Error cancelando la reserva:', error);
+    alert('Error al cancelar la reserva. Por favor, intente nuevamente más tarde.');
+  }
+};
+
 
   if (loading) {
     return (
@@ -205,23 +243,19 @@ const UserHistory = () => {
                       position: 'relative',
                     }}
                   >
-                    <Typography variant="h6" textAlign="center" gutterBottom>
-                      Reserva #{reservation.reservation_id}
-                    </Typography>
-                    <Typography variant="body2" textAlign="center">
+                    <Typography variant="body1" textAlign="center">
                       Categoría del vehículo: {reservation.vehicle_category}
                     </Typography>
-                    <Typography variant="body2" textAlign="center">
+                    <Typography variant="body1" textAlign="center">
                       Retiro: {safeFormatDate(reservation.pickup_datetime)}
                     </Typography>
-                    <Typography variant="body2" textAlign="center">
+                    <Typography variant="body1" textAlign="center">
                       Devolución: {safeFormatDate(reservation.return_datetime)}
                     </Typography>
-                    <Typography variant="body2" textAlign="center">
+                    <Typography variant="body1" textAlign="center">
                       Costo estimado: ${reservation.cost}
                     </Typography>
-
-                    <Typography variant="body2" textAlign="center" sx={{ mt: 1, fontStyle: 'italic' }}>
+                    <Typography variant="body1" textAlign="center">
                       Política de cancelación: {getCancelationPolicy(reservation.vehicle_category)}
                     </Typography>
 
@@ -230,7 +264,9 @@ const UserHistory = () => {
                         variant="contained"
                         color="error"
                         onClick={() => {
-                          console.log(`Cancelar reserva ${reservation.reservation_id}`);
+                          if (window.confirm('¿Estás seguro de que querés cancelar esta reserva?')) {
+                            handleCancelReservation(reservation);
+                          }
                         }}
                       >
                         Cancelar reserva

@@ -52,14 +52,15 @@ def get_branches():
 @getters_bp.route('/get_categories', methods=['GET'])
 def get_categories():
     with engine.connect() as conn:
-        stmt = select(categories.c.category_id, categories.c.name, categories.c.price_per_day, categories.c.minimum_rental_days).order_by(categories.c.name)
+        stmt = select(categories.c.category_id, categories.c.name, categories.c.price_per_day, categories.c.minimum_rental_days, categories.c.cancelation_policy_id).order_by(categories.c.name)
         result = conn.execute(stmt).fetchall()
         categories_list = [
             {
                 "category_id": row.category_id,
                 "name": row.name,
                 "price_per_day": row.price_per_day,
-                "minimum_rental_days": row.minimum_rental_days
+                "minimum_rental_days": row.minimum_rental_days,
+                "cancelation_policy_id": row.cancelation_policy_id
             }
             for row in result
         ]
