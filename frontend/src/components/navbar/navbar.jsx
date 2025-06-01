@@ -84,6 +84,19 @@ export const Navbar = () => {
                 </>
               )}
 
+              {role === 'employee' && (
+                <>
+                  <Button
+                    component={Link}
+                    to="/mi-perfil"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Mi Perfil
+                  </Button>
+                </>
+              )}
+
               {role === 'admin' && (
                 <>
                   {/* Acá agregamos botones que usaría el admin */}
