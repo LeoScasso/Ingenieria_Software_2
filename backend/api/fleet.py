@@ -106,7 +106,7 @@ def update_vehicle():
     data = request.get_json()
     number_plate = data.get('number_plate')
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         stmt_model = select(vehicle_models).where(
             and_(
                 vehicle_models.c.name == data.get('model'),
