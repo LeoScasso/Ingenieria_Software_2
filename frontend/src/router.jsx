@@ -1,11 +1,13 @@
 import { Box } from '@mui/material'
 import React from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Vehicles } from './components/Fleet/Vehicles'
 import Home from './components/Home/Home' // Assuming Home component path
 import Login from './components/auth/Login' // Assuming Login component path}
 import { LoginAdmin } from './components/auth/LoginAdmin'
 import BackgroundLogo from './components/bgLogo/bgLogo'
 import CarForm from './components/carForm/CarForm'
+import EditCarForm from './components/carForm/EditCarForm'
 import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
@@ -13,9 +15,8 @@ import RegistrationForm from './components/registration/RegistrationForm' // Ass
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
-import { theme } from './theme/theme'
 import RentalHistory from './components/user/RentalHistory' // Assuming RentalHistory component path
-import EditCarForm from './components/carForm/EditCarForm'
+import { theme } from './theme/theme'
 
 const AppRouter = () => {
   return (
@@ -50,7 +51,8 @@ const AppRouter = () => {
             <Route path="/mi-perfil" element={<Profile />} />
             <Route path="/editar-perfil" element={<EditProfile />} />
             <Route path="/historial-alquileres" element={<RentalHistory />} />
-            <Route path="/vehicles/edit/:id" element={<EditCarForm />} />
+            <Route path="/vehicles/edit" element={<EditCarForm />} />
+            <Route path="/vehicles" element={<Vehicles />} />
           </Routes>
         </Box>
         <Footer />
