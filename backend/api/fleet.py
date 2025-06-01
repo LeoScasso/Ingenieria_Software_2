@@ -14,17 +14,17 @@ cancelation_policies = Table('cancelation_policies', metadata, autoload_with=eng
 branches = Table('branches', metadata, autoload_with=engine)
 reservations = Table('reservations', metadata, autoload_with=engine)
 
+## Se borró la cancelation policy de los vehiculos
+
 @fleet_bp.route('/vehicle_registration', methods=['POST'])
 def vehicle_registration():
     data = request.get_json()
     
 
-
     data_check = {
             'number_plate' : data.get('number_plate'),
             'category' : data.get('category'),
             'condition' : data.get('condition'),
-            'cancelation_policy' : data.get('cancelation_policy'),
             'model' : data.get('model'),
             'year' : data.get('year'),
             'brand' : data.get('brand')
@@ -78,12 +78,9 @@ def vehicle_registration():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('cancelation_policy'))
-        policy = conn.execute(stmt).fetchone()
 
         vehicle.update({
             'model_id' : model_id,
-            'cancelation_policy_id' : policy.policy_id,
             'category_id' :category.category_id,
             'condition_id' : condition.condition_id
         })
@@ -103,6 +100,7 @@ def get_categories():
 
     return jsonify(categories)
 
+## Se borró la cancelation policy de los vehiculos
 
 @fleet_bp.route('/update_vehicle', methods=['PUT'])
 def update_vehicle():
@@ -113,7 +111,6 @@ def update_vehicle():
         year
         category
         condition
-        policy
     """
     data = request.get_json()
     number_plate = data.get('number_plate')
@@ -155,13 +152,10 @@ def update_vehicle():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-        stmt = select(cancelation_policies).where(cancelation_policies.c.name == data.get('policy'))
-        policy = conn.execute(stmt).fetchone()
 
         new_fields = {
             'number_plate' : data.get('number_plate'),
             'model_id' : model_id,
-            'cancellation_policy_id' : policy.policy_id,
             'category_id' :category.category_id,
             'condition' : condition.condition_id
         }
@@ -171,31 +165,33 @@ def update_vehicle():
         conn.commit()
         return jsonify({'message': 'Vehículo editado con éxito'}), 200
 
+## Se borró la cancelation policy de los vehiculos
 @fleet_bp.route('/get_vehicles',methods=['GET'])
 def get_vehicles():
-    
     stmt = select(vehicles.c.number_plate,
             vehicle_categories.c.capacity,
             vehicle_categories.c.price_per_day,
             vehicle_categories.c.minimum_rental_days,
+            cancelation_policies.c.name, ## Aca se encuentra la politica ahora
             vehicle_models.c.name.label('model'),
             vehicle_brands.c.name.label('brand'),
             vehicle_categories.c.name.label('category'),
             vehicle_conditions.c.name.label('condition'),
-            cancelation_policies.c.name.label('policy'),
             vehicle_models.c.year
             ).select_from(
                 vehicles
                 .join(vehicle_models, vehicles.c.model_id == vehicle_models.c.model_id)
                 .join(vehicle_categories, vehicles.c.category_id == vehicle_categories.c.category_id)
                 .join(vehicle_conditions, vehicles.c.condition == vehicle_conditions.c.condition_id)
-                .join(cancelation_policies, vehicles.c.cancelation_policy_id == cancelation_policies.c.policy_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
+                .join(cancelation_policies, cancelation_policies.c.cancelation_policy_id == vehicle_categories.c.cancelation_policy_id)
             )
     with engine.connect() as conn:
         result = conn.execute(stmt).fetchall()
     vehicles_list = [dict(row) for row in result]
     return jsonify(vehicles_list)
+
+## Ahora faltan las politicas de cancelacion aca! agregar para segundo Sprint (si es necesario)
 
 @fleet_bp.route('get_avaible_vehicles', methods=['GET'])
 def get_avaible_vehicles():
@@ -228,16 +224,15 @@ def get_avaible_vehicles():
         stmt = select(
             vehicles.c.vehicle_id,
             vehicle_categories.c.capacity,
+            vehicle_categories.c.cancelation_policy_id, ##
             vehicle_models.c.name.label('model'),
             vehicle_brands.c.name.label('brand'),
             vehicle_models.c.year,
-            (vehicle_categories.c.price_per_day * days).label('cost'),
-            cancelation_policies.c.name
+            (vehicle_categories.c.price_per_day * days).label('cost')
         ).select_from(
             vehicles
                 .join(vehicle_models, vehicle_models.c.model_id == vehicles.c.model_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
-                .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
                 .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
         ).where((vehicles.c.branch_id == branch_id) & (vehicles.c.category_id == category_id) & (vehicles.c.conditon == 1) 
                 & (vehicles.c.minimum_rantal_days <= days) & (~vehicles.c.vehicle_id.in_(reserved_vehicles_subq)))

@@ -12,6 +12,7 @@ vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 cancelation_policies = Table('cancelation_policies', metadata, autoload_with=engine)
 
+## Ahora la politica de cancelacion esta en categories
 @rental_history_bp.route('/user_rentals', methods=['GET'])
 def user_rentals():
     user_id = session['user_id']
@@ -30,7 +31,7 @@ def user_rentals():
         .join(vehicle_models, vehicle_models.c.model_id == vehicles.c.model_id)
         .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
         .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
-        .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
+        .join(cancelation_policies, cancelation_policies.c.policy_id == vehicle_categories.c.cancelation_policy_id)
         .join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
     ).where(reservations.c.user_id == user_id)
 
