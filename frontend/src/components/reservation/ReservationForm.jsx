@@ -122,17 +122,17 @@ const ReservationForm = () => {
       autoComplete: 'new-return_datetime',
     },
     {
-        name: 'category',
-        label: 'Categoría',
-        type: 'select',
-        value: formData.category,
-        onChange: handleChange,
-        required: true,
-        autoComplete: 'new-category',
-        options: categories.map((cat) => ({
-            value: cat.category_id,
-            label: `${cat.name} - $${cat.price_per_day}/día - ${cat.minimum_rental_days} día(s) mínimo`,
-        })) 
+      name: 'category',
+      label: 'Categoría',
+      type: 'select',
+      value: formData.category,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'new-category',
+      options: categories.map((cat) => ({
+          value: cat.category_id,
+          label: `${cat.name} - $${cat.price_per_day}/día - ${cat.minimum_rental_days} día(s) mínimo`,
+      })) 
     },
     {
       name: 'branch',

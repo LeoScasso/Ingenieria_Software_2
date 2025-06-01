@@ -40,11 +40,12 @@ const CardPaymentForm = () => {
         const tarjeta = tarjetas.find((t) => t.numero === card_number)
 
         if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
-        if (tarjeta.codigo !== sec_number) return alert('Código incorrecto')
-        if (tarjeta.titular !== titular_name) return alert('Titular incorrecto')
+        if (tarjeta.codigo !== sec_number) return alert('El código de seguridad es incorrecto')
+        if (tarjeta.titular !== titular_name) return alert('El titular de la tarjeta no coincide')
         if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
 
         try {
+            console.log("Datos enviados al backend:", formDataReserva)
             const response = await apiClient.post('/reserve', formDataReserva)
             alert(`¡Pago exitoso! ${response.data.message}`)
             navigate('/')
