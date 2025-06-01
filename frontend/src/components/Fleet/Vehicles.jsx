@@ -1,4 +1,4 @@
-import EditIcon from '@mui/icons-material/Edit'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Chip,
@@ -13,9 +13,16 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import EditIcon from '@mui/icons-material/Edit'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
+
+// Función para obtener el rol del usuario
+const getUserRole = () => {
+  return sessionStorage.getItem('role')
+}
+
+// Componente para las celdas del encabezado
 const HeaderCell = ({ children }) => {
   return (
     <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
@@ -24,6 +31,7 @@ const HeaderCell = ({ children }) => {
   )
 }
 
+// Función para determinar color de política
 const getPolicyColor = (policyName, theme) => {
   switch (policyName?.toLowerCase()) {
     case 'sin devolucion':
@@ -68,12 +76,21 @@ const BodyCell = ({ children }) => {
 
 export const Vehicles = () => {
   const [vehicles, setVehicles] = useState([])
+  const [userRole, setUserRole] = useState('guest')
   const navigate = useNavigate()
   const theme = useTheme()
 
+  useEffect(() => {
+    setUserRole(getUserRole())
+  }, [])
+
   const getVehicles = async () => {
-    const response = await apiClient.get('/get_vehicles')
-    setVehicles(response.data)
+    try {
+      const response = await apiClient.get('/get_vehicles')
+      setVehicles(response.data)
+    } catch (error) {
+      console.error('Error fetching vehicles:', error)
+    }
   }
 
   useEffect(() => {
@@ -109,7 +126,7 @@ export const Vehicles = () => {
                 backgroundColor: theme.palette.charcoal,
               }}
             >
-              <HeaderCell>Placa</HeaderCell>
+              <HeaderCell>Patente</HeaderCell>
               <HeaderCell>Modelo</HeaderCell>
               <HeaderCell>Marca</HeaderCell>
               <HeaderCell>Año</HeaderCell>
@@ -119,7 +136,7 @@ export const Vehicles = () => {
               <HeaderCell>Días mín. alq.</HeaderCell>
               <HeaderCell>Política de cancelación</HeaderCell>
               <HeaderCell>Condición</HeaderCell>
-              <HeaderCell>Acciones</HeaderCell>
+              {userRole === 'admin' && <HeaderCell>Acciones</HeaderCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -155,25 +172,29 @@ export const Vehicles = () => {
                   />
                 </BodyCell>
                 <BodyCell>{vehicle.condition}</BodyCell>
-                <BodyCell>
-                  <IconButton
-                    onClick={() => {
-                      navigate('/vehicles/edit', { state: { vehicle } })
-                    }}
-                    variant="contained"
-                    sx={{
-                      borderRadius: '10px',
-                      backgroundColor: theme.palette.slateGray,
-                      color: theme.palette.beige,
-                      '&:hover': {
-                        backgroundColor: theme.palette.beanBlue,
-                      },
-                    }}
-                  >
-                    <Typography variant="body1">Editar</Typography>
-                    <EditIcon />
-                  </IconButton>
-                </BodyCell>
+                {userRole === 'admin' && (
+                  <BodyCell>
+                    <IconButton
+                      onClick={() => {
+                        navigate('/vehicles/edit', { state: { vehicle } })
+                      }}
+                      variant="contained"
+                      sx={{
+                        borderRadius: '10px',
+                        backgroundColor: theme.palette.slateGray,
+                        color: theme.palette.beige,
+                        '&:hover': {
+                          backgroundColor: theme.palette.beanBlue,
+                        },
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ marginRight: '5px' }}>
+                        Editar
+                      </Typography>
+                      <EditIcon />
+                    </IconButton>
+                  </BodyCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
