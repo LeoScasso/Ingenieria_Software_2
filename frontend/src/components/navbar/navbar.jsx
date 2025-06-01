@@ -14,14 +14,14 @@ export const Navbar = () => {
   const [role, setRole] = useState(null)
 
   useEffect(() => {
-    setUserName(localStorage.getItem('name'))
-    setRole(localStorage.getItem('role')) // <--- leemos el rol del usuario
+    setUserName(sessionStorage.getItem('name'))
+    setRole(sessionStorage.getItem('role')) // <--- leemos el rol del usuario
   }, [location])
 
   const handleLogout = async () => {
     try {
       const response = await axios.post('http://localhost:5000/api/logout')
-      localStorage.clear()
+      sessionStorage.clear()
       setUserName(null)
       setRole(null)
       navigate('/')
@@ -80,6 +80,19 @@ export const Navbar = () => {
                     sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
                   >
                     Mis Reservas
+                  </Button>
+                </>
+              )}
+
+              {role === 'employee' && (
+                <>
+                  <Button
+                    component={Link}
+                    to="/mi-perfil"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Mi Perfil
                   </Button>
                 </>
               )}
