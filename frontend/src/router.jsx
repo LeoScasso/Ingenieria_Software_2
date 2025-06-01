@@ -14,6 +14,7 @@ import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import { theme } from './theme/theme'
+import RentalHistory from './components/user/RentalHistory' // Assuming RentalHistory component path
 
 const AppRouter = () => {
   return (
@@ -47,6 +48,7 @@ const AppRouter = () => {
             <Route path="/reservation" element={<ReservationForm />} />
             <Route path="/mi-perfil" element={<Profile />} />
             <Route path="/editar-perfil" element={<EditProfile />} />
+            <Route path="/historial-alquileres" element={<RentalHistory />} />
           </Routes>
         </Box>
         <Footer />
