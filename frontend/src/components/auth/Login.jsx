@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
-import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -26,9 +26,9 @@ const Login = () => {
       const response = await apiClient.post('/login', formData)
       const data = response.data
 
-      localStorage.setItem('userId', data.user_id)
-      localStorage.setItem('role', data.user_role)
-      localStorage.setItem('name', data.user_name)
+      sessionStorage.setItem('userId', data.user_id)
+      sessionStorage.setItem('role', data.user_role)
+      sessionStorage.setItem('name', data.user_name)
       alert(data.message)
       navigate('/')
     } catch (error) {
