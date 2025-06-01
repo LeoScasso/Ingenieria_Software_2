@@ -101,22 +101,12 @@ def get_categories():
     return jsonify(categories)
 
 ## Se borró la cancelation policy de los vehiculos
-
 @fleet_bp.route('/update_vehicle', methods=['PUT'])
 def update_vehicle():
-    """ datos del request:
-        number_plate
-        model
-        brand
-        year
-        category
-        condition
-    """
     data = request.get_json()
     number_plate = data.get('number_plate')
 
     with engine.connect() as conn:
-        
         stmt_model = select(vehicle_models).where(
             and_(
                 vehicle_models.c.name == data.get('model'),
@@ -152,17 +142,16 @@ def update_vehicle():
         stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
         condition = conn.execute(stmt).fetchone()
 
-
         new_fields = {
-            'number_plate' : data.get('number_plate'),
-            'model_id' : model_id,
-            'category_id' :category.category_id,
-            'condition' : condition.condition_id
+            'number_plate': data.get('number_plate'),
+            'model_id': model_id,
+            'category_id': category.category_id,
+            'condition_id': condition.condition_id  # <== Acá el fix
         }
 
         stmt = update(vehicles).where(vehicles.c.number_plate == number_plate).values(new_fields)
         conn.execute(stmt)
-        conn.commit()
+
         return jsonify({'message': 'Vehículo editado con éxito'}), 200
 
 ## Se borró la cancelation policy de los vehiculos

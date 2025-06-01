@@ -17,28 +17,37 @@ def get_models():
         models = [row.result for row in result]
         return jsonify(models), 200
 
-@getters_bp.route('get_models_by_brand', methods=['GET'])
+@getters_bp.route('/get_models_by_brand')
 def get_models_by_brand():
     brand_name = request.args.get('brand')
+
     if not brand_name:
-        return jsonify({'message':'No se ha introducido una marca'})
-    
-    stmt = select(vehicle_brands.c.id).where(vehicle_brands.c.name == brand_name)
-    brand_result = conn.execute(stmt).fetchone()
+        return jsonify({'error': 'No se proporcionó la marca'}), 400
 
     with engine.connect() as conn:
-        stmt = select(distinct(vehicle_models.c.name)).where(vehicle_models.c.brand_id == brand_result.brand_id).order_by(vehicle_models.c.name)
-        result = conn.execute(stmt).fetchall()
-        models = [row.result for row in result]
-        return jsonify(models), 200
+        # Obtener el brand_id de vehicle_brands
+        stmt = select(vehicle_brands.c.brand_id).where(vehicle_brands.c.name == brand_name)
+        result = conn.execute(stmt).fetchone()
 
+        if not result:
+            return jsonify({'error': 'Marca no encontrada'}), 404
 
-@getters_bp.route('get_brands', methods=['GET'])
+        brand_id = result[0]
+
+        # Obtener los modelos asociados a ese brand_id
+        stmt = select(vehicle_models.c.name).where(vehicle_models.c.brand_id == brand_id).distinct()
+        result = conn.execute(stmt)
+
+        models = [row[0] for row in result]
+
+    return jsonify(models)
+
+@getters_bp.route('/get_brands', methods=['GET'])
 def get_brands():
     with engine.connect() as conn:
-        stmt = select(vehicle_brands.c.name).distinct().order_by(vehicle_brands.c.name)
-        result = conn.execute(stmt).fetchall
-        brands = [row.result for row in result]
+        stmt = select(distinct(vehicle_brands.c.name)).order_by(vehicle_brands.c.name)
+        result = conn.execute(stmt).fetchall()
+        brands = [row[0] for row in result]  # row[0] es el nombre de la marca
         return jsonify(brands), 200
     
 @getters_bp.route('/get_branches', methods=['GET'])
