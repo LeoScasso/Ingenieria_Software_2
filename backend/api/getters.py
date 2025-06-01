@@ -7,6 +7,7 @@ getters_bp = Blueprint('getters', __name__)
 vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 branches = Table('branches', metadata, autoload_with=engine)
+categories = Table('vehicle_categories', metadata, autoload_with=engine)
 
 @getters_bp.route('get_models', methods=['GET'])
 def get_models():
@@ -40,10 +41,26 @@ def get_brands():
         brands = [row.result for row in result]
         return jsonify(brands), 200
     
-@getters_bp.route('get_branches', methods=['GET'])
+@getters_bp.route('/get_branches', methods=['GET'])
 def get_branches():
     with engine.connect() as conn:
-        stmt = select(branches.c.name).distinct().order_by(branches.c.name)
-        result = conn.execute(stmt).fetchall
-        branch = [row.result for row in result]
+        stmt = select(branches.c.name, branches.c.address).distinct().order_by(branches.c.name)
+        result = conn.execute(stmt).fetchall()  # ¡ojo, faltaban los paréntesis!
+        branch = [{'name': row.name, 'address': row.address} for row in result]  # así extraés bien los campos
         return jsonify(branch), 200
+
+@getters_bp.route('/get_categories', methods=['GET'])
+def get_categories():
+    with engine.connect() as conn:
+        stmt = select(categories.c.category_id, categories.c.name, categories.c.price_per_day, categories.c.minimum_rental_days).order_by(categories.c.name)
+        result = conn.execute(stmt).fetchall()
+        categories_list = [
+            {
+                "category_id": row.category_id,
+                "name": row.name,
+                "price_per_day": row.price_per_day,
+                "minimum_rental_days": row.minimum_rental_days
+            }
+            for row in result
+        ]
+    return jsonify(categories_list), 200

@@ -26,47 +26,53 @@ def cancel_reservation():
 @reservation_management_bp.route('/reserve', methods=['POST'])
 def reserve():  
     data = request.get_json()
-    user_id = session['user_id']
-    role = session['user_role']
+    user_id = session.get('user_id')
+    role = session.get('user_role')
+
     with engine.connect() as conn:
+        try:
+            pickup_datetime = datetime.strptime(data.get('pickup_datetime'), '%Y-%m-%d').date()
+            return_datetime = datetime.strptime(data.get('return_datetime'), '%Y-%m-%d').date()
+            days = (return_datetime - pickup_datetime).days
 
-        pickup_datetime = datetime.strptime(data.get('pickup_datetime'), '%Y-%m-%d').date()
-        return_datetime = datetime.strptime(data.get('return_datetime'), '%Y-%m-%d').date()
-        days =  (return_datetime - pickup_datetime).days
+            # Obtener costo
+            stmt = select((categories.c.price_per_day * days).label('cost')).where(categories.c.category_id == data.get('category'))
+            cost_row = conn.execute(stmt).fetchone()
+            if cost_row is None:
+                return jsonify({'error': 'Categoría inválida'}), 400
+            cost = cost_row[0]
 
-        stmt = select((categories.c.price_per_day * days).label('cost'))
-        cost = conn.execute(stmt).fetchone()
+            # Obtener branch_id
+            stmt = select(branches.c.branch_id).where(branches.c.name == data.get('branch'))
+            branch_row = conn.execute(stmt).fetchone()
+            if branch_row is None:
+                return jsonify({'error': 'Sucursal no encontrada'}), 400
+            branch_id = branch_row[0]
 
-        stmt = select((branches.c.branch_id)).where(branches.c.name == data.get('branch'))
-        branch_id = conn.execute(stmt).fetchone()
+            reserve_info = {
+                'cost': cost,
+                'branch_id': branch_id,
+                'pickup_datetime': data.get('pickup_datetime'),
+                'return_datetime': data.get('return_datetime'),
+                'category_id': data.get('category'),
+                'is_rented': 0
+            }
 
-        stmt = select(categories.c.category_id).where(categories.c.name == data.get('category'))
-        category_id = conn.execute(stmt).fetchone()
+            if role == 'user':
+                reserve_info['user_id'] = user_id
+            else:
+                stmt = select(users).where(users.c.email == data.get('email'))
+                user_row = conn.execute(stmt).fetchone()
+                if user_row is None:
+                    return jsonify({'error': 'Usuario no encontrado'}), 400
+                reserve_info['user_id'] = user_row.user_id
 
-        reserve_info = {
-            'cost' : cost,
-            'branch_id' : branch_id,
-            'pickup_datetime' : data.get('pickup_datetime'),
-            'return_datetime' : data.get('return_datetime'),
-            'category_id' : category_id,
-            'is_rented' : 0
-        }
+            stmt = insert(reservations).values(reserve_info)
+            conn.execute(stmt)
+            conn.commit()
 
-        if role == 'user':
-            reserve_info.update({
-                'user_id' : user_id
-            })
-        else:
-            stmt = select(users).where(users.c.email == data.get('email'))
-            result = conn.execute(stmt).fetchone()
-            reserve_info.update({
-                'user_id' : result.user_id
-            })
-        
-        stmt = insert(reservations).values(reserve_info)
-        conn.execute(stmt)
-        conn.commit()
+            return jsonify({'message': 'Se registró su reserva'}), 200
 
-    return jsonify({ 'message' : 'se registro su reserva' }), 200
-
-            
+        except Exception as e:
+            print("Error al reservar:", e)
+            return jsonify({'error': 'Error interno del servidor'}), 500

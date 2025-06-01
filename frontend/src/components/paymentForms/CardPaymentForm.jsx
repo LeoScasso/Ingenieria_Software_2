@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Typography } from '@mui/material'
 import Form from '../common/Form'
-import { useNavigate, useLocation } from 'react-router-dom' // <--- faltaba esto
+import { useNavigate, useLocation } from 'react-router-dom'
+import apiClient from '../../middleware/axios'
 
 const tarjetas = [
   {
@@ -19,78 +20,71 @@ const tarjetas = [
 ]
 
 const CardPaymentForm = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const formDataReserva = location.state
+    const navigate = useNavigate()
+    const location = useLocation()
+    const formDataReserva = location.state
 
-  const [formData, setFormData] = useState({
-    card_number: '',
-    sec_number: '',
-    titular_name: '',
-  })
+    const [formData, setFormData] = useState({
+        card_number: '',
+        sec_number: '',
+        titular_name: '',
+    })
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const { card_number, sec_number, titular_name } = formData
-    const tarjeta = tarjetas.find((t) => t.numero === card_number)
-
-    if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
-    if (tarjeta.codigo !== sec_number) return alert('Código incorrecto')
-    if (tarjeta.titular !== titular_name) return alert('Titular incorrecto')
-    if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
-
-    try {
-      const response = await fetch('/reserve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formDataReserva),
-      })
-
-      if (!response.ok) throw new Error('Error en el servidor')
-
-      const data = await response.json()
-      alert(`¡Pago exitoso! ${data.message}`)
-      navigate('/')
-    } catch (error) {
-      console.error(error)
-      alert('Ocurrió un error al registrar la reserva')
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value })
     }
-  }
 
-  const fields = [
-    {
-      name: 'card_number',
-      label: 'Número de Tarjeta',
-      type: 'text',
-      value: formData.card_number,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'cc-number',
-      autoFocus: true,
-    },
-    {
-      name: 'sec_number',
-      label: 'Código de Seguridad',
-      type: 'password',
-      value: formData.sec_number,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'cc-csc',
-    },
-    {
-      name: 'titular_name',
-      label: 'Nombre del Titular',
-      type: 'text',
-      value: formData.titular_name,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'cc-name',
-    },
-  ]
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        const { card_number, sec_number, titular_name } = formData
+        const tarjeta = tarjetas.find((t) => t.numero === card_number)
+
+        if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
+        if (tarjeta.codigo !== sec_number) return alert('El código de seguridad es incorrecto')
+        if (tarjeta.titular !== titular_name) return alert('El titular de la tarjeta no coincide')
+        if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
+
+        try {
+            console.log("Datos enviados al backend:", formDataReserva)
+            const response = await apiClient.post('/reserve', formDataReserva)
+            alert(`¡Pago exitoso! ${response.data.message}`)
+            navigate('/')
+        } catch (error) {
+            console.error(error)
+            alert('Ocurrió un error al registrar la reserva')
+        }
+    }
+
+    const fields = [
+        {
+        name: 'card_number',
+        label: 'Número de Tarjeta',
+        type: 'text',
+        value: formData.card_number,
+        onChange: handleChange,
+        required: true,
+        autoComplete: 'cc-number',
+        autoFocus: true,
+        },
+        {
+        name: 'sec_number',
+        label: 'Código de Seguridad',
+        type: 'password',
+        value: formData.sec_number,
+        onChange: handleChange,
+        required: true,
+        autoComplete: 'cc-csc',
+        },
+        {
+        name: 'titular_name',
+        label: 'Nombre del Titular',
+        type: 'text',
+        value: formData.titular_name,
+        onChange: handleChange,
+        required: true,
+        autoComplete: 'cc-name',
+        },
+    ]
 
   return (
     <>
@@ -101,7 +95,7 @@ const CardPaymentForm = () => {
         submitButtonText="Pagar"
       >
         <Typography variant="h6" color="white" sx={{ textAlign: 'center', mb: 2 }}>
-          Cantidad a pagar: ${formDataReserva?.cost ?? '—'}
+            Cantidad a pagar: {formDataReserva?.totalCost?.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) ?? '—'}
         </Typography>
         <Typography
           variant="body2"
