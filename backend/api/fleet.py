@@ -169,7 +169,7 @@ def update_vehicle():
 @fleet_bp.route('/get_vehicles',methods=['GET'])
 def get_vehicles():
     stmt = select(vehicles.c.number_plate,
-            vehicle_categories.c.capacity,
+            vehicle_categories.c.max_capacity,
             vehicle_categories.c.price_per_day,
             vehicle_categories.c.minimum_rental_days,
             cancelation_policies.c.name, ## Aca se encuentra la politica ahora
@@ -182,13 +182,13 @@ def get_vehicles():
                 vehicles
                 .join(vehicle_models, vehicles.c.model_id == vehicle_models.c.model_id)
                 .join(vehicle_categories, vehicles.c.category_id == vehicle_categories.c.category_id)
-                .join(vehicle_conditions, vehicles.c.condition == vehicle_conditions.c.condition_id)
+                .join(vehicle_conditions, vehicles.c.condition_id == vehicle_conditions.c.condition_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
-                .join(cancelation_policies, cancelation_policies.c.cancelation_policy_id == vehicle_categories.c.cancelation_policy_id)
+                .join(cancelation_policies, cancelation_policies.c.policy_id == vehicle_categories.c.cancelation_policy_id)
             )
     with engine.connect() as conn:
         result = conn.execute(stmt).fetchall()
-    vehicles_list = [dict(row) for row in result]
+    vehicles_list = [dict(row._mapping) for row in result]
     return jsonify(vehicles_list)
 
 ## Ahora faltan las politicas de cancelacion aca! agregar para segundo Sprint (si es necesario)
