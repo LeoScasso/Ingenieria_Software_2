@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Form from '../common/Form'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Typography } from '@mui/material'
+import Form from '../common/Form'
+import apiClient from '../../middleware/axios'
 
 // Simulación de billeteras hardcodeadas
 const billeteras = [
@@ -17,8 +18,10 @@ const billeteras = [
   },
 ]
 
-const WalletPaymentForm = ({ amount }) => {
+const WalletPaymentForm = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const formDataReserva = location.state
 
   const [formData, setFormData] = useState({
     wallet_id: '',
@@ -30,25 +33,17 @@ const WalletPaymentForm = ({ amount }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const { card_number, sec_number, titular_name } = formData
-    const tarjeta = tarjetas.find((t) => t.numero === card_number)
 
-    if (!tarjeta) return alert('El número de tarjeta ingresado no es válido')
-    if (tarjeta.codigo !== sec_number) return alert('Código incorrecto')
-    if (tarjeta.titular !== titular_name) return alert('Titular incorrecto')
-    if (tarjeta.saldo <= 0) return alert('Saldo insuficiente')
+    const { wallet_id, titular_name } = formData
+    const billetera = billeteras.find((b) => b.id === wallet_id)
+
+    if (!billetera) return alert('La billetera ingresada no es válida')
+    if (billetera.saldo <= 0) return alert('Saldo insuficiente')
 
     try {
-      const response = await fetch('/reserve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formDataReserva),
-      })
-
-      if (!response.ok) throw new Error('Error en el servidor')
-
-      const data = await response.json()
-      alert(`¡Pago exitoso! ${data.message}`)
+      console.log('Datos enviados al backend:', formDataReserva)
+      const response = await apiClient.post('/reserve', formDataReserva)
+      alert(`¡Pago exitoso! ${response.data.message}`)
       navigate('/')
     } catch (error) {
       console.error(error)
@@ -78,7 +73,11 @@ const WalletPaymentForm = ({ amount }) => {
         submitButtonText="Pagar"
       >
         <Typography variant="h6" color="white" sx={{ textAlign: 'center', mb: 2 }}>
-          Cantidad a pagar: ${amount}
+          Cantidad a pagar:{' '}
+          {formDataReserva?.totalCost?.toLocaleString('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+          }) ?? '—'}
         </Typography>
         <Typography variant="body2" color="white" sx={{ textAlign: 'center', mt: 2 }}>
           Todos los campos son obligatorios

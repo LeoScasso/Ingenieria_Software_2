@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Divider,
   useTheme,
+  Button,
 } from '@mui/material';
 import apiClient from '../../middleware/axios';
 
@@ -31,34 +32,53 @@ const InfoPaper = ({ children }) => {
   );
 };
 
+const safeFormatDate = (dateString) => {
+  if (!dateString) return 'Fecha no disponible';
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Fecha inválida';
+
+  return date.toLocaleDateString('es-AR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 const UserHistory = () => {
-    const theme = useTheme();
-    const [rentals, setRentals] = useState([]);
-    const [reservations, setReservations] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+  const [rentals, setRentals] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-            const [rentalRes, reservationRes] = await Promise.all([
-                apiClient.get('/user_rentals'),
-                apiClient.get('/user_reservations'),
-            ]);
-            console.log("RESERVATIONS RESPONSE", reservationRes.data);
-            console.log("RENTALS RESPONSE", rentalRes.data);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [rentalRes, reservationRes, categoriesRes] = await Promise.all([
+          apiClient.get('/user_rentals'),
+          apiClient.get('/user_reservations'),
+          apiClient.get('/get_categories'), // acá traemos las categorías con las políticas
+        ]);
 
-            setRentals(rentalRes.data);
-            setReservations(reservationRes.data);
-            } catch (error) {
-            console.error('Error fetching data', error);
-            } finally {
-            setLoading(false);
-            }
-        };
+        setRentals(rentalRes.data);
+        setReservations(reservationRes.data);
+        setCategories(categoriesRes.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchData();
-    }, []);
+    fetchData();
+  }, []);
 
+  // Función para obtener la política según el nombre de la categoría
+  const getCancelationPolicy = (categoryName) => {
+    const category = categories.find(cat => cat.name === categoryName);
+    return category?.cancelation_policy || 'No disponible';
+  };
 
   if (loading) {
     return (
@@ -104,10 +124,10 @@ const UserHistory = () => {
             }}
           />
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} direction="column">
             {rentals.length > 0 ? (
               rentals.map((rental, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid item key={index}>
                   <Paper
                     sx={{
                       p: 2,
@@ -117,8 +137,7 @@ const UserHistory = () => {
                     }}
                   >
                     <Typography variant="h6" textAlign="center" gutterBottom>
-                      {rental.brand_name} {rental.model_name} (
-                      {rental.model_year})
+                      {rental.brand_name} {rental.model_name} ({rental.model_year})
                     </Typography>
                     <Typography variant="body2" textAlign="center">
                       Categoría: {rental.category_name}
@@ -127,22 +146,19 @@ const UserHistory = () => {
                       Sucursal: {rental.name}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Desde:{' '}
-                      {new Date(rental.pickup_datetime).toLocaleString()}
+                      Desde: {safeFormatDate(rental.pickup_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Hasta:{' '}
-                      {new Date(rental.return_datetime).toLocaleString()}
+                      Hasta: {safeFormatDate(rental.return_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Política de cancelación:{' '}
-                      {rental.cancelation_policy_name}
+                      Política de cancelación: {getCancelationPolicy(rental.category_name)}
                     </Typography>
                   </Paper>
                 </Grid>
               ))
             ) : (
-              <Grid item xs={12}>
+              <Grid item>
                 <Box
                   sx={{
                     display: 'flex',
@@ -176,16 +192,17 @@ const UserHistory = () => {
             Reservas Actuales
           </Typography>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} direction="column">
             {reservations.length > 0 ? (
               reservations.map((reservation, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid item key={index}>
                   <Paper
                     sx={{
                       p: 2,
                       backgroundColor: theme.palette.beanBlue,
                       color: 'white',
                       borderRadius: 2,
+                      position: 'relative',
                     }}
                   >
                     <Typography variant="h6" textAlign="center" gutterBottom>
@@ -195,22 +212,35 @@ const UserHistory = () => {
                       Categoría del vehículo: {reservation.vehicle_category}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Retiro:{' '}
-                      {new Date(
-                        reservation.pickup_datetime
-                      ).toLocaleString()}
+                      Retiro: {safeFormatDate(reservation.pickup_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Devolución:{' '}
-                      {new Date(
-                        reservation.return_datetime
-                      ).toLocaleString()}
+                      Devolución: {safeFormatDate(reservation.return_datetime)}
                     </Typography>
+                    <Typography variant="body2" textAlign="center">
+                      Costo estimado: ${reservation.cost}
+                    </Typography>
+
+                    <Typography variant="body2" textAlign="center" sx={{ mt: 1, fontStyle: 'italic' }}>
+                      Política de cancelación: {getCancelationPolicy(reservation.vehicle_category)}
+                    </Typography>
+
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          console.log(`Cancelar reserva ${reservation.reservation_id}`);
+                        }}
+                      >
+                        Cancelar reserva
+                      </Button>
+                    </Box>
                   </Paper>
                 </Grid>
               ))
             ) : (
-              <Grid item xs={12}>
+              <Grid item>
                 <Box
                   sx={{
                     display: 'flex',
