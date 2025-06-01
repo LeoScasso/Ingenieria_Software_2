@@ -31,34 +31,44 @@ const InfoPaper = ({ children }) => {
   );
 };
 
+// 🧠 Nueva función para formatear fechas sin hora y evitar invalid dates
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  if (isNaN(date)) return 'Fecha inválida';
+  return date.toLocaleDateString('es-AR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 const UserHistory = () => {
-    const theme = useTheme();
-    const [rentals, setRentals] = useState([]);
-    const [reservations, setReservations] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+  const [rentals, setRentals] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-            const [rentalRes, reservationRes] = await Promise.all([
-                apiClient.get('/user_rentals'),
-                apiClient.get('/user_reservations'),
-            ]);
-            console.log("RESERVATIONS RESPONSE", reservationRes.data);
-            console.log("RENTALS RESPONSE", rentalRes.data);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [rentalRes, reservationRes] = await Promise.all([
+          apiClient.get('/user_rentals'),
+          apiClient.get('/user_reservations'),
+        ]);
+        console.log("RESERVATIONS RESPONSE", reservationRes.data);
+        console.log("RENTALS RESPONSE", rentalRes.data);
 
-            setRentals(rentalRes.data);
-            setReservations(reservationRes.data);
-            } catch (error) {
-            console.error('Error fetching data', error);
-            } finally {
-            setLoading(false);
-            }
-        };
+        setRentals(rentalRes.data);
+        setReservations(reservationRes.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchData();
-    }, []);
-
+    fetchData();
+  }, []);
 
   if (loading) {
     return (
@@ -127,12 +137,10 @@ const UserHistory = () => {
                       Sucursal: {rental.name}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Desde:{' '}
-                      {new Date(rental.pickup_datetime).toLocaleString()}
+                      Desde: {formatDate(rental.pickup_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Hasta:{' '}
-                      {new Date(rental.return_datetime).toLocaleString()}
+                      Hasta: {formatDate(rental.return_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
                       Política de cancelación:{' '}
@@ -195,16 +203,10 @@ const UserHistory = () => {
                       Categoría del vehículo: {reservation.vehicle_category}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Retiro:{' '}
-                      {new Date(
-                        reservation.pickup_datetime
-                      ).toLocaleString()}
+                      Retiro: {formatDate(reservation.pickup_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Devolución:{' '}
-                      {new Date(
-                        reservation.return_datetime
-                      ).toLocaleString()}
+                      Devolución: {formatDate(reservation.return_datetime)}
                     </Typography>
                   </Paper>
                 </Grid>
