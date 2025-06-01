@@ -75,7 +75,7 @@ export const Navbar = () => {
                   </Button>
                   <Button
                     component={Link}
-                    to="/"
+                    to="/historial-alquileres"
                     variant="contained"
                     sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
                   >
