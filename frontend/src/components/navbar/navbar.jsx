@@ -67,14 +67,6 @@ export const Navbar = () => {
                   </Button>
                   <Button
                     component={Link}
-                    to="/vehicles"
-                    variant="contained"
-                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
-                  >
-                    Ver Flota
-                  </Button>
-                  <Button
-                    component={Link}
                     to="/reservation"
                     variant="contained"
                     sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
@@ -118,7 +110,14 @@ export const Navbar = () => {
                   </Button>
                 </>
               )}
-
+              <Button
+                component={Link}
+                to="/vehicles"
+                variant="contained"
+                sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+              >
+                Ver Flota
+              </Button>
               <Button
                 variant="outlined"
                 onClick={handleLogout}
