@@ -12,7 +12,7 @@ vehicles = Table('vehicles', metadata, autoload_with=engine)
 branches = Table('branches', metadata, autoload_with=engine)
 
 
-@reservation_management_bp.route('/cancel_reservation', method=['DELETE'])
+@reservation_management_bp.route('/cancel_reservation', methods=['DELETE'])
 def cancel_reservation():
     reservation = request.get_json()
 
