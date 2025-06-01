@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react'
 import { Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 
-const EditCarForm = ({ vehicleId = 5 }) => {
+const EditCarForm = () => {
+  const location = useLocation()
+  const vehicleFromState = location.state?.vehicle
+
   const [formData, setFormData] = useState({
-    number_plate: '',
-    category: '',
-    condition: '',
-    cancelation_policy: '',
-    model: '',
-    year: '',
-    brand: ''
+    vehicle_id: vehicleFromState?.vehicle_id || '',
+    number_plate: vehicleFromState?.number_plate || '',
+    category: vehicleFromState?.category || '',
+    condition: vehicleFromState?.condition || '',
+    cancelation_policy: vehicleFromState?.name || '',
+    model: vehicleFromState?.model || '',
+    year: vehicleFromState?.year || '',
+    brand: vehicleFromState?.brand || '',
+    price_per_day: vehicleFromState?.price_per_day || '',
+    max_capacity: vehicleFromState?.max_capacity || '',
+    minimum_rental_days: vehicleFromState?.minimum_rental_days || '',
   })
 
   const [categories, setCategories] = useState([])
@@ -20,73 +28,55 @@ const EditCarForm = ({ vehicleId = 5 }) => {
 
   const modelsByBrand = {
     'Marca A': ['Modelo A1', 'Modelo A2'],
-    'Marca B': ['Modelo B1', 'Modelo B2']
+    'Marca B': ['Modelo B1', 'Modelo B2'],
   }
 
   const cancelationPolicies = [
     '100% de devolucion',
     '20% de devolucion',
-    'Sin devolucion'
+    'Sin devolucion',
   ]
 
-  const estados = [
-    'Disponible',
-    'Alquilado',
-    'En mantenimiento'
-  ]
+  const estados = ['Disponible', 'Alquilado', 'En mantenimiento']
 
   useEffect(() => {
-    const fetchVehicle = async () => {
+    const getCategories = async () => {
       try {
-        const response = await apiClient.get('/get_vehicles')
-        const vehicle = response.data.find(v => v.vehicle_id == vehicleId)
-        if (vehicle) {
-          setFormData({
-            vehicle_id: vehicle.vehicle_id,
-            number_plate: vehicle.number_plate,
-            category: vehicle.category,
-            condition: vehicle.condition,
-            cancelation_policy: vehicle.policy,
-            model: vehicle.model,
-            year: vehicle.year,
-            brand: vehicle.brand
-          })
-        } else {
-          alert('Vehículo no encontrado')
-        }
+        const response = await apiClient.get('/categories')
+        setCategories(response.data)
       } catch (error) {
-        console.error('Error al obtener vehículo:', error)
+        console.error('Error al obtener categorías:', error)
       }
     }
 
-    const getCategories = async () => {
-      const response = await apiClient.get('/categories')
-      setCategories(response.data)
-    }
-
-    fetchVehicle()
     getCategories()
-  }, [vehicleId])
+  }, [])
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleChangeBrand = e => {
+  const handleChangeBrand = (e) => {
     setFormData({ ...formData, brand: e.target.value, model: '' })
   }
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       const response = await apiClient.put('/update_vehicle', formData)
       alert(response.data.message)
     } catch (error) {
       if (error.response) {
-        console.error('Error al actualizar - respuesta del servidor:', error.response.data)
+        console.error(
+          'Error al actualizar - respuesta del servidor:',
+          error.response.data
+        )
         alert('Error: ' + (error.response.data.message || 'Error del server'))
       } else if (error.request) {
-        console.error('Error al actualizar - sin respuesta del servidor:', error.request)
+        console.error(
+          'Error al actualizar - sin respuesta del servidor:',
+          error.request
+        )
         alert('Error: No hubo respuesta del servidor.')
       } else {
         console.error('Error en la solicitud de actualización:', error.message)
@@ -104,7 +94,7 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       onChange: handleChange,
       required: true,
       autoComplete: 'edit-number_plate',
-      autoFocus: true
+      autoFocus: true,
     },
     {
       name: 'brand',
@@ -114,7 +104,7 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       onChange: handleChangeBrand,
       required: true,
       autoComplete: 'edit-brand',
-      options: carBrands.map(brand => ({ value: brand, label: brand }))
+      options: carBrands.map((brand) => ({ value: brand, label: brand })),
     },
     {
       name: 'model',
@@ -125,8 +115,11 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       required: true,
       autoComplete: 'edit-model',
       options: formData.brand
-        ? modelsByBrand[formData.brand]?.map(model => ({ value: model, label: model })) || []
-        : [{ value: '', label: 'Seleccione una marca primero' }]
+        ? modelsByBrand[formData.brand]?.map((model) => ({
+            value: model,
+            label: model,
+          })) || []
+        : [{ value: '', label: 'Seleccione una marca primero' }],
     },
     {
       name: 'category',
@@ -136,7 +129,7 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       onChange: handleChange,
       required: true,
       autoComplete: 'edit-category',
-      options: categories.map(name => ({ value: name, label: name }))
+      options: categories.map((name) => ({ value: name, label: name })),
     },
     {
       name: 'year',
@@ -145,7 +138,7 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       value: formData.year,
       onChange: handleChange,
       required: true,
-      autoComplete: 'edit-year'
+      autoComplete: 'edit-year',
     },
     {
       name: 'condition',
@@ -155,8 +148,48 @@ const EditCarForm = ({ vehicleId = 5 }) => {
       onChange: handleChange,
       required: true,
       autoComplete: 'edit-condition',
-      options: estados.map(estado => ({ value: estado, label: estado }))
-    }
+      options: estados.map((estado) => ({ value: estado, label: estado })),
+    },
+    {
+      name: 'price_per_day',
+      label: 'Precio por día',
+      type: 'number',
+      value: formData.price_per_day,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'edit-price',
+    },
+    {
+      name: 'max_capacity',
+      label: 'Capacidad máxima',
+      type: 'number',
+      value: formData.max_capacity,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'edit-capacity',
+    },
+    {
+      name: 'minimum_rental_days',
+      label: 'Días mínimos de alquiler',
+      type: 'number',
+      value: formData.minimum_rental_days,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'edit-min-days',
+    },
+    {
+      name: 'cancelation_policy',
+      label: 'Política de cancelación',
+      type: 'select',
+      value: formData.cancelation_policy,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'edit-policy',
+      options: cancelationPolicies.map((policy) => ({
+        value: policy,
+        label: policy,
+      })),
+    },
   ]
 
   return (
