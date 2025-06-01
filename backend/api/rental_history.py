@@ -19,6 +19,7 @@ def user_rentals():
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(
         rentals,
+        reservations,
         vehicle_models.c.name.label("model_name"),
         vehicle_models.c.year.label("model_year"),
         vehicle_brands.c.name.label("brand_name"),
@@ -30,7 +31,8 @@ def user_rentals():
         .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
         .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
         .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
-    ).where(rentals.c.user_id == user_id)
+        .join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
+    ).where(reservations.c.user_id == user_id)
 
     with engine.connect() as conn:
         result = conn.execute(stmt)
