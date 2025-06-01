@@ -15,11 +15,34 @@ branches = Table('branches', metadata, autoload_with=engine)
 @reservation_management_bp.route('/cancel_reservation', methods=['DELETE'])
 def cancel_reservation():
     reservation = request.get_json()
+    print("Datos recibidos:", reservation)
 
-    stmt = delete(reservations).where(reservations.c.reservation_id == reservation.get('reservation_id'))
+    # Asegurarse que reservation sea dict
+    if not isinstance(reservation, dict):
+        return {'message': 'Datos inválidos'}, 400
+
+    reservation_id = reservation.get('reservation_id')
+    total_cost = reservation.get('total_cost')
+    cancelation_policy_id = reservation.get('cancelation_policy_id')
+
+    if not all([reservation_id, total_cost, cancelation_policy_id]):
+        return {'message': 'Faltan datos para procesar la cancelación'}, 400
+
+    # Aquí aplicás la lógica para calcular la devolución según la política
+    # Ejemplo básico:
+    if cancelation_policy_id == 1:
+        refund = total_cost
+    elif cancelation_policy_id == 2:
+        refund = total_cost * 0.2
+    else:
+        refund = 0
+
+    stmt = delete(reservations).where(reservations.c.reservation_id == reservation_id)
     with engine.connect() as conn:
         conn.execute(stmt)
         conn.commit()
+
+    return {'message': f'Reserva cancelada. Se reembolsaron ${refund:.2f} a su cuenta.'}, 200
 
 
 
