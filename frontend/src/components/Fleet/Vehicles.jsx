@@ -14,10 +14,9 @@ import {
   useTheme,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
-
 const HeaderCell = ({ children }) => {
-  const theme = useTheme()
   return (
     <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
       {children}
@@ -50,21 +49,6 @@ const getPolicyColor = (policyName, theme) => {
   }
 }
 
-const getConditionColor = (condition, theme) => {
-  switch (condition?.toLowerCase()) {
-    case 'bueno':
-      return {
-        backgroundColor: `${theme.palette.charcoal}90`,
-        color: 'white',
-      }
-    default:
-      return {
-        backgroundColor: 'white',
-        color: 'black',
-      }
-  }
-}
-
 // Componente para las celdas del cuerpo
 const BodyCell = ({ children }) => {
   const theme = useTheme()
@@ -84,6 +68,7 @@ const BodyCell = ({ children }) => {
 
 export const Vehicles = () => {
   const [vehicles, setVehicles] = useState([])
+  const navigate = useNavigate()
   const theme = useTheme()
 
   const getVehicles = async () => {
@@ -173,7 +158,7 @@ export const Vehicles = () => {
                 <BodyCell>
                   <IconButton
                     onClick={() => {
-                      console.log(vehicle) // aca va el navigate a la pagina de edicion
+                      navigate('/vehicles/edit', { state: { vehicle } })
                     }}
                     variant="contained"
                     sx={{
