@@ -55,26 +55,41 @@ def profile():
 
 @profile_bp.route('/update_profile', methods=['PUT'])
 def update_profile():
-    
+    print(session)
     user_id = session['user_id']
     role = session['user_role']
     data = request.get_json()
 
     with engine.connect() as conn:
-
+        current_password = data.get('password')
+        
         if role == 'user':
+            stmt = select(users).where(users.c.user_id == user_id)
+            current_user = conn.execute(stmt).fetchone()
+            if current_user.password != current_password:
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
+                
             data_user = {
                 'name' : data.get('name'),
                 'last_name' : data.get('last_name'),
                 'dni' : data.get('dni'),
                 'email' : data.get('email'),
                 'phone_number' : data.get('phone_number'),
-                'password' : data.get('password')
+                'password' : current_password,  # Mantener la contraseña actual por defecto
             }
+
+            # Solo actualizar la contraseña si se proporciona una nueva
+            if data.get('new_password'):
+                data_user['password'] = data.get('new_password')
 
             stmt = update(users).where(users.c.user_id == user_id).values(data_user)
             conn.execute(stmt)
+            
         elif role == 'employee':
+            stmt = select(employees).where(employees.c.employee_id == user_id)
+            current_employee = conn.execute(stmt).fetchone()
+            if not current_employee or current_employee.password != current_password:
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
             
             stmt = select(branches).where(branches.c.name == data.get('branch'))
             result = conn.execute(stmt).fetchone()
@@ -85,19 +100,36 @@ def update_profile():
                 'dni' : data.get('dni'),
                 'email' : data.get('email'),
                 'phone_number' : data.get('phone_number'),
-                'password' : data.get('password'),
+                'password' : current_password,  # Mantener la contraseña actual por defecto
                 'branch_id' : result.branch_id
             }
+            
+            # Solo actualizar la contraseña si se proporciona una nueva
+            if data.get('new_password'):
+                data_employee['password'] = data.get('new_password')
+                
             stmt = update(employees).where(employees.c.employee_id == user_id ).values(data_employee)
             conn.execute(stmt)
-        else:
+            
+        else:  # admin
+            stmt = select(admins).where(admins.c.admin_id == user_id)
+            current_admin = conn.execute(stmt).fetchone()
+            if not current_admin or current_admin.password != current_password:
+                return jsonify({'error': 'Contraseña actual incorrecta'}), 403
+                
             data_admin = {
                 'name' : data.get('name'),
                 'email' : data.get('email'),
-                'password' : data.get('password')
+                'password' : current_password  # Mantener la contraseña actual por defecto
             }
+            
+            # Solo actualizar la contraseña si se proporciona una nueva
+            if data.get('new_password'):
+                data_admin['password'] = data.get('new_password')
+                
             stmt = update(admins).where(admins.c.admin_id == user_id).values(data_admin)
             conn.execute(stmt)
+            
         conn.commit()
         
         return jsonify({'message': 'Perfil actualizado correctamente'}), 200

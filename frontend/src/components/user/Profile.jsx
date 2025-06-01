@@ -29,7 +29,6 @@ export const Profile = () => {
     const getUser = async () => {
       try {
         const response = await apiClient.get('/my_profile')
-        console.log(response)
         setUser(response.data)
       } catch (error) {
         console.error('Error al obtener el perfil:', error)
@@ -146,7 +145,6 @@ export const Profile = () => {
             </IconButton>
           )}
 
-          {/* Header con Avatar y Nombre */}
           <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
             <Avatar
               sx={{
@@ -198,7 +196,6 @@ export const Profile = () => {
             }}
           />
 
-          {/* Campos de información */}
           <Stack spacing={3}>
             {renderInfoField(
               <PersonIcon

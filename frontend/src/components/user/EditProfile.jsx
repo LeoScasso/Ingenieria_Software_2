@@ -1,4 +1,4 @@
-import { Save } from '@mui/icons-material'
+import { Save, Visibility, VisibilityOff } from '@mui/icons-material'
 import {
   Alert,
   Avatar,
@@ -7,6 +7,8 @@ import {
   Card,
   CardActions,
   CardContent,
+  IconButton,
+  InputAdornment,
   Stack,
   TextField,
   Typography,
@@ -19,12 +21,14 @@ import apiClient from '../../middleware/axios'
 export const EditProfile = () => {
   const [errors, setErrors] = useState({})
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [userData, setUserData] = useState({
     name: '',
     last_name: '',
     dni: '',
     email: '',
     phone_number: '',
+    password: '',
   })
   const theme = useTheme()
   const navigate = useNavigate()
@@ -44,7 +48,6 @@ export const EditProfile = () => {
   }
 
   const validateForm = () => {
-    console.log(userData)
     const newErrors = {}
 
     if (!userData.name) {
@@ -76,30 +79,37 @@ export const EditProfile = () => {
       newErrors.phone_number = 'Formato de teléfono inválido'
     }
 
+    if (!userData.password) {
+      newErrors.password = 'La contraseña es requerida'
+    }
+
     setErrors(newErrors)
-    console.log(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  const togglePassword = () => {
+    setShowPassword(!showPassword)
+  }
+
   const handleSave = async () => {
-    console.log(userData)
     if (validateForm()) {
       try {
-        await apiClient.put('/update_profile', userData)
-        console.log('Datos guardados:', userData)
-        setShowSuccess(true)
-        setTimeout(() => {
-          setShowSuccess(false)
-          navigate('/mi-perfil')
-        }, 2000)
+        await apiClient
+          .put('/update_profile', userData)
+          .then(() => {
+            setShowSuccess(true)
+            setTimeout(() => {
+              navigate('/mi-perfil')
+            }, 300)
+          })
+          .catch((error) => {
+            console.error('Error al guardar:', error.response.data)
+            alert(error.response.data.error)
+          })
       } catch (error) {
         console.error('Error al guardar:', error)
       }
     }
-  }
-
-  const handleCancel = () => {
-    navigate('/mi-perfil')
   }
 
   // Obtener las iniciales del nombre completo
@@ -117,7 +127,6 @@ export const EditProfile = () => {
     const fetchUserData = async () => {
       try {
         const response = await apiClient.get('/my_profile')
-        console.log(response.data)
         setUserData(response.data)
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error)
@@ -432,6 +441,71 @@ export const EditProfile = () => {
                 },
                 '& .MuiInputLabel-root.Mui-focused': {
                   color: theme.palette.darkBlue,
+                },
+              }}
+            />
+
+            <TextField
+              label="Contraseña"
+              type={showPassword ? 'text' : 'password'}
+              value={userData.password}
+              onChange={handleInputChange('password')}
+              error={!!errors.password}
+              helperText={errors.password}
+              placeholder="Ingrese la contraseña"
+              fullWidth
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: theme.palette.beige,
+                  '& fieldset': {
+                    borderColor: theme.palette.ming,
+                    borderWidth: 2,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.darkBlue,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.darkBlue,
+                  },
+                  // Estilos para autofill
+                  '& input:-webkit-autofill': {
+                    WebkitBoxShadow: `0 0 0 1000px ${theme.palette.beige} inset`,
+                    WebkitTextFillColor: theme.palette.darkBlue,
+                  },
+                  '& input:-webkit-autofill:hover': {
+                    WebkitBoxShadow: `0 0 0 1000px ${theme.palette.beige} inset`,
+                  },
+                  '& input:-webkit-autofill:focus': {
+                    WebkitBoxShadow: `0 0 0 1000px ${theme.palette.beige} inset`,
+                  },
+                  '&:has(input:-webkit-autofill) fieldset': {
+                    borderColor: '#666666 !important', // darkGray
+                    borderWidth: 2,
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: theme.palette.ming,
+                  fontWeight: 'bold',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: theme.palette.darkBlue,
+                },
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end" sx={{ mr: 0.5 }}>
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={togglePassword}
+                        edge="end"
+                        sx={{ color: theme.palette.darkBlue }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 },
               }}
             />

@@ -1,19 +1,16 @@
-import {
-  Visibility,
-  VisibilityOff
-} from '@mui/icons-material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import {
   Box,
   Button,
+  Checkbox,
+  FormControlLabel,
   IconButton,
   InputAdornment,
+  MenuItem,
   Paper,
   TextField,
   Typography,
   useTheme,
-  MenuItem,
-  FormControlLabel,
-  Checkbox
 } from '@mui/material'
 import React from 'react'
 
@@ -84,7 +81,7 @@ const CustomForm = ({
     switch (field.type) {
       case 'select':
         return (
-          <TextField {...commonProps} select>
+          <TextField {...commonProps} key={field.name} select>
             {(field.options || []).map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
@@ -115,6 +112,7 @@ const CustomForm = ({
         return (
           <TextField
             {...commonProps}
+            key={field.name}
             multiline
             rows={field.rows || 4}
           />
@@ -124,6 +122,7 @@ const CustomForm = ({
         return (
           <TextField
             {...commonProps}
+            key={field.name}
             type={getFieldType(field)}
             InputProps={{
               endAdornment: (
@@ -146,6 +145,7 @@ const CustomForm = ({
         return (
           <TextField
             {...commonProps}
+            key={field.name}
             type={getFieldType(field)}
           />
         )

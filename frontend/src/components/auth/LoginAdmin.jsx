@@ -38,9 +38,9 @@ export const LoginAdmin = () => {
     try {
       const response = await apiClient.post('/login', formData)
       const data = response.data
-      localStorage.setItem('userId', data.user_id)
-      localStorage.setItem('role', data.user_role)
-      localStorage.setItem('name', data.user_name)
+      sessionStorage.setItem('userId', data.user_id)
+      sessionStorage.setItem('role', data.user_role)
+      sessionStorage.setItem('name', data.user_name)
       alert(data.message)
       navigate('/')
     } catch (error) {
