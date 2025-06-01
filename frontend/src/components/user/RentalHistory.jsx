@@ -31,7 +31,6 @@ const InfoPaper = ({ children }) => {
   );
 };
 
-// 🧠 Nueva función para formatear fechas sin hora y evitar invalid dates
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   if (isNaN(date)) return 'Fecha inválida';
@@ -114,10 +113,10 @@ const UserHistory = () => {
             }}
           />
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} direction="column">
             {rentals.length > 0 ? (
               rentals.map((rental, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid item key={index}>
                   <Paper
                     sx={{
                       p: 2,
@@ -127,8 +126,7 @@ const UserHistory = () => {
                     }}
                   >
                     <Typography variant="h6" textAlign="center" gutterBottom>
-                      {rental.brand_name} {rental.model_name} (
-                      {rental.model_year})
+                      {rental.brand_name} {rental.model_name} ({rental.model_year})
                     </Typography>
                     <Typography variant="body2" textAlign="center">
                       Categoría: {rental.category_name}
@@ -143,14 +141,13 @@ const UserHistory = () => {
                       Hasta: {formatDate(rental.return_datetime)}
                     </Typography>
                     <Typography variant="body2" textAlign="center">
-                      Política de cancelación:{' '}
-                      {rental.cancelation_policy_name}
+                      Política de cancelación: {rental.cancelation_policy_name}
                     </Typography>
                   </Paper>
                 </Grid>
               ))
             ) : (
-              <Grid item xs={12}>
+              <Grid item>
                 <Box
                   sx={{
                     display: 'flex',
@@ -184,10 +181,10 @@ const UserHistory = () => {
             Reservas Actuales
           </Typography>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} direction="column">
             {reservations.length > 0 ? (
               reservations.map((reservation, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid item key={index}>
                   <Paper
                     sx={{
                       p: 2,
@@ -212,7 +209,7 @@ const UserHistory = () => {
                 </Grid>
               ))
             ) : (
-              <Grid item xs={12}>
+              <Grid item>
                 <Box
                   sx={{
                     display: 'flex',
