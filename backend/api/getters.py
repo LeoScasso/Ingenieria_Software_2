@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify
-from sqlalchemy import Table, select
+from flask import Blueprint, request, jsonify, session
+from sqlalchemy import Table, select, insert, and_, update, or_, distinct
 from app.db import engine, metadata
 
 getters_bp = Blueprint('getters', __name__)
@@ -16,6 +16,22 @@ def get_models():
         result = conn.execute(stmt).fetchall
         models = [row.result for row in result]
         return jsonify(models), 200
+
+@getters_bp.route('get_models_by_brand', methods=['GET'])
+def get_models_by_brand():
+    brand_name = request.args.get('brand')
+    if not brand_name:
+        return jsonify({'message':'No se ha introducido una marca'})
+    
+    stmt = select(vehicle_brands.c.id).where(vehicle_brands.c.name == brand_name)
+    brand_result = conn.execute(stmt).fetchone()
+
+    with engine.connect() as conn:
+        stmt = select(distinct(vehicle_models.c.name)).where(vehicle_models.c.brand_id == brand_result.brand_id).order_by(vehicle_models.c.name)
+        result = conn.execute(stmt).fetchall()
+        models = [row.result for row in result]
+        return jsonify(models), 200
+
 
 @getters_bp.route('get_brands', methods=['GET'])
 def get_brands():
