@@ -19,6 +19,7 @@ def user_rentals():
         return jsonify({"error": "User not authenticated"}), 401    
     stmt = select(
         rentals,
+        reservations,
         vehicle_models.c.name.label("model_name"),
         vehicle_models.c.year.label("model_year"),
         vehicle_brands.c.name.label("brand_name"),
@@ -30,7 +31,8 @@ def user_rentals():
         .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
         .join(vehicle_categories, vehicle_categories.c.category_id == vehicles.c.category_id)
         .join(cancelation_policies, cancelation_policies.c.policy_id == vehicles.c.cancelation_policy_id)
-    ).where(rentals.c.user_id == user_id)
+        .join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
+    ).where(reservations.c.user_id == user_id)
 
     with engine.connect() as conn:
         result = conn.execute(stmt)
@@ -41,19 +43,24 @@ def user_rentals():
 
 @rental_history_bp.route('/user_reservations', methods=['GET'])
 def user_reservations():
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     if not user_id:
         return jsonify({"error": "User not authenticated"}), 401    
+    
     stmt = select(
         reservations.c.reservation_id,
         reservations.c.user_id,
         reservations.c.pickup_datetime,
+        reservations.c.return_datetime,
         reservations.c.cost,
         reservations.c.is_rented,
         vehicle_categories.c.name.label('vehicle_category')
-        ).select_from(
-            reservations.join(vehicle_categories,reservations.c.category_id == vehicle_categories.c.category_id)
-        ).where((reservations.c.user_id == user_id)&(reservations.c.is_rented == 0))
+    ).select_from(
+        reservations.join(vehicle_categories, reservations.c.category_id == vehicle_categories.c.category_id)
+    ).where(
+        (reservations.c.user_id == user_id) & (reservations.c.is_rented == 0)
+    )
+
     with engine.connect() as conn:
         result = conn.execute(stmt)
         user_reservations = [dict(fila._mapping) for fila in result]
