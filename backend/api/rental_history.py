@@ -52,7 +52,7 @@ def user_reservations():
         reservations.c.is_rented,
         vehicle_categories.c.name.label('vehicle_category')
         ).select_from(
-            reservations.join(vehicle_categories,reservations.c.vehicle_category_id == vehicle_categories.c.category_id)
+            reservations.join(vehicle_categories,reservations.c.category_id == vehicle_categories.c.category_id)
         ).where((reservations.c.user_id == user_id)&(reservations.c.is_rented == 0))
     with engine.connect() as conn:
         result = conn.execute(stmt)
