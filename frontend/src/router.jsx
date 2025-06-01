@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
 import React from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Vehicles } from './components/Fleet/Vehicles'
 import Home from './components/Home/Home' // Assuming Home component path
 import Login from './components/auth/Login' // Assuming Login component path}
 import { LoginAdmin } from './components/auth/LoginAdmin'
@@ -13,9 +14,12 @@ import RegistrationForm from './components/registration/RegistrationForm' // Ass
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
-import { theme } from './theme/theme'
 import RentalHistory from './components/user/RentalHistory' // Assuming RentalHistory component path
+<<<<<<< HEAD
 import EditCarForm from './components/carForm/EditCarForm'
+=======
+import { theme } from './theme/theme'
+>>>>>>> lean
 
 const AppRouter = () => {
   return (
@@ -51,6 +55,7 @@ const AppRouter = () => {
             <Route path="/editar-perfil" element={<EditProfile />} />
             <Route path="/historial-alquileres" element={<RentalHistory />} />
             <Route path="/vehicles/edit/:id" element={<EditCarForm />} />
+            <Route path="/vehicles" element={<Vehicles />} />
           </Routes>
         </Box>
         <Footer />
