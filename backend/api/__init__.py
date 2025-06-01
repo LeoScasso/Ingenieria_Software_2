@@ -4,3 +4,5 @@ from . import fleet
 from . import rental_history
 from . import profile
 from . import registration
+from . import reservation_management
+from . import getters
