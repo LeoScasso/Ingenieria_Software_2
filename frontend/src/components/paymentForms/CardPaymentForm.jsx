@@ -19,7 +19,9 @@ const tarjetas = [
   },
 ]
 
+
 const CardPaymentForm = () => {
+    const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
     const formDataReserva = location.state
@@ -72,6 +74,8 @@ const CardPaymentForm = () => {
         type: 'password',
         value: formData.sec_number,
         onChange: handleChange,
+        showPassword: showPassword,
+        onTogglePassword: () => setShowPassword(!showPassword),
         required: true,
         autoComplete: 'cc-csc',
         },

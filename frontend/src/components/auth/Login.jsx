@@ -65,7 +65,7 @@ const handleSubmit = async (e) => {
       name: 'email',
       label: 'Correo Electrónico',
       type: 'email',
-      value: formData.email, // corregí aquí, antes tenías formData.mail que no existe
+      value: formData.email,
       onChange: handleChange,
       required: true,
       autoComplete: 'email',
@@ -74,15 +74,14 @@ const handleSubmit = async (e) => {
     {
       name: 'password',
       label: 'Contraseña',
-      type: showPassword ? 'text' : 'password',
+      type: 'password', // 👈 mantenelo fijo
       value: formData.password,
       onChange: handleChange,
       required: true,
-      // Pasamos el toggle como prop extra para el input, si tu Form lo maneja
       showPassword: showPassword,
       onTogglePassword: () => setShowPassword(!showPassword),
       autoComplete: 'current-password',
-    },
+    }
   ]
 
   return (
