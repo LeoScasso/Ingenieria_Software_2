@@ -7,10 +7,11 @@ import Form from '../common/Form'
 const EditCarForm = () => {
   const location = useLocation()
   const vehicleFromState = location.state?.vehicle
-
+  const oldNumberPlate = vehicleFromState.number_plate // fix (salva la vieja patente)
   const [formData, setFormData] = useState({
     vehicle_id: vehicleFromState?.vehicle_id || '',
     number_plate: vehicleFromState?.number_plate || '',
+    old_number_plate: oldNumberPlate,
     category: vehicleFromState?.category || '',
     condition: vehicleFromState?.condition || '',
     model: vehicleFromState?.model || '',
@@ -28,7 +29,7 @@ const EditCarForm = () => {
     'Sin devolucion',
   ]
 
-  const estados = ['Disponible', 'Alquilado', 'En mantenimiento']
+  const estados = ['Disponible', 'Alquilado', 'Mantenimiento']
 
   useEffect(() => {
     const getCategories = async () => {
@@ -85,6 +86,7 @@ const EditCarForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
+      console.log(formData)
       const response = await apiClient.put('/update_vehicle', formData)
       alert(response.data.message)
     } catch (error) {
