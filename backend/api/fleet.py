@@ -31,8 +31,6 @@ def vehicle_registration():
             'brand' : data.get('brand')
         }
 
-    print(data_check)
-
     if any(value is None for value in data_check.values()):
         return jsonify({
             'message':'Error, faltan campos que completar'
@@ -42,53 +40,64 @@ def vehicle_registration():
         'number_plate' : data.get('number_plate'),
     }
 
-    with engine.begin() as conn:
+    try:
+        with engine.begin() as conn:
 
-        stmt_model = select(vehicle_models).where(
-            and_(
-                vehicle_models.c.name == data.get('model'),
-                vehicle_models.c.year == data.get('year')
+            stmt = select(vehicles).where(vehicles.c.number_plate == data.get('number_plate'))
+            existing_vehicle = conn.execute(stmt).fetchone()
+            if existing_vehicle:
+                return jsonify({'message': 'La patente ingresada ya está registrada'}), 400
+
+            stmt_model = select(vehicle_models).where(
+                and_(
+                    vehicle_models.c.name == data.get('model'),
+                    vehicle_models.c.year == data.get('year')
+                )
             )
-        )
-        model = conn.execute(stmt_model).fetchone()
+            model = conn.execute(stmt_model).fetchone()
 
-        if not model:
-            stmt = select(vehicle_brands).where(vehicle_brands.c.name == data.get('brand'))
-            brand = conn.execute(stmt).fetchone()
-            if not brand:
-                new_brand = {
-                    'name': data.get('brand')
+            if not model:
+                stmt = select(vehicle_brands).where(vehicle_brands.c.name == data.get('brand'))
+                brand = conn.execute(stmt).fetchone()
+                if not brand:
+                    new_brand = {
+                        'name': data.get('brand')
+                    }
+                    ins = insert(vehicle_brands).values(new_brand).returning(vehicle_brands.c.brand_id)
+                    brand_id = conn.execute(ins).scalar()
+                else:
+                    brand_id = brand.brand_id
+                new_model = {
+                    'name': data.get('model'),
+                    'year': data.get('year'),
+                    'brand_id': brand_id
                 }
-                ins = insert(vehicle_brands).values(new_brand).returning(vehicle_brands.c.brand_id)
-                brand_id = conn.execute(ins).scalar()
+                ins = insert(vehicle_models).values(new_model).returning(vehicle_models.c.model_id)
+                model_id = conn.execute(ins).scalar()
             else:
-                brand_id = brand.brand_id
-            new_model = {
-                'name': data.get('model'),
-                'year': data.get('year'),
-                'brand_id': brand_id
-            }
-            ins = insert(vehicle_models).values(new_model).returning(vehicle_models.c.model_id)
-            model_id = conn.execute(ins).scalar()
-        else:
-            model_id = model.model_id
+                model_id = model.model_id
 
-        stmt = select(vehicle_categories).where(vehicle_categories.c.name == data.get('category'))
-        category = conn.execute(stmt).fetchone()
+            stmt = select(vehicle_categories).where(vehicle_categories.c.name == data.get('category'))
+            category = conn.execute(stmt).fetchone()
 
-        stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
-        condition = conn.execute(stmt).fetchone()
+            stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
+            condition = conn.execute(stmt).fetchone()
 
 
-        vehicle.update({
-            'model_id' : model_id,
-            'category_id' :category.category_id,
-            'condition_id' : condition.condition_id
-        })
+            vehicle.update({
+                'model_id' : model_id,
+                'category_id' :category.category_id,
+                'condition_id' : condition.condition_id
+            })
 
-        stmt = insert(vehicles).values(vehicle)
-        conn.execute(stmt)
-        return jsonify({'message':'vehículo registrado con exito'}),200
+            stmt = insert(vehicles).values(vehicle)
+            conn.execute(stmt)
+            return jsonify({'message':'vehículo registrado con exito'}),200
+
+    except IntegrityError:
+        return jsonify({'message': 'Error de integridad en la base de datos'}), 400
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 
 @fleet_bp.route('/categories', methods=['GET'])
