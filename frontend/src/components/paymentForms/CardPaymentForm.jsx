@@ -13,7 +13,7 @@ const tarjetas = [
   },
   {
     numero: '5555',
-    codigo: '123 ',
+    codigo: '123',
     titular: 'usuario1',
     saldo: 0,
   },
