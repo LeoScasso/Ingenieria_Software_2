@@ -12,6 +12,10 @@ const Login = () => {
   })
   const [showPassword, setShowPassword] = useState(false)
 
+  // Estado para mensajes de éxito o error
+  const [message, setMessage] = useState(null)
+  const [isError, setIsError] = useState(false)
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prevState) => ({
@@ -20,39 +24,48 @@ const Login = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      const response = await apiClient.post('/login', formData)
-      const data = response.data
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setMessage(null)  // limpio mensaje previo
+  setIsError(false)
+  try {
+    const response = await apiClient.post('/login', formData)
+    const data = response.data
 
-      sessionStorage.setItem('userId', data.user_id)
-      sessionStorage.setItem('role', data.user_role)
-      sessionStorage.setItem('name', data.user_name)
-      alert(data.message)
-      navigate('/')
-    } catch (error) {
-      if (error.response) {
-        console.error('Login failed - Server responded:', error.response.data)
-        alert(
-          'Login failed: ' + (error.response.data.message || 'Server error')
-        )
-      } else if (error.request) {
-        console.error('Login failed - No response:', error.request)
-        alert('Login error: No response from server.')
-      } else {
-        console.error('Login error - Request setup:', error.message)
-        alert('Login error: ' + error.message)
-      }
+    sessionStorage.setItem('userId', data.user_id)
+    sessionStorage.setItem('role', data.user_role)
+    sessionStorage.setItem('name', data.user_name)
+
+    alert(data.message || 'Inicio de sesión exitoso.')
+    navigate('/')
+  } catch (error) {
+    let errorMsg = 'Error inesperado en el login.'
+
+    if (error.response) {
+      // Agarro error.response.data.message o error.response.data.error o fallback
+      errorMsg =
+        error.response.data.message ||
+        error.response.data.error ||
+        'Error del servidor.'
+      alert(`Fallo en el login: ${errorMsg}`)
+    } else if (error.request) {
+      errorMsg = 'No se recibió respuesta del servidor.'
+      alert(`Fallo en el login: ${errorMsg}`)
+    } else {
+      errorMsg = error.message
+      alert(`Fallo en el login: ${errorMsg}`)
     }
+    setMessage(errorMsg)
+    setIsError(true)
   }
+}
 
   const fields = [
     {
       name: 'email',
       label: 'Correo Electrónico',
       type: 'email',
-      value: formData.mail,
+      value: formData.email, // corregí aquí, antes tenías formData.mail que no existe
       onChange: handleChange,
       required: true,
       autoComplete: 'email',
@@ -61,10 +74,11 @@ const Login = () => {
     {
       name: 'password',
       label: 'Contraseña',
-      type: 'password',
+      type: showPassword ? 'text' : 'password',
       value: formData.password,
       onChange: handleChange,
       required: true,
+      // Pasamos el toggle como prop extra para el input, si tu Form lo maneja
       showPassword: showPassword,
       onTogglePassword: () => setShowPassword(!showPassword),
       autoComplete: 'current-password',
@@ -72,12 +86,26 @@ const Login = () => {
   ]
 
   return (
-    <Form
-      title="Iniciar Sesión"
-      fields={fields}
-      onSubmit={handleSubmit}
-      submitButtonText="Ingresar"
-    />
+    <>
+      <Form
+        title="Iniciar Sesión"
+        fields={fields}
+        onSubmit={handleSubmit}
+        submitButtonText="Ingresar"
+      />
+      {message && (
+        <div
+          style={{
+            marginTop: '1rem',
+            color: isError ? 'red' : 'green',
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+        >
+          {message}
+        </div>
+      )}
+    </>
   )
 }
 

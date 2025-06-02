@@ -29,25 +29,42 @@ export const LoginAdmin = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (formData.code2FA !== code2FA) {
-      alert('Código 2FA incorrecto!')
-      return
-    }
-    try {
-      const response = await apiClient.post('/login', formData)
-      const data = response.data
-      sessionStorage.setItem('userId', data.user_id)
-      sessionStorage.setItem('role', data.user_role)
-      sessionStorage.setItem('name', data.user_name)
-      alert(data.message)
-      navigate('/')
-    } catch (error) {
-      console.error('Login failed - Server responded:', error.response.data)
-      alert('Login failed: ' + (error.response.data.message || 'Server error'))
+const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  if (formData.code2FA !== code2FA) {
+    alert('Código 2FA incorrecto!')
+    return
+  }
+
+  try {
+    const response = await apiClient.post('/login', formData)
+    const data = response.data
+
+    sessionStorage.setItem('userId', data.user_id)
+    sessionStorage.setItem('role', data.user_role)
+    sessionStorage.setItem('name', data.user_name)
+
+    alert(data.message || 'Inicio de sesión exitoso.')
+    navigate('/')
+  } catch (error) {
+    let errorMsg = 'Error inesperado en el login.'
+
+    if (error.response) {
+      errorMsg =
+        error.response.data.message ||
+        error.response.data.error ||
+        'Error del servidor.'
+      alert(`Fallo en el login: ${errorMsg}`)
+    } else if (error.request) {
+      errorMsg = 'No se recibió respuesta del servidor.'
+      alert(`Fallo en el login: ${errorMsg}`)
+    } else {
+      errorMsg = error.message
+      alert(`Fallo en el login: ${errorMsg}`)
     }
   }
+}
 
   const fields = [
     {
