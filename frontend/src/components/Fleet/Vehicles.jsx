@@ -127,8 +127,8 @@ export const Vehicles = () => {
               }}
             >
               <HeaderCell>Patente</HeaderCell>
-              <HeaderCell>Modelo</HeaderCell>
               <HeaderCell>Marca</HeaderCell>
+              <HeaderCell>Modelo</HeaderCell>
               <HeaderCell>Año</HeaderCell>
               <HeaderCell>Categoría</HeaderCell>
               <HeaderCell>Precio/Día</HeaderCell>
@@ -151,8 +151,8 @@ export const Vehicles = () => {
                 }}
               >
                 <BodyCell>{vehicle.number_plate}</BodyCell>
-                <BodyCell>{vehicle.model}</BodyCell>
                 <BodyCell>{vehicle.brand}</BodyCell>
+                <BodyCell>{vehicle.model}</BodyCell>
                 <BodyCell>{vehicle.year}</BodyCell>
                 <BodyCell>{vehicle.category}</BodyCell>
                 <BodyCell>{vehicle.price_per_day}</BodyCell>
