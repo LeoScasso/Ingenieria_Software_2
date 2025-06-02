@@ -151,16 +151,6 @@ const CarForm = () => {
       autoComplete: 'new-year'
     },
     {
-      name: 'cancelation_policy',
-      label: 'Política de Cancelación',
-      type: 'select',
-      value: formData.cancelation_policy,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'new-cancelation_policy',
-      options: cancelationPolicies.map(policy => ({ value: policy, label: policy }))
-    },
-    {
       name: 'condition',
       label: 'Condición',
       type: 'select',
