@@ -95,7 +95,7 @@ const CarForm = () => {
   const estados = [
     "Disponible",
     "Alquilado",
-    "En mantenimiento",
+    "Mantenimiento",
   ]
 
   const fields = [
