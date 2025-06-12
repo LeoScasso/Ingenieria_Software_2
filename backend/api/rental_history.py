@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify, session, request
 from sqlalchemy import Table, select, join, and_
 from app.db import engine, metadata
 from datetime import datetime, timedelta
 
 rental_history_bp = Blueprint('rental_history_bp', __name__)
 
+users = Table('users', metadata, autoload_with=engine)
 rentals = Table('rentals', metadata, autoload_with=engine)
 reservations = Table('reservations', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
@@ -58,12 +59,27 @@ def user_rentals():
 
     return jsonify(user_rentals)
 
+
+@rental_history_bp.route('/user_reservations_for_employee', methods=['POST'])
+def user_reservations_for_employee():
+    data = request.get_json()
+    email = data.get('email')
+    with engine.connect() as conn:
+        stmt = select(users.c.user_id).where(users.c.email == email)
+        user_id = conn.execute(stmt).fetchone()
+        if user_id is None:
+            return jsonify({'error': 'Usuario no encontrado'}), 400
+    return return_user_reservations(user_id)
+
+
+
 @rental_history_bp.route('/user_reservations', methods=['GET'])
 def user_reservations():
-    user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({"error": "User not authenticated"}), 401    
+    return return_user_reservations(session.get('user_id'))
 
+
+
+def return_user_reservations(user_id):
     stmt = select(
         reservations.c.reservation_id,
         reservations.c.user_id,

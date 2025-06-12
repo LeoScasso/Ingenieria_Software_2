@@ -66,15 +66,23 @@ def reserve():
             cost = cost_row[0]
 
             # Obtener branch_id
-            stmt = select(branches.c.branch_id).where(branches.c.name == data.get('branch'))
-            branch_row = conn.execute(stmt).fetchone()
-            if branch_row is None:
+            stmt = select(branches.c.branch_id).where(branches.c.name == data.get('pickup_branch'))
+            pickup_branch_row = conn.execute(stmt).fetchone()
+            if pickup_branch_row is None:
                 return jsonify({'error': 'Sucursal no encontrada'}), 400
-            branch_id = branch_row[0]
+            pickup_branch_id = pickup_branch_row[0]
+
+            stmt = select(branches.c.branch_id).where(branches.c.name == data.get('return_branch'))
+            return_branch_row = conn.execute(stmt).fetchone()
+            if return_branch_row is None:
+                return jsonify({'error': 'Sucursal no encontrada'}), 400
+            return_branch_id = pickup_branch_row[0]
+
 
             reserve_info = {
                 'cost': cost,
-                'branch_id': branch_id,
+                'branch_id_pickup': pickup_branch_id,
+                'branch_id_return' : return_branch_id,
                 'pickup_datetime': data.get('pickup_datetime'),
                 'return_datetime': data.get('return_datetime'),
                 'category_id': data.get('category'),
