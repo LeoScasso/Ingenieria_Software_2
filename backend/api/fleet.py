@@ -28,7 +28,8 @@ def vehicle_registration():
             'condition' : data.get('condition'),
             'model' : data.get('model'),
             'year' : data.get('year'),
-            'brand' : data.get('brand')
+            'brand' : data.get('brand'),
+            'branch' : data.get('branch')
         }
 
     if any(value is None for value in data_check.values()):
@@ -83,11 +84,15 @@ def vehicle_registration():
             stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
             condition = conn.execute(stmt).fetchone()
 
+            stmt = select(branches).where(branches.c.name == data.get('branch'))
+            branch = conn.execute(stmt).fetchone()
+
 
             vehicle.update({
                 'model_id' : model_id,
                 'category_id' :category.category_id,
-                'condition_id' : condition.condition_id
+                'condition_id' : condition.condition_id,
+                'branch_id' : branch.branch_id
             })
 
             stmt = insert(vehicles).values(vehicle)
@@ -158,11 +163,15 @@ def update_vehicle():
             stmt = select(vehicle_conditions).where(vehicle_conditions.c.name == data.get('condition'))
             condition = conn.execute(stmt).fetchone()
 
+            stmt = select(branches).where(branches.c.name == data.get('branch'))
+            branch = conn.execute(stmt).fetchone()
+
             new_fields = {
                 'number_plate': data.get('number_plate'),
                 'model_id': model_id,
                 'category_id': category.category_id,
-                'condition_id': condition.condition_id  # <== Acá el fix
+                'condition_id': condition.condition_id,  # <== Acá el fix
+                'branch_id' : branch.branch_id
             }
 
             stmt = update(vehicles).where(vehicles.c.number_plate == old_number_plate).values(new_fields)
@@ -188,7 +197,8 @@ def get_vehicles():
             vehicle_brands.c.name.label('brand'),
             vehicle_categories.c.name.label('category'),
             vehicle_conditions.c.name.label('condition'),
-            vehicle_models.c.year
+            vehicle_models.c.year,
+            branches.c.name.label('Sucursal')
             ).select_from(
                 vehicles
                 .join(vehicle_models, vehicles.c.model_id == vehicle_models.c.model_id)
@@ -196,6 +206,7 @@ def get_vehicles():
                 .join(vehicle_conditions, vehicles.c.condition_id == vehicle_conditions.c.condition_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
                 .join(cancelation_policies, cancelation_policies.c.policy_id == vehicle_categories.c.cancelation_policy_id)
+                .join(branches, branches.c.branch_id == vehicles.c.branch_id)
             )
     with engine.connect() as conn:
         result = conn.execute(stmt).fetchall()

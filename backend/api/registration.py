@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import Table, select, insert
 from app.db import engine, metadata
-
+from datetime import datetime
 registration_bp = Blueprint('registration',__name__)
 
 users = Table('users', metadata, autoload_with=engine)
@@ -17,7 +17,8 @@ def registration():
         'name': data.get('name'),
         'last_name': data.get('last_name'),
         'dni': data.get('dni'),
-        'phone_number':  data.get('phone_number')
+        'phone_number':  data.get('phone_number'),
+        'registration_date' : datetime.now()
         }
     if any(value is None for value in new_user.values()):
         return jsonify({
