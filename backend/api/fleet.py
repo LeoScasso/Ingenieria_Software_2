@@ -206,7 +206,7 @@ def get_vehicles():
                 .join(vehicle_conditions, vehicles.c.condition_id == vehicle_conditions.c.condition_id)
                 .join(vehicle_brands, vehicle_brands.c.brand_id == vehicle_models.c.brand_id)
                 .join(cancelation_policies, cancelation_policies.c.policy_id == vehicle_categories.c.cancelation_policy_id)
-                .join(branches, branches.c.branch_id == vehicles.c.branch_id)
+                .join(branches, vehicles.c.branch_id == branches.c.branch_id)
             )
     with engine.connect() as conn:
         result = conn.execute(stmt).fetchall()
