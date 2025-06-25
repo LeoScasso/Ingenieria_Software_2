@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from app.db import engine, metadata
+from functions import check_values;
 
 profile_bp = Blueprint('profile', __name__)
 
@@ -55,7 +56,6 @@ def profile():
 
 @profile_bp.route('/update_profile', methods=['PUT'])
 def update_profile():
-    print(session)
     user_id = session['user_id']
     role = session['user_role']
     data = request.get_json()
@@ -84,7 +84,7 @@ def update_profile():
 
             stmt = update(users).where(users.c.user_id == user_id).values(data_user)
             conn.execute(stmt)
-            
+
         elif role == 'employee':
             stmt = select(employees).where(employees.c.employee_id == user_id)
             current_employee = conn.execute(stmt).fetchone()
@@ -133,3 +133,37 @@ def update_profile():
         conn.commit()
         
         return jsonify({'message': 'Perfil actualizado correctamente'}), 200
+
+
+@profile_bp.route('/delete_employee', methods=['DELETE'])
+def delete_employee():
+    employee = request.get_json()
+    stmt = delete(employees).where(employees.c.employee_id == employee.employee.id)
+    with engine.connect() as conn:
+        conn.execute(stmt)
+        conn.commit()
+        return jsonify({'message':'Empleado eliminado con exito'}),200
+    
+
+
+@profile_bp.route('/edit_employee', methods=['UPDATE'])
+def edit_employee():
+    data = request.get_json()
+    with engine.connect() as conn:
+        stmt = select(branches).where(branches.c.name == data.get('branch'))
+        result = conn.execute(stmt).fetchone()
+        data_employee = {
+            'name' : data.get('name'),
+            'last_name' : data.get('last_name'),
+            'dni' : data.get('dni'),
+            'email' : data.get('email'),
+            'phone_number' : data.get('phone_number'),
+            'password' : data.get('password'),
+            'branch_id' : result.branch_id
+            }         
+        if check_values(data_employee):
+            stmt = update(employees).where(employees.c.employee_id == data.get('employee_id')).values(data_employee)
+            conn.execute(stmt)
+            return jsonify({'message': 'Empleado editado con exito'}),200
+        else:
+            return jsonify({'message': 'Debe ingresar todos los campos'}),400

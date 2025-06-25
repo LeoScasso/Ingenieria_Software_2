@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, delete
+from sqlalchemy import Table, select, insert, delete, update
 from app.db import engine, metadata
 from datetime import datetime
 
@@ -15,14 +15,13 @@ branches = Table('branches', metadata, autoload_with=engine)
 @reservation_management_bp.route('/cancel_reservation', methods=['DELETE'])
 def cancel_reservation():
     reservation = request.get_json()
-    print("Datos recibidos:", reservation)
 
     # Asegurarse que reservation sea dict
     if not isinstance(reservation, dict):
         return {'message': 'Datos inválidos'}, 400
 
     reservation_id = reservation.get('reservation_id')
-    total_cost = reservation.get('total_cost')
+    cost = reservation.get('cost')
     cancelation_policy_id = reservation.get('cancelation_policy_id')
 
     if not all([reservation_id, total_cost, cancelation_policy_id]):
@@ -31,13 +30,13 @@ def cancel_reservation():
     # Aquí aplicás la lógica para calcular la devolución según la política
     # Ejemplo básico:
     if cancelation_policy_id == 1:
-        refund = total_cost
+        refund = cost
     elif cancelation_policy_id == 2:
-        refund = total_cost * 0.2
+        refund = cost * 0.2
     else:
         refund = 0
 
-    stmt = delete(reservations).where(reservations.c.reservation_id == reservation_id)
+    stmt = update(reservations).where(reservations.c.reservation_id == reservation_id).values(is_rented = 2, cost = refund)
     with engine.connect() as conn:
         conn.execute(stmt)
         conn.commit()
