@@ -24,7 +24,7 @@ def cancel_reservation():
     cost = reservation.get('cost')
     cancelation_policy_id = reservation.get('cancelation_policy_id')
 
-    if not all([reservation_id, total_cost, cancelation_policy_id]):
+    if not all([reservation_id, cost, cancelation_policy_id]):
         return {'message': 'Faltan datos para procesar la cancelación'}, 400
 
     # Aquí aplicás la lógica para calcular la devolución según la política
