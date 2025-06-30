@@ -3,7 +3,8 @@ from sqlalchemy import Table, select, insert
 from app.db import engine, metadata
 from datetime import datetime
 import random, string
-from functions import check_values
+from .functions import check_values
+
 registration_bp = Blueprint('registration',__name__)
 
 users = Table('users', metadata, autoload_with=engine)
