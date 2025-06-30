@@ -108,6 +108,14 @@ export const Navbar = () => {
                   >
                     Agregar Vehículo
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/branches"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Ver Sucursales
+                  </Button>
                 </>
               )}
               <Button
