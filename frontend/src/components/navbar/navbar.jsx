@@ -94,6 +94,22 @@ export const Navbar = () => {
                   >
                     Mi Perfil
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/rental-registration"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Alta de alquileres
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Registrar cliente
+                  </Button>
                 </>
               )}
 
