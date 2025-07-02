@@ -1,20 +1,24 @@
 import React, { useState } from 'react'
-import { Typography, Box, useTheme } from '@mui/material'
+import { Typography } from '@mui/material'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 import { useNavigate } from 'react-router-dom'
 
-
 const RegistrationForm = () => {
   const navigate = useNavigate()
+  const userRole = sessionStorage.getItem('role')
+
+  const isEmployee = userRole === 'employee'
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     last_name: '',
     dni: '',
     phone_number: '',
+    showPassword: false,
   })
 
   const handleChange = (e) => {
@@ -27,29 +31,54 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden')
-      return
+
+    if (!isEmployee) {
+      if (formData.password !== formData.confirmPassword) {
+        alert('Las contraseñas no coinciden')
+        return
+      }
+
+      if (formData.password.length < 8) {
+        alert('La contraseña debe tener al menos 8 caracteres')
+        return
+      }
     }
-    if (formData.password.length < 8){
-      alert('La contraseña debe tener al menos 8 caracteres')
-      return
+
+    // Crear objeto sin campos innecesarios
+    const {
+      confirmPassword,
+      showPassword,
+      ...dataToSend
+    } = formData
+
+    if (isEmployee) {
+      delete dataToSend.password
     }
+
     try {
-      const response = await apiClient.post('/registration', formData);
-      const data = response.data;
-      alert(data.message);
-      navigate('/login');
+      const response = await apiClient.post('/registration', dataToSend)
+
+      if (response.status === 200) {
+        if (isEmployee && response.data.password) {
+          alert(`${response.data.message}\nContraseña generada: ${response.data.password}`)
+        } else {
+          alert(response.data.message)
+        }
+        navigate('/')
+      } else {
+        alert('Registro fallido: Respuesta inesperada del servidor')
+        console.warn('Respuesta inesperada:', response)
+      }
     } catch (error) {
       if (error.response) {
-        console.error('Registro fallido - Respuesta del servidor:', error.response.data);
-        alert('Registro fallido: ' + (error.response.data.message || 'Error del servidor'));
+        console.error('Registro fallido - Respuesta del servidor:', error.response.data)
+        alert('Registro fallido: ' + (error.response.data.message || 'Error del servidor'))
       } else if (error.request) {
-        console.error('Registro fallido - No hubo respuesta:', error.request);
-        alert('Error de registrción: No hubo respuesta del servidor.');
+        console.error('Registro fallido - No hubo respuesta:', error.request)
+        alert('Error de registro: No hubo respuesta del servidor.')
       } else {
-        console.error('Registration error - Request setup:', error.message);
-        alert('Error en el registro: ' + error.message);
+        console.error('Error en el registro - Setup:', error.message)
+        alert('Error en el registro: ' + error.message)
       }
     }
   }
@@ -65,7 +94,7 @@ const RegistrationForm = () => {
       autoComplete: 'email',
       autoFocus: true,
     },
-    {
+    !isEmployee && {
       name: 'password',
       label: 'Contraseña (Mínimo 8 caracteres)',
       type: 'password',
@@ -76,7 +105,7 @@ const RegistrationForm = () => {
       showPassword: formData.showPassword,
       onTogglePassword: togglePassword,
     },
-    {
+    !isEmployee && {
       name: 'confirmPassword',
       label: 'Confirmar Contraseña',
       type: 'password',
@@ -100,7 +129,7 @@ const RegistrationForm = () => {
       name: 'last_name',
       label: 'Apellido',
       type: 'text',
-      value: formData.lastName,
+      value: formData.last_name,
       onChange: handleChange,
       required: true,
       autoComplete: 'family-name',
@@ -109,7 +138,7 @@ const RegistrationForm = () => {
       name: 'dni',
       label: 'DNI',
       type: 'text',
-      value: formData.DNI,
+      value: formData.dni,
       onChange: handleChange,
       required: true,
       autoComplete: 'off',
@@ -118,28 +147,24 @@ const RegistrationForm = () => {
       name: 'phone_number',
       label: 'Teléfono',
       type: 'tel',
-      value: formData.phone,
+      value: formData.phone_number,
       onChange: handleChange,
       required: true,
       autoComplete: 'tel',
     },
-  ]
+  ].filter(Boolean) // 🔥 Esto limpia los `false` si `!isEmployee`
 
   return (
     <Form
       title="Formulario de Registro"
       fields={fields}
       onSubmit={handleSubmit}
-      submitButtonText="Registrarse"
+      submitButtonText={isEmployee ? 'Registrar cliente' : 'Registrarse'}
     >
-      <Typography
-        variant="body2"
-        color="white"
-        sx={{ textAlign: 'center', mt: 2 }}
-      >
+      <Typography variant="body2" color="white" sx={{ textAlign: 'center', mt: 2 }}>
         Todos los campos son obligatorios
-      </Typography>   
-    </Form>   
+      </Typography>
+    </Form>
   )
 }
 
