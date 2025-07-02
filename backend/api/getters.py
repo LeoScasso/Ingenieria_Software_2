@@ -8,6 +8,8 @@ vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 branches = Table('branches', metadata, autoload_with=engine)
 categories = Table('vehicle_categories', metadata, autoload_with=engine)
+employees = Table('employees', metadata, autoload_with=engine)
+vehicles = Table('vehicles', metadata, autoload_with=engine)
 
 @getters_bp.route('get_models', methods=['GET'])
 def get_models():
@@ -53,10 +55,33 @@ def get_brands():
 @getters_bp.route('/get_branches', methods=['GET'])
 def get_branches():
     with engine.connect() as conn:
-        stmt = select(branches.c.name, branches.c.address).distinct().order_by(branches.c.name)
-        result = conn.execute(stmt).fetchall()  # ¡ojo, faltaban los paréntesis!
-        branch = [{'name': row.name, 'address': row.address} for row in result]  # así extraés bien los campos
-        return jsonify(branch), 200
+        # Obtener información básica de sucursales
+        stmt = select(branches.c.branch_id, branches.c.name, branches.c.address, branches.c.locality).order_by(branches.c.name)
+        result = conn.execute(stmt).fetchall()
+        
+        branches_list = []
+        for row in result:
+            # Contar empleados por sucursal
+            employees_stmt = select(employees.c.employee_id).where(employees.c.branch_id == row.branch_id)
+            employees_result = conn.execute(employees_stmt).fetchall()
+            employee_count = len(employees_result)
+            
+            # Contar vehículos por sucursal
+            vehicles_stmt = select(vehicles.c.vehicle_id).where(vehicles.c.branch_id == row.branch_id)
+            vehicles_result = conn.execute(vehicles_stmt).fetchall()
+            fleet_size = len(vehicles_result)
+            
+            branch_info = {
+                'branch_id': row.branch_id,
+                'name': row.name,
+                'address': row.address,
+                'locality': row.locality,
+                'employee_count': employee_count,
+                'fleet_size': fleet_size
+            }
+            branches_list.append(branch_info)
+        
+        return jsonify(branches_list), 200
 
 @getters_bp.route('/get_categories', methods=['GET'])
 def get_categories():

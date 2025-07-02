@@ -18,6 +18,7 @@ import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
 import { theme } from './theme/theme'
 import UsersReservations from './components/rental/RentalRegistration'
+import { BranchesList } from './components/branches/BranchesList'
 
 const AppRouter = () => {
   return (
@@ -55,6 +56,7 @@ const AppRouter = () => {
             <Route path="/vehicles/edit" element={<EditCarForm />} />
             <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/rental-registration" element={<UsersReservations />} />
+            <Route path="/branches" element={<BranchesList />} />
           </Routes>
         </Box>
         <Footer />
