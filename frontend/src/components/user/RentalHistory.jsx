@@ -100,7 +100,7 @@ const handleCancelReservation = async (reservation) => {
     const response = await apiClient.delete('/cancel_reservation', {
       data: {
         reservation_id: reservation.reservation_id,
-        total_cost: reservation.cost,
+        cost: reservation.cost,
         cancelation_policy_id: cancelation_policy_id
       }
     });
