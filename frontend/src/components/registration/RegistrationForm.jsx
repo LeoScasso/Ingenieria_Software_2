@@ -152,7 +152,7 @@ const RegistrationForm = () => {
       required: true,
       autoComplete: 'tel',
     },
-  ].filter(Boolean) // 🔥 Esto limpia los `false` si `!isEmployee`
+  ].filter(Boolean)
 
   return (
     <Form
