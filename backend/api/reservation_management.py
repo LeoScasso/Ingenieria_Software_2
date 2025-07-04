@@ -75,8 +75,7 @@ def reserve():
             return_branch_row = conn.execute(stmt).fetchone()
             if return_branch_row is None:
                 return jsonify({'error': 'Sucursal no encontrada'}), 400
-            return_branch_id = pickup_branch_row[0]
-
+            return_branch_id = return_branch_row[0]
 
             reserve_info = {
                 'cost': cost,
