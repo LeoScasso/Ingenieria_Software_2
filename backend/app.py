@@ -9,6 +9,7 @@ from api.fleet import fleet_bp
 from api.profile import profile_bp
 from api.getters import getters_bp
 from api.reservation_management import reservation_management_bp
+from api.packages import packages_bp
 
 app = Flask(__name__)
 app.secret_key = 'grupo57'
@@ -33,6 +34,7 @@ app.register_blueprint(fleet_bp, url_prefix='/api')
 app.register_blueprint(profile_bp, url_prefix='/api')
 app.register_blueprint(getters_bp, url_prefix='/api')
 app.register_blueprint(reservation_management_bp, url_prefix='/api')
+app.register_blueprint(packages_bp, url_prefix='/api')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
