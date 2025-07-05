@@ -1,24 +1,25 @@
 import { Box } from '@mui/material'
 import React from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { AddPackages } from './components/AddPackages/AddPackages'
 import { Vehicles } from './components/Fleet/Vehicles'
 import Home from './components/Home/Home'
 import Login from './components/auth/Login'
 import { LoginAdmin } from './components/auth/LoginAdmin'
 import BackgroundLogo from './components/bgLogo/bgLogo'
+import { BranchesList } from './components/branches/BranchesList'
 import CarForm from './components/carForm/CarForm'
 import EditCarForm from './components/carForm/EditCarForm'
 import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
 import RegistrationForm from './components/registration/RegistrationForm'
+import UsersReservations from './components/rental/RentalRegistration'
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
 import { theme } from './theme/theme'
-import UsersReservations from './components/rental/RentalRegistration'
-import { BranchesList } from './components/branches/BranchesList'
 
 const AppRouter = () => {
   return (
@@ -58,6 +59,7 @@ const AppRouter = () => {
             <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/rental-registration" element={<UsersReservations />} />
             <Route path="/branches" element={<BranchesList />} />
+            <Route path="/add-packages" element={<AddPackages />} />
           </Routes>
         </Box>
         <Footer />
