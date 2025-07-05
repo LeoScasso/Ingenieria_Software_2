@@ -6,3 +6,4 @@ from . import profile
 from . import registration
 from . import reservation_management
 from . import getters
+from . import packages
