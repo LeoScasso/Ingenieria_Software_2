@@ -128,10 +128,7 @@ const RentalRegistration = () => {
       }
 
       alert(alertMessage);
-      
-      if(window.confirm('¿Agregar paquetes a este alquiler?')) {
-        navigate(`/add-packages/${rental_id}`);
-      }
+      navigate(`/add-packages/${rental_id}`);
       await fetchData(); // Refrescar luego de alquilar
     } catch (error) {
       console.error('Error al dar de alta el alquiler:', error);

@@ -456,16 +456,37 @@ export const AddPackages = () => {
                 </Box>
 
                 {Object.keys(selectedPackages).length === 0 ? (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.slateGray,
-                      textAlign: 'center',
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    No hay paquetes seleccionados
-                  </Typography>
+                  <>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.slateGray,
+                        textAlign: 'center',
+                        fontStyle: 'italic',
+                        mb: 2,
+                      }}
+                    >
+                      No hay paquetes seleccionados
+                    </Typography>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      onClick={() => navigate('/historial-alquileres')}
+                      sx={{
+                        borderColor: theme.palette.beanBlue,
+                        color: theme.palette.beanBlue,
+                        fontWeight: 'bold',
+                        py: 1.5,
+                        borderRadius: 2,
+                        '&:hover': {
+                          borderColor: theme.palette.charcoal,
+                          backgroundColor: `${theme.palette.beanBlue}10`,
+                        },
+                      }}
+                    >
+                      Continuar sin paquetes
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Box sx={{ mb: 3 }}>
