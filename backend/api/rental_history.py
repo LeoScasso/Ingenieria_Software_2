@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 rental_history_bp = Blueprint('rental_history_bp', __name__)
 
 users = Table('users', metadata, autoload_with=engine)
+employees = Table('employees', metadata, autoload_with=engine)
+branches = Table('branches', metadata, autoload_with=engine)
 rentals = Table('rentals', metadata, autoload_with=engine)
 reservations = Table('reservations', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
@@ -110,12 +112,28 @@ def return_user_reservations(user_id):
 
 @rental_history_bp.route('/today_reservations', methods=['GET'])
 def today_reservations():
+    # Verificar que el usuario esté autenticado y sea empleado
+    user_id = session.get('user_id')
+    user_role = session.get('user_role')
+    
+    if not user_id or user_role != 'employee':
+        return jsonify({'error': 'Acceso denegado. Solo empleados pueden acceder a este endpoint'}), 403
+
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
 
     with engine.connect() as conn:
-        # Buscar todas las reservas que están listas para ser convertidas en alquileres
-        # (reservas que no han sido alquiladas aún y cuya fecha de recogida es hoy o ayer)
+        # Obtener la branch_id del empleado
+        stmt_employee = select(employees.c.branch_id).where(employees.c.employee_id == user_id)
+        employee_result = conn.execute(stmt_employee).fetchone()
+        
+        if not employee_result:
+            return jsonify({'error': 'Empleado no encontrado'}), 404
+            
+        employee_branch_id = employee_result.branch_id
+
+        # Buscar reservas que están listas para ser convertidas en alquileres
+        # Solo para la sucursal del empleado y que no han sido alquiladas aún
         stmt_reservas = select(
             reservations,
             users.c.email,
@@ -129,14 +147,15 @@ def today_reservations():
             and_(
                 reservations.c.is_rented == 0,  # Solo reservas que no han sido alquiladas
                 reservations.c.pickup_datetime >= yesterday,
-                reservations.c.pickup_datetime <= today
+                reservations.c.pickup_datetime <= today,
+                reservations.c.branch_id_pickup == employee_branch_id  # Solo reservas de la sucursal del empleado
             )
         )
 
         result_reservas = conn.execute(stmt_reservas).fetchall()
 
         if not result_reservas:
-            return jsonify({'message': 'No hay reservas pendientes para hoy o ayer'}), 200
+            return jsonify({'message': 'No hay reservas pendientes en su sucursal'}), 200
         
         reservas_list = [dict(r._mapping) for r in result_reservas]
 

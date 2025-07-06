@@ -26,17 +26,26 @@ def rental():
         cost = result.cost
         pickup_date = result.pickup_datetime
         return_date = result.return_datetime
+        branch_id_pickup = result.branch_id_pickup
 
-        reserved_vehicles_subq = select(reservations.c.vehicle_id).where(
-        and_(
-            reservations.c.pickup_datetime <= return_date,
-            reservations.c.return_datetime >= pickup_date,
-            reservations.c.reservation_id != reserve_id  
-        )).subquery()
+        # Buscar vehículos que están siendo utilizados en alquileres activos durante el período
+        reserved_vehicles_subq = select(rentals.c.vehicle_id).select_from(
+            rentals.join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
+        ).where(
+            and_(
+                reservations.c.pickup_datetime <= return_date,
+                reservations.c.return_datetime >= pickup_date
+            )
+        ).subquery()
 
+        # Buscar vehículos disponibles de la misma categoría y sucursal
         stmt = select(vehicles).where(
-            not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
-            vehicles.c.category_id == category_id
+            and_(
+                vehicles.c.category_id == category_id,
+                vehicles.c.branch_id == branch_id_pickup,
+                vehicles.c.condition_id == 1,  # Vehículos en buen estado
+                not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
+            )
         )
         available_vehicles = conn.execute(stmt).fetchall()
 
@@ -58,6 +67,5 @@ def rental():
         conn.execute(stmt)
         conn.commit()
 
-        return jsonify({'message': 'Se dio de alta su alquiler',
-                        'number_plate': selected_vehicle.number_plate}), 200
+        return jsonify({'message': f'Se dio de alta su alquiler, el vehiculo es: {selected_vehicle.number_plate}'}), 200
 
