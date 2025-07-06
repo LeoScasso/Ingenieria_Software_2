@@ -106,3 +106,40 @@ def return_user_reservations(user_id):
             reservation['return_datetime'] = add_hours(reservation['return_datetime']).isoformat()
 
     return jsonify(user_reservations)
+
+
+@rental_history_bp.route('/today_reservations', methods=['POST'])
+def today_reservations():
+    data = request.get_json()
+    user_email = data.get('email')
+
+    if not user_email:
+        return jsonify({'error': 'Email no proporcionado'}), 400
+
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+
+    with engine.connect() as conn:
+        stmt_user = select(users.c.user_id).where(users.c.email == user_email)
+        result = conn.execute(stmt_user).fetchone()
+
+        if not result:
+            return jsonify({'error': 'Usuario no encontrado'}), 400
+
+        user_id = result.user_id
+
+        stmt_reservas = select(reservations).where(
+            and_(
+                reservations.c.user_id == user_id,
+                reservations.c.pickup_datetime >= yesterday,
+                reservations.c.pickup_datetime <= today
+            )
+        )
+
+        result_reservas = conn.execute(stmt_reservas).fetchall()
+
+        if(not result_reservas):
+            return jsonify({'message': 'El cliente no tiene reservas para ayer u hoy'}),200
+        reservas_list = [dict(r._mapping) for r in result_reservas]
+
+    return jsonify(reservas_list), 200
