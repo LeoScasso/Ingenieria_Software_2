@@ -86,6 +86,7 @@ const UsersReservations = () => {
 
   const handleCancelReservation = async (reservation) => {
     try {
+      // Buscar la categoría correspondiente para obtener la política
       const category = categories.find(cat => cat.name === reservation.vehicle_category);
       const cancelation_policy_id = category?.cancelation_policy_id;
 
@@ -97,13 +98,17 @@ const UsersReservations = () => {
       const response = await apiClient.delete('/cancel_reservation', {
         data: {
           reservation_id: reservation.reservation_id,
-          total_cost: reservation.cost,
+          cost: reservation.cost,
           cancelation_policy_id: cancelation_policy_id
         }
       });
 
+      setReservations(prev =>
+        prev.filter(r => r.reservation_id !== reservation.reservation_id)
+      );
+
       alert(response.data.message);
-      await fetchData(); // Refrescar luego de cancelar
+
     } catch (error) {
       console.error('Error cancelando la reserva:', error);
       alert('Error al cancelar la reserva. Por favor, intente nuevamente más tarde.');
