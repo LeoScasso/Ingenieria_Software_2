@@ -77,7 +77,6 @@ def reserve():
                 return jsonify({'error': 'Sucursal no encontrada'}), 400
             return_branch_id = return_branch_row[0]
 
-
             reserve_info = {
                 'cost': cost,
                 'branch_id_pickup': pickup_branch_id,

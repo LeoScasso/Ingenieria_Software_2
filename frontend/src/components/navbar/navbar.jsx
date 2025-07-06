@@ -94,6 +94,22 @@ export const Navbar = () => {
                   >
                     Mi Perfil
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/rental-registration"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Alta de alquileres
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Registrar cliente
+                  </Button>
                 </>
               )}
 
@@ -107,6 +123,14 @@ export const Navbar = () => {
                     sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
                   >
                     Agregar Vehículo
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/branches"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Ver Sucursales
                   </Button>
                 </>
               )}

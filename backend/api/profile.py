@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import select, update, delete
 from app.db import engine, metadata
-from functions import check_values;
+from .functions import check_values
 
 profile_bp = Blueprint('profile', __name__)
 

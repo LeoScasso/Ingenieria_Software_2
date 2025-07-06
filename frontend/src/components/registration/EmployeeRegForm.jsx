@@ -4,7 +4,7 @@ import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 import { useNavigate } from 'react-router-dom'
 
-const RegistrationForm = () => {
+const EmployeeRegForm = () => {
   const navigate = useNavigate()
   const userRole = sessionStorage.getItem('role')
 
@@ -94,28 +94,6 @@ const RegistrationForm = () => {
       autoComplete: 'email',
       autoFocus: true,
     },
-    !isEmployee && {
-      name: 'password',
-      label: 'Contraseña (Mínimo 8 caracteres)',
-      type: 'password',
-      value: formData.password,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'new-password',
-      showPassword: formData.showPassword,
-      onTogglePassword: togglePassword,
-    },
-    !isEmployee && {
-      name: 'confirmPassword',
-      label: 'Confirmar Contraseña',
-      type: 'password',
-      value: formData.confirmPassword,
-      onChange: handleChange,
-      required: true,
-      autoComplete: 'new-password',
-      showPassword: formData.showPassword,
-      onTogglePassword: togglePassword,
-    },
     {
       name: 'name',
       label: 'Nombre',
@@ -156,10 +134,10 @@ const RegistrationForm = () => {
 
   return (
     <Form
-      title="Formulario de Registro"
+      title="Formulario de Registro de Empleado"
       fields={fields}
       onSubmit={handleSubmit}
-      submitButtonText={isEmployee ? 'Registrar cliente' : 'Registrarse'}
+      submitButtonText={'Registrar Empleado'}
     >
       <Typography variant="body2" color="white" sx={{ textAlign: 'center', mt: 2 }}>
         Todos los campos son obligatorios
@@ -168,4 +146,4 @@ const RegistrationForm = () => {
   )
 }
 
-export default RegistrationForm
+export default EmployeeRegForm
