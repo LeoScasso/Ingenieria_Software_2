@@ -40,10 +40,8 @@ const InfoPaper = ({ children }) => {
 
 const safeFormatDate = (dateString) => {
   if (!dateString) return 'Fecha no disponible';
-
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return 'Fecha inválida';
-
   return date.toLocaleDateString('es-AR', {
     year: 'numeric',
     month: 'long',
@@ -61,14 +59,21 @@ const UsersReservations = () => {
     const fetchData = async () => {
       try {
         const [reservationRes, categoriesRes] = await Promise.all([
-          apiClient.get('/user_reservations'), // Backend ya filtra las reservas
+          apiClient.get('/today_reservations'),
           apiClient.get('/get_categories'),
         ]);
 
-        setReservations(reservationRes.data);
+        // Puede venir con .message si no hay reservas
+        if (Array.isArray(reservationRes.data)) {
+          setReservations(reservationRes.data);
+        } else {
+          setReservations([]);
+        }
+
         setCategories(categoriesRes.data);
       } catch (error) {
         console.error('Error fetching data', error);
+        alert('Error al obtener reservas. Intente nuevamente más tarde.');
       } finally {
         setLoading(false);
       }
@@ -106,10 +111,29 @@ const UsersReservations = () => {
       );
 
       alert(response.data.message);
-
     } catch (error) {
       console.error('Error cancelando la reserva:', error);
       alert('Error al cancelar la reserva. Por favor, intente nuevamente más tarde.');
+    }
+  };
+
+  const handleRental = async (reservationId) => {
+    try {
+      const response = await apiClient.post('/rental', {
+        id: reservationId
+      });
+
+      alert(`${response.data.message}. Vehículo asignado: ${response.data.number_plate}`);
+
+      setReservations(prev =>
+        prev.map(r =>
+          r.reservation_id === reservationId ? { ...r, is_rented: 1 } : r
+        )
+      );
+    } catch (error) {
+      console.error('Error al dar de alta el alquiler:', error);
+      const msg = error.response?.data?.message || 'Error desconocido al procesar el alquiler.';
+      alert(msg);
     }
   };
 
@@ -147,7 +171,7 @@ const UsersReservations = () => {
             color={theme.palette.darkBlue}
             gutterBottom
           >
-            Reservas para procesar
+            Reservas pendientes
           </Typography>
           <Divider
             sx={{
@@ -171,7 +195,7 @@ const UsersReservations = () => {
                     }}
                   >
                     <Typography variant="body1" textAlign="center">
-                      Cliente: {reservation.client_name || reservation.client?.name || 'Cliente no disponible'}
+                      Cliente: {reservation.first_name} {reservation.last_name} ({reservation.email})
                     </Typography>
                     <Typography variant="body1" textAlign="center">
                       Categoría del vehículo: {reservation.vehicle_category}
@@ -189,8 +213,27 @@ const UsersReservations = () => {
                       Política de cancelación: {getCancelationPolicy(reservation.vehicle_category)}
                     </Typography>
 
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                      {/* Podés agregar acá botón para dar de alta alquiler */}
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap' }}>
+                      {reservation.is_rented !== 1 && (
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            if (window.confirm('¿Confirmás dar de alta este alquiler?')) {
+                              handleRental(reservation.reservation_id);
+                            }
+                          }}
+                          sx={{
+                            backgroundColor: 'white',
+                            color: theme.palette.darkBlue,
+                            border: `1px solid ${theme.palette.darkBlue}`,
+                            '&:hover': {
+                              backgroundColor: theme.palette.grey[100],
+                            },
+                          }}
+                        >
+                          Dar de alta alquiler
+                        </Button>
+                      )}
 
                       <Button
                         variant="contained"
@@ -218,7 +261,7 @@ const UsersReservations = () => {
                     width: '100%',
                   }}
                 >
-                  <InfoPaper>No hay reservas activas para dar de alta.</InfoPaper>
+                  <InfoPaper>No hay reservas pendientes para hoy o ayer.</InfoPaper>
                 </Box>
               </Grid>
             )}
