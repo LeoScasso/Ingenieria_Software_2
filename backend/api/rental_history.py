@@ -137,7 +137,7 @@ def today_reservations():
         stmt_reservas = select(
             reservations,
             users.c.email,
-            users.c.first_name,
+            users.c.name,
             users.c.last_name,
             vehicle_categories.c.name.label('vehicle_category')
         ).select_from(
