@@ -14,7 +14,7 @@ import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
 import RegistrationForm from './components/registration/RegistrationForm'
-import UsersReservations from './components/rental/RentalRegistration'
+import RentalRegistration from './components/rental/RentalRegistration'
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
@@ -57,7 +57,7 @@ const AppRouter = () => {
             <Route path="/historial-alquileres" element={<RentalHistory />} />
             <Route path="/vehicles/edit" element={<EditCarForm />} />
             <Route path="/vehicles" element={<Vehicles />} />
-            <Route path="/rental-registration" element={<UsersReservations />} />
+            <Route path="/rental-registration" element={<RentalRegistration />} />
             <Route path="/branches" element={<BranchesList />} />
             <Route path="/add-packages/:id" element={<AddPackages />} />
           </Routes>

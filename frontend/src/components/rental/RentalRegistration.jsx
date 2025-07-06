@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Typography,
-  Paper,
-  Grid,
+  Button,
   Card,
   CardContent,
   CircularProgress,
   Divider,
+  Grid,
+  Paper,
+  Typography,
   useTheme,
-  Button,
 } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../../middleware/axios';
 
 const politicas_cancelacion = {
@@ -30,7 +31,8 @@ const safeFormatDate = (dateString) => {
   });
 };
 
-const UsersReservations = () => {
+const RentalRegistration = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [reservations, setReservations] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -118,7 +120,7 @@ const UsersReservations = () => {
   const handleRental = async (reservationId) => {
     try {
       const response = await apiClient.post('/rental', { id: reservationId });
-      const { message, number_plate } = response.data;
+      const { message, number_plate, rental_id } = response.data;
 
       let alertMessage = message;
       if (number_plate) {
@@ -126,6 +128,10 @@ const UsersReservations = () => {
       }
 
       alert(alertMessage);
+      
+      if(window.confirm('¿Agregar paquetes a este alquiler?')) {
+        navigate(`/add-packages/${rental_id}`);
+      }
       await fetchData(); // Refrescar luego de alquilar
     } catch (error) {
       console.error('Error al dar de alta el alquiler:', error);
@@ -257,4 +263,4 @@ const UsersReservations = () => {
   );
 };
 
-export default UsersReservations;
+export default RentalRegistration;

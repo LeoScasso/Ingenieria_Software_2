@@ -40,7 +40,7 @@ def add_package_to_rental():
     quantity = data.get('quantity', 1)  # Por defecto 1 si no se especifica
     
     if not all([rental_id, package_id]):
-        return jsonify({'message': 'Error: faltan rental_id o package_id'}), 400
+        return jsonify({'message': 'No se agregó ningún paquete'}), 200
     
     try:
         with engine.begin() as conn:
