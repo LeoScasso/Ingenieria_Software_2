@@ -54,24 +54,19 @@ def rental():
 def check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, reserved_vehicles_subq):
     
     if not available_vehicles:
-        if category_id < 1:
-            stmt = select(vehicles).where(
-            not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
-            vehicles.c.category_id > category_id)
-        else:
-            stmt = select(vehicles).where(
-            not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
-            vehicles.c.category_id < category_id)
+        stmt = select(vehicles).where(
+        not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
+        vehicles.c.category_id > category_id)
         
         available_vehicles = conn.execute(stmt).fetchall()
         if not available_vehicles:
-            return jsonify({'message': 'No hay vehiculos disponibles'})
+            return jsonify({'message': 'No hay vehiculos disponibles de una categoria superior'})
         
     selected_vehicle = random.choice(available_vehicles)
     
     stmt = select(categories.c.name).where(categories.c.category_id == selected_vehicle.category_id)
     category_name = conn.execute(stmt).fetchone()[0]
-    message = f'Se dio de alta su alquiler en categoría {category_name}'
+    message = f'Se dio de alta su alquiler, la categoría es {category_name}'
 
     new_rental = {
         'final_cost' : cost,
