@@ -27,16 +27,21 @@ export const AddPackages = () => {
   const { id: rentalId } = useParams()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (!rentalId) {
+      setError('ID de alquiler no proporcionado')
+      setLoading(false)
+      return
+    }
+    fetchPackages()
+  }, [rentalId])
+
   const [packages, setPackages] = useState([])
   const [selectedPackages, setSelectedPackages] = useState({})
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
-
-  useEffect(() => {
-    fetchPackages()
-  }, [])
 
   const fetchPackages = async () => {
     try {
