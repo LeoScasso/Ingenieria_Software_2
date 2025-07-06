@@ -7,7 +7,13 @@ import Form from '../common/Form'
 const EditCarForm = () => {
   const location = useLocation()
   const vehicleFromState = location.state?.vehicle
-  const oldNumberPlate = vehicleFromState.number_plate // fix (salva la vieja patente)
+  const oldNumberPlate = vehicleFromState.number_plate
+
+  const [branches, setBranches] = useState([])
+  const [categories, setCategories] = useState([])
+  const [carBrands, setCarBrands] = useState([])
+  const [models, setModels] = useState([])
+
   const [formData, setFormData] = useState({
     vehicle_id: vehicleFromState?.vehicle_id || '',
     number_plate: vehicleFromState?.number_plate || '',
@@ -17,17 +23,8 @@ const EditCarForm = () => {
     model: vehicleFromState?.model || '',
     year: vehicleFromState?.year || '',
     brand: vehicleFromState?.brand || '',
+    branch: vehicleFromState?.branch?.name || '' // Asegúrate de acceder al nombre de la sucursal
   })
-
-  const [categories, setCategories] = useState([])
-  const [carBrands, setCarBrands] = useState([])
-  const [models, setModels] = useState([])
-
-  const cancelationPolicies = [
-    '100% de devolucion',
-    '20% de devolucion',
-    'Sin devolucion',
-  ]
 
   const estados = ['Disponible', 'Alquilado', 'Mantenimiento']
 
@@ -50,8 +47,26 @@ const EditCarForm = () => {
       }
     }
 
+    const getBranches = async () => {
+      try {
+        const response = await apiClient.get('/get_branches')
+        setBranches(response.data)
+        
+        // Si la sucursal no está establecida pero tenemos datos del vehículo
+        if (vehicleFromState?.branch && !formData.branch) {
+          setFormData(prev => ({
+            ...prev,
+            branch: vehicleFromState.branch.name || ''
+          }))
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error)
+      }
+    }
+
     getCategories()
     getBrands()
+    getBranches()
   }, [])
 
   useEffect(() => {
@@ -78,7 +93,7 @@ const EditCarForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleChangeBrand = async (e) => {
+  const handleChangeBrand = (e) => {
     const selectedBrand = e.target.value
     setFormData({ ...formData, brand: selectedBrand, model: '' })
   }
@@ -86,8 +101,19 @@ const EditCarForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      console.log(formData)
-      const response = await apiClient.put('/update_vehicle', formData)
+      const selectedBranch = branches.find(b => b.name === formData.branch)
+
+      if (!selectedBranch) {
+        alert('Sucursal no válida seleccionada.')
+        return
+      }
+
+      const payload = {
+        ...formData,
+        branch: selectedBranch.branch_id // Convertimos nombre a ID
+      }
+
+      const response = await apiClient.put('/update_vehicle', payload)
       alert(response.data.message)
     } catch (error) {
       if (error.response) {
@@ -166,6 +192,19 @@ const EditCarForm = () => {
       autoComplete: 'edit-condition',
       options: estados.map((estado) => ({ value: estado, label: estado })),
     },
+    {
+      name: 'branch',
+      label: 'Sucursal',
+      type: 'select',
+      value: formData.branch,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'edit-branch',
+      options: branches.map(branch => ({
+        value: branch.name,
+        label: `${branch.name} - ${branch.address}`,
+      })),
+    }
   ]
 
   return (
