@@ -11,12 +11,14 @@ const CarForm = () => {
     cancelation_policy: '',
     model: '',
     year: '',
-    brand: ''
+    brand: '',
+    branch: ''
   })
 
   const [brands, setBrands] = useState([])
   const [models, setModels] = useState([])
   const [categories, setCategories] = useState([])
+  const [branches, setBranches] = useState([])
 
   const getBrands = async () => {
     try {
@@ -52,9 +54,19 @@ const CarForm = () => {
     }
   }
 
+  const getBranches = async () => {
+    try {
+      const response = await apiClient.get('/get_branches')
+      setBranches(response.data)
+    } catch (error) {
+      console.error('Error fetching branches:', error)
+    }
+  }
+
   useEffect(() => {
     getBrands()
     getCategories()
+    getBranches()
   }, [])
 
   useEffect(() => {
@@ -87,9 +99,9 @@ const CarForm = () => {
   }
 
   const cancelationPolicies = [
-    '100% de devolucion',
-    '20% de devolucion',
-    'Sin devolucion'
+    '100% de devolución',
+    '20% de devolución',
+    'Sin devolución'
   ]
 
   const estados = [
@@ -159,6 +171,19 @@ const CarForm = () => {
       required: true,
       autoComplete: 'new-condition',
       options: estados.map(estado => ({ value: estado, label: estado }))
+    },
+    {
+      name: 'branch',
+      label: 'Sucursal',
+      type: 'select',
+      value: formData.branch,
+      onChange: handleChange,
+      required: true,
+      autoComplete: 'new-branch',
+      options: branches.map(branch => ({
+        value: branch.name,
+        label: `${branch.name} - ${branch.address}`,
+      })),
     }
   ]
 

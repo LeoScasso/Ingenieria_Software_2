@@ -59,7 +59,7 @@ const AppRouter = () => {
             <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/rental-registration" element={<UsersReservations />} />
             <Route path="/branches" element={<BranchesList />} />
-            <Route path="/add-packages" element={<AddPackages />} />
+            <Route path="/add-packages/:id" element={<AddPackages />} />
           </Routes>
         </Box>
         <Footer />

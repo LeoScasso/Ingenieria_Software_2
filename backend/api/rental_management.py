@@ -49,36 +49,59 @@ def rental():
         )
         available_vehicles = conn.execute(stmt).fetchall()
 
-        return check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, reserved_vehicles_subq)
+        return check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, branch_id_pickup, reserved_vehicles_subq)
 
-def check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, reserved_vehicles_subq):
-    
+def check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, branch_id_pickup, reserved_vehicles_subq):
     if not available_vehicles:
-        stmt = select(vehicles).where(
-        not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
-        vehicles.c.category_id > category_id)
-        
+
+        if category_id < 1:
+            stmt = select(vehicles).where(
+                and_(
+                    not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
+                    vehicles.c.category_id > category_id,
+                    vehicles.c.branch_id == branch_id_pickup,
+                    vehicles.c.condition_id == 1
+                )
+            )
+        else:
+            stmt = select(vehicles).where(
+                and_(
+                    not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq)),
+                    vehicles.c.category_id < category_id,
+                    vehicles.c.branch_id == branch_id_pickup,
+                    vehicles.c.condition_id == 1
+                )
+            )
+
         available_vehicles = conn.execute(stmt).fetchall()
+
         if not available_vehicles:
-            return jsonify({'message': 'No hay vehiculos disponibles de una categoria superior'})
-        
+            return jsonify({'message': 'No hay vehículos disponibles'}), 200
+
     selected_vehicle = random.choice(available_vehicles)
-    
+
     stmt = select(categories.c.name).where(categories.c.category_id == selected_vehicle.category_id)
     category_name = conn.execute(stmt).fetchone()[0]
     message = f'Se dio de alta su alquiler, la categoría es {category_name}'
 
     new_rental = {
-        'final_cost' : cost,
-        'vehicle_id' : selected_vehicle.vehicle_id,
-        'reservation_id' : reserve_id
+        'final_cost': cost,
+        'vehicle_id': selected_vehicle.vehicle_id,
+        'reservation_id': reserve_id
     }
 
+    # Marcar la reserva como alquilada
     stmt = update(reservations).where(reservations.c.reservation_id == reserve_id).values(is_rented=1)
     conn.execute(stmt)
 
+    # Insertar el nuevo alquiler
     stmt = insert(rentals).values(new_rental)
     conn.execute(stmt)
 
-    return jsonify({'message': message ,
-                    'number_plate': selected_vehicle.number_plate}), 200
+    # Marcar el vehículo como ocupado
+    stmt = update(vehicles).where(
+        vehicles.c.vehicle_id == selected_vehicle.vehicle_id
+    ).values(condition_id=2)
+    conn.execute(stmt)
+
+    return jsonify({'message': message, 'number_plate': selected_vehicle.number_plate}), 200
