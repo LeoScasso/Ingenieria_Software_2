@@ -118,7 +118,14 @@ const UsersReservations = () => {
   const handleRental = async (reservationId) => {
     try {
       const response = await apiClient.post('/rental', { id: reservationId });
-      alert(`${response.data.message}. Vehículo asignado: ${response.data.number_plate}`);
+      const { message, number_plate } = response.data;
+
+      let alertMessage = message;
+      if (number_plate) {
+        alertMessage += `. Vehículo asignado: ${number_plate}`;
+      }
+
+      alert(alertMessage);
       await fetchData(); // Refrescar luego de alquilar
     } catch (error) {
       console.error('Error al dar de alta el alquiler:', error);
