@@ -53,6 +53,7 @@ def rental():
 
 def check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, branch_id_pickup, reserved_vehicles_subq):
     if not available_vehicles:
+
         if category_id < 1:
             stmt = select(vehicles).where(
                 and_(
@@ -71,6 +72,7 @@ def check_available_vehicles(conn, available_vehicles, cost, reserve_id, categor
                     vehicles.c.condition_id == 1
                 )
             )
+
         available_vehicles = conn.execute(stmt).fetchall()
 
         if not available_vehicles:
@@ -80,7 +82,7 @@ def check_available_vehicles(conn, available_vehicles, cost, reserve_id, categor
 
     stmt = select(categories.c.name).where(categories.c.category_id == selected_vehicle.category_id)
     category_name = conn.execute(stmt).fetchone()[0]
-    message = f'Se dio de alta su alquiler en categoría {category_name}'
+    message = f'Se dio de alta su alquiler, la categoría es {category_name}'
 
     new_rental = {
         'final_cost': cost,
