@@ -16,7 +16,6 @@ branches = Table('branches', metadata, autoload_with=engine)
 def cancel_reservation():
     reservation = request.get_json()
 
-    # Asegurarse que reservation sea dict
     if not isinstance(reservation, dict):
         return {'message': 'Datos inválidos'}, 400
 
@@ -27,8 +26,7 @@ def cancel_reservation():
     if not all([reservation_id, cost, cancelation_policy_id]):
         return {'message': 'Faltan datos para procesar la cancelación'}, 400
 
-    # Aquí aplicás la lógica para calcular la devolución según la política
-    # Ejemplo básico:
+    # Cálculo de reembolso según política
     if cancelation_policy_id == 1:
         refund = cost
     elif cancelation_policy_id == 2:
@@ -36,13 +34,22 @@ def cancel_reservation():
     else:
         refund = 0
 
-    stmt = update(reservations).where(reservations.c.reservation_id == reservation_id).values(is_rented = 2, cost = refund)
+    stmt = update(reservations).where(reservations.c.reservation_id == reservation_id).values(
+        is_rented=2,
+        cost=refund
+    )
+
     with engine.connect() as conn:
         conn.execute(stmt)
         conn.commit()
 
-    return {'message': f'Reserva cancelada. Se reembolsaron ${refund:.2f} a su cuenta.'}, 200
+    user_role = session.get('user_role')
+    if user_role == 'employee':
+        msg = f'Reserva cancelada. Se reembolsaron ${refund:.2f} a la cuenta del cliente.'
+    else:
+        msg = f'Reserva cancelada. Se reembolsaron ${refund:.2f} a su cuenta.'
 
+    return {'message': msg}, 200
 
 
 @reservation_management_bp.route('/reserve', methods=['POST'])
