@@ -108,29 +108,26 @@ def return_user_reservations(user_id):
     return jsonify(user_reservations)
 
 
-@rental_history_bp.route('/today_reservations', methods=['POST'])
+@rental_history_bp.route('/today_reservations', methods=['GET'])
 def today_reservations():
-    data = request.get_json()
-    user_email = data.get('email')
-
-    if not user_email:
-        return jsonify({'error': 'Email no proporcionado'}), 400
-
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
 
     with engine.connect() as conn:
-        stmt_user = select(users.c.user_id).where(users.c.email == user_email)
-        result = conn.execute(stmt_user).fetchone()
-
-        if not result:
-            return jsonify({'error': 'Usuario no encontrado'}), 400
-
-        user_id = result.user_id
-
-        stmt_reservas = select(reservations).where(
+        # Buscar todas las reservas que están listas para ser convertidas en alquileres
+        # (reservas que no han sido alquiladas aún y cuya fecha de recogida es hoy o ayer)
+        stmt_reservas = select(
+            reservations,
+            users.c.email,
+            users.c.first_name,
+            users.c.last_name,
+            vehicle_categories.c.name.label('vehicle_category')
+        ).select_from(
+            reservations.join(users, reservations.c.user_id == users.c.user_id)
+            .join(vehicle_categories, reservations.c.category_id == vehicle_categories.c.category_id)
+        ).where(
             and_(
-                reservations.c.user_id == user_id,
+                reservations.c.is_rented == 0,  # Solo reservas que no han sido alquiladas
                 reservations.c.pickup_datetime >= yesterday,
                 reservations.c.pickup_datetime <= today
             )
@@ -138,8 +135,16 @@ def today_reservations():
 
         result_reservas = conn.execute(stmt_reservas).fetchall()
 
-        if(not result_reservas):
-            return jsonify({'message': 'El cliente no tiene reservas para ayer u hoy'}),200
+        if not result_reservas:
+            return jsonify({'message': 'No hay reservas pendientes para hoy o ayer'}), 200
+        
         reservas_list = [dict(r._mapping) for r in result_reservas]
+
+        # Ajustar las fechas sumando horas
+        for reservation in reservas_list:
+            if reservation.get('pickup_datetime'):
+                reservation['pickup_datetime'] = add_hours(reservation['pickup_datetime']).isoformat()
+            if reservation.get('return_datetime'):
+                reservation['return_datetime'] = add_hours(reservation['return_datetime']).isoformat()
 
     return jsonify(reservas_list), 200
