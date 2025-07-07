@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from sqlalchemy import Table, select, insert, delete, update, and_, not_
 from app.db import engine, metadata
 from datetime import datetime
@@ -22,13 +22,18 @@ def rental():
 
     with engine.begin() as conn:
         result = conn.execute(stmt).fetchone()
+
+        if not result:
+            return jsonify({'message': 'La reserva no existe'}), 404
+
         category_id = result.category_id
+        original_category_id = category_id  # Guardamos para comparar luego
         cost = result.cost
         pickup_date = result.pickup_datetime
         return_date = result.return_datetime
         branch_id_pickup = result.branch_id_pickup
 
-        # Buscar vehículos que están siendo utilizados en alquileres activos durante el período
+        # Vehículos ya reservados en ese período
         reserved_vehicles_subq = select(rentals.c.vehicle_id).select_from(
             rentals.join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
         ).where(
@@ -38,40 +43,10 @@ def rental():
             )
         ).subquery()
 
-        # Buscar vehículos disponibles de la misma categoría y sucursal
+        # Intentamos con la categoría original
         stmt = select(vehicles).where(
             and_(
                 vehicles.c.category_id == category_id,
-                vehicles.c.branch_id == branch_id_pickup,
-                vehicles.c.condition_id == 1,  # Vehículos en buen estado
-                not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
-            )
-        )
-        available_vehicles = conn.execute(stmt).fetchall()
-
-        return check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, branch_id_pickup, reserved_vehicles_subq)
-
-def check_available_vehicles(conn, available_vehicles, cost, reserve_id, category_id, branch_id_pickup, reserved_vehicles_subq):
-    if not available_vehicles:
-        # Obtener la prioridad de la categoría actual
-        stmt = select(categories.c.priority).where(categories.c.category_id == category_id)
-        result = conn.execute(stmt).fetchone()
-        current_priority = result.priority
-
-        # Buscar todas las categorías con mayor prioridad (menor número)
-        stmt = select(categories.c.category_id).where(
-            categories.c.priority < current_priority
-        ).order_by(categories.c.priority.asc())
-        superior_categories = conn.execute(stmt).fetchall()
-        category_ids = [row.category_id for row in superior_categories]
-
-        if not category_ids:
-            return jsonify({'message': 'No hay categorías superiores disponibles'}), 200
-
-        # Buscar vehículos disponibles en cualquiera de esas categorías
-        stmt = select(vehicles).where(
-            and_(
-                vehicles.c.category_id.in_(category_ids),
                 vehicles.c.branch_id == branch_id_pickup,
                 vehicles.c.condition_id == 1,
                 not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
@@ -79,36 +54,69 @@ def check_available_vehicles(conn, available_vehicles, cost, reserve_id, categor
         )
         available_vehicles = conn.execute(stmt).fetchall()
 
+        # Si no hay, buscar categorías de mayor prioridad (menor número)
+        if not available_vehicles:
+            stmt = select(categories.c.priority).where(categories.c.category_id == category_id)
+            current_priority_row = conn.execute(stmt).fetchone()
+
+            if not current_priority_row:
+                return jsonify({'message': 'Error al obtener prioridad de categoría'}), 500
+
+            current_priority = current_priority_row.priority
+
+            stmt = select(categories.c.category_id, categories.c.priority).where(
+                categories.c.priority < current_priority
+            ).order_by(categories.c.priority.asc())
+
+            higher_categories = conn.execute(stmt).fetchall()
+
+            for higher_cat in higher_categories:
+                new_category_id = higher_cat.category_id
+
+                stmt = select(vehicles).where(
+                    and_(
+                        vehicles.c.category_id == new_category_id,
+                        vehicles.c.branch_id == branch_id_pickup,
+                        vehicles.c.condition_id == 1,
+                        not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
+                    )
+                )
+                available_vehicles = conn.execute(stmt).fetchall()
+
+                if available_vehicles:
+                    category_id = new_category_id  # actualizar categoría usada
+                    break
+
+        # Si no se encontró ningún vehículo
         if not available_vehicles:
             return jsonify({'message': 'No hay vehículos disponibles'}), 200
 
-    # Seleccionar vehículo aleatorio entre los disponibles
-    selected_vehicle = random.choice(available_vehicles)
+        # Seleccionamos un vehículo aleatorio
+        selected_vehicle = random.choice(available_vehicles)
 
-    # Obtener el nombre de la categoría del vehículo elegido
-    stmt = select(categories.c.name).where(categories.c.category_id == selected_vehicle.category_id)
-    category_name = conn.execute(stmt).fetchone()[0]
-    message = f'Se dio de alta su alquiler, la categoría es {category_name}'
+        # Obtener nombre de categoría final
+        stmt = select(categories.c.name).where(categories.c.category_id == selected_vehicle.category_id)
+        category_name = conn.execute(stmt).fetchone()[0]
 
-    # Insertar el nuevo alquiler
-    new_rental = {
-        'final_cost': cost,
-        'vehicle_id': selected_vehicle.vehicle_id,
-        'reservation_id': reserve_id
-    }
+        # Crear alquiler
+        new_rental = {
+            'final_cost': cost,
+            'vehicle_id': selected_vehicle.vehicle_id,
+            'reservation_id': reserve_id
+        }
 
-    # Marcar la reserva como alquilada
-    stmt = update(reservations).where(reservations.c.reservation_id == reserve_id).values(is_rented=1)
-    conn.execute(stmt)
+        conn.execute(update(reservations).where(reservations.c.reservation_id == reserve_id).values(is_rented=1))
+        result = conn.execute(insert(rentals).returning(rentals.c.rental_id), new_rental)
+        rental_id = result.scalar()
 
-    # Insertar el alquiler
-    stmt = insert(rentals).values(new_rental)
-    conn.execute(stmt)
+        conn.execute(update(vehicles).where(vehicles.c.vehicle_id == selected_vehicle.vehicle_id).values(condition_id=2))
 
-    # Marcar el vehículo como ocupado
-    stmt = update(vehicles).where(
-        vehicles.c.vehicle_id == selected_vehicle.vehicle_id
-    ).values(condition_id=2)
-    conn.execute(stmt)
+        response_data = {
+            'message': f'Se dio de alta su alquiler, la categoría es {category_name}',
+            'number_plate': selected_vehicle.number_plate,
+            'rental_id': rental_id,
+            'category_name': category_name,
+            'category_changed': original_category_id != selected_vehicle.category_id
+        }
 
-    return jsonify({'message': message, 'number_plate': selected_vehicle.number_plate}), 200
+        return jsonify(response_data), 200
