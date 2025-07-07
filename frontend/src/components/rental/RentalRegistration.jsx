@@ -134,7 +134,7 @@ const RentalRegistration = () => {
       }
 
       if (category_changed) {
-        alertMessage += ` Se ha asignado una categoría superior: ${category_name}.`;
+        alertMessage += `\nSe ha asignado una categoría superior debido a stock faltante de la categoría original.`;
       }
 
       alert(alertMessage);

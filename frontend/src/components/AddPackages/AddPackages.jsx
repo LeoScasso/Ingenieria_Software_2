@@ -117,13 +117,12 @@ export const AddPackages = () => {
 
     try {
       const selectedSummaries = Object.entries(selectedPackages).map(
-        ([packageId, quantity]) => {
+        ([packageId]) => {
           const pkg = getSelectedPackageInfo(parseInt(packageId))
-          const name = pkg?.name || 'Desconocido'
-          const isBoolean = name !== 'Sillita de bebe'
-          return `${name} (${isBoolean ? '1 unidad' : `${quantity} unidades`})`
+          return pkg?.name || 'Desconocido'
         }
       )
+
       setAddedPackagesSummary(selectedSummaries)
 
       const promises = Object.entries(selectedPackages).map(
@@ -191,9 +190,6 @@ export const AddPackages = () => {
               </ul>
             </>
           )}
-          <Typography>
-            Ya podés cerrar esta pestaña o volver al panel cuando lo necesites.
-          </Typography>
         </Alert>
       </Box>
     )
