@@ -88,7 +88,6 @@ const RentalRegistration = () => {
 
   const handleCancelReservation = async (reservation) => {
     try {
-      // Buscar la categoría correspondiente para obtener la política
       const category = categories.find(cat => cat.name === reservation.vehicle_category);
       const cancelation_policy_id = category?.cancelation_policy_id;
 
@@ -120,19 +119,31 @@ const RentalRegistration = () => {
   const handleRental = async (reservationId) => {
     try {
       const response = await apiClient.post('/rental', { id: reservationId });
-      const { message, number_plate, rental_id } = response.data;
+      const {
+        message,
+        number_plate,
+        rental_id,
+        category_name,
+        category_changed
+      } = response.data;
 
       let alertMessage = message;
+
       if (number_plate) {
-        alertMessage += `. Vehículo asignado: ${number_plate}`;
+        alertMessage += `. Vehículo asignado: ${number_plate}.`;
+      }
+
+      if (category_changed) {
+        alertMessage += ` Se ha asignado una categoría superior: ${category_name}.`;
       }
 
       alert(alertMessage);
-      
-      if(window.confirm('¿Agregar paquetes a este alquiler?')) {
+
+      if (rental_id) {
         navigate(`/add-packages/${rental_id}`);
       }
-      await fetchData(); // Refrescar luego de alquilar
+
+      await fetchData();
     } catch (error) {
       console.error('Error al dar de alta el alquiler:', error);
       const msg = error.response?.data?.message || 'Error desconocido al procesar el alquiler.';
