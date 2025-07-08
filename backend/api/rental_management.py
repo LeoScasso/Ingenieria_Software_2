@@ -27,7 +27,7 @@ def rental():
             return jsonify({'message': 'La reserva no existe'}), 404
 
         category_id = result.category_id
-        original_category_id = category_id  # Guardamos para comparar luego
+        original_category_id = category_id  
         cost = result.cost
         pickup_date = result.pickup_datetime
         return_date = result.return_datetime
