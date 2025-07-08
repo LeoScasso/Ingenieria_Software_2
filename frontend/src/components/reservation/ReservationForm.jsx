@@ -21,6 +21,7 @@ const ReservationForm = () => {
   const [categories, setCategories] = useState([]);
   const [branches, setBranches] = useState([]);
   const [totalCost, setTotalCost] = useState(null);
+  const [rentalDays, setRentalDays] = useState(0);
 
   const requiredFields = userRole === 'employee'
     ? ['email', 'pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch']
@@ -35,10 +36,24 @@ const ReservationForm = () => {
     if (pickup_datetime && return_datetime && category) {
       const pickupDate = new Date(pickup_datetime);
       const returnDate = new Date(return_datetime);
-      const days = Math.max(1, Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24)));
+      const days = Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24));
       const categoryObj = categories.find(c => c.category_id === parseInt(category));
-      if (categoryObj) setTotalCost(days * categoryObj.price_per_day);
+
+      if (pickupDate > returnDate) {
+        setTotalCost(null);
+        setRentalDays(0);
+        return;
+      }
+
+      if (categoryObj && days > 0) {
+        setRentalDays(days);
+        setTotalCost(days * categoryObj.price_per_day);
+      } else {
+        setRentalDays(0);
+        setTotalCost(null);
+      }
     } else {
+      setRentalDays(0);
       setTotalCost(null);
     }
   }, [formData.pickup_datetime, formData.return_datetime, formData.category, categories]);
@@ -54,15 +69,32 @@ const ReservationForm = () => {
         return;
       }
 
+      const pickupDate = new Date(formData.pickup_datetime);
+      const returnDate = new Date(formData.return_datetime);
+      const days = Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24));
+      const categoryObj = categories.find(c => c.category_id === parseInt(formData.category));
+
+      if (pickupDate > returnDate) {
+        alert('La fecha de retiro no puede ser posterior a la fecha de devolución');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (categoryObj && days < categoryObj.minimum_rental_days) {
+        alert(`Debe alquilar al menos ${categoryObj.minimum_rental_days} día(s) para la categoría seleccionada`);
+        setIsSubmitting(false);
+        return;
+      }
+
       if (userRole === 'employee') {
         const response = await apiClient.post('/reserve', {
           ...formData,
           cost: totalCost
         });
-        alert('Reserva creada con éxito');
+
+        alert(response.data.message || 'Reserva creada con éxito');
         navigate('/');
       } else {
-        // Redirigir al pago
         navigate(`/payment/${method}`, {
           state: {
             ...formData,
@@ -73,7 +105,8 @@ const ReservationForm = () => {
 
     } catch (err) {
       console.error('Error:', err);
-      alert('Ocurrió un error al procesar la reserva');
+      const errorMsg = err?.response?.data?.error || 'Error interno del servidor';
+      alert(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
