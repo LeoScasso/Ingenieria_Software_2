@@ -120,7 +120,6 @@ def today_reservations():
         return jsonify({'error': 'Acceso denegado. Solo empleados pueden acceder a este endpoint'}), 403
 
     today = datetime.now().date()
-    yesterday = today - timedelta(days=1)
 
     with engine.connect() as conn:
         # Obtener la branch_id del empleado
@@ -146,8 +145,7 @@ def today_reservations():
         ).where(
             and_(
                 reservations.c.is_rented == 0,  # Solo reservas que no han sido alquiladas
-                reservations.c.pickup_datetime >= yesterday,
-                reservations.c.pickup_datetime <= today,
+                reservations.c.pickup_datetime == today,
                 reservations.c.branch_id_pickup == employee_branch_id  # Solo reservas de la sucursal del empleado
             )
         )
