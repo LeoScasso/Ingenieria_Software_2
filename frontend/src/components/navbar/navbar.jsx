@@ -110,6 +110,14 @@ export const Navbar = () => {
                   >
                     Registrar cliente
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/reservation"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Crear Reserva
+                  </Button>
                 </>
               )}
 
