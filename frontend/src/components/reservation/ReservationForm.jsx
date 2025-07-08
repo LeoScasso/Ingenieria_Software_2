@@ -10,12 +10,12 @@ const ReservationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
+    ...(userRole === 'employee' && { email: '' }),
     pickup_datetime: '',
     return_datetime: '',
     category: '',
     pickup_branch: '',
     return_branch: '',
-    ...(userRole === 'employee' && { email: '' }),
   });
 
   const [categories, setCategories] = useState([]);
@@ -23,14 +23,13 @@ const ReservationForm = () => {
   const [totalCost, setTotalCost] = useState(null);
 
   const requiredFields = userRole === 'employee'
-    ? ['pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch', 'email']
+    ? ['email', 'pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch']
     : ['pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch'];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Solo cálculo de costo (sin validaciones)
   useEffect(() => {
     const { pickup_datetime, return_datetime, category } = formData;
     if (pickup_datetime && return_datetime && category) {
@@ -55,21 +54,31 @@ const ReservationForm = () => {
         return;
       }
 
-      navigate(`/payment/${method}`, { 
-        state: { 
-          ...formData, 
-          totalCost
-        } 
-      });
-      
+      if (userRole === 'employee') {
+        const response = await apiClient.post('/reserve', {
+          ...formData,
+          cost: totalCost
+        });
+        alert('Reserva creada con éxito');
+        navigate('/');
+      } else {
+        // Redirigir al pago
+        navigate(`/payment/${method}`, {
+          state: {
+            ...formData,
+            totalCost
+          }
+        });
+      }
+
     } catch (err) {
       console.error('Error:', err);
-      alert('Ocurrió un error al procesar la solicitud');
+      alert('Ocurrió un error al procesar la reserva');
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Carga inicial de datos
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -86,7 +95,7 @@ const ReservationForm = () => {
     loadData();
   }, []);
 
-  const fields = [
+  const baseFields = [
     {
       name: 'pickup_datetime',
       label: 'Fecha de retiro',
@@ -139,15 +148,21 @@ const ReservationForm = () => {
         label: `${branch.name} - ${branch.address}`,
       })),
     },
-    ...(userRole === 'employee' ? [{
-      name: 'email',
-      label: 'Email del cliente',
-      type: 'text',
-      value: formData.email,
-      onChange: handleChange,
-      required: true,
-    }] : []),
-  ]
+  ];
+
+  const fields = userRole === 'employee'
+    ? [
+        {
+          name: 'email',
+          label: 'Email del cliente',
+          type: 'text',
+          value: formData.email,
+          onChange: handleChange,
+          required: true,
+        },
+        ...baseFields,
+      ]
+    : baseFields;
 
   return (
     <Form title="Reservar Vehículo" fields={fields}>
@@ -156,21 +171,38 @@ const ReservationForm = () => {
       </Typography>
 
       <Stack direction="row" justifyContent="center" spacing={2} sx={{ mt: 3 }}>
-        <Button
-          variant="contained"
-          onClick={() => handleSubmit('card')}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Procesando...' : 'Pagar con Tarjeta'}
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => handleSubmit('wallet')}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Procesando...' : 'Pagar con Billetera'}
-        </Button>
+        {userRole === 'employee' ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              if (window.confirm('Confirme que desea crear la reserva')) {
+                handleSubmit();
+              }
+            }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Procesando...' : 'Continuar Reserva'}
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="contained"
+              onClick={() => handleSubmit('card')}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Procesando...' : 'Pagar con Tarjeta'}
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => handleSubmit('wallet')}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Procesando...' : 'Pagar con Billetera'}
+            </Button>
+          </>
+        )}
       </Stack>
     </Form>
   );
