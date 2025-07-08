@@ -171,7 +171,15 @@ export const AddPackages = () => {
 
   if (success) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh" px={2}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="60vh"
+        px={2}
+        flexDirection="column"
+        gap={2}
+      >
         <Alert severity="success" sx={{ maxWidth: 600 }} icon={<CheckIcon />}>
           <Typography variant="h6" gutterBottom>
             ¡Paquetes agregados exitosamente!
@@ -190,10 +198,26 @@ export const AddPackages = () => {
               </ul>
             </>
           )}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/rental_summary/' + rentalId)}
+            sx={{
+              backgroundColor: theme.palette.beanBlue,
+              color: theme.palette.beige,
+              fontWeight: 'bold',
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              '&:hover': { backgroundColor: theme.palette.charcoal },
+            }}
+          >
+            Continuar
+          </Button>
         </Alert>
       </Box>
     )
   }
+
 
   if (skipped) {
     return (
