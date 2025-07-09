@@ -99,3 +99,30 @@ def get_categories():
             for row in result
         ]
     return jsonify(categories_list), 200
+
+@getters_bp.route('/get_employees', methods=['GET'])
+def get_employees():
+     stmt = select(employees,branches.c.name).select_from(employees.join(branches, employees.c.branch_id == branches.c.branch_id))
+     with engine.begin() as conn:
+        result = conn.execute(stmt).fetchall()
+        if not result:
+            return jsonify({'message': 'No hay empleados'}),400
+        
+        return jsonify([dict(row._mapping) for row in result]),200
+     
+@getters_bp.route('/employee_detail', methods=['POST'])
+def employee_detail():
+    data = request.get_json()
+    employee_id = data.get('employee_id')
+
+    stmt = select(employees,branches.c.name
+                         ).select_from(employees.join(branches, employees.c.branch_id == branches.c.branch_id)
+                                       ).where(employees.c.employee_id == employee_id)
+    
+    with engine.begin() as conn:
+        result = conn.execute(stmt).fetchone()
+
+        if not result:
+            return jsonify({'message':'empleado no encontrado'})
+
+        return jsonify(dict(result._mapping)),200
