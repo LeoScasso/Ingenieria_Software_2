@@ -14,6 +14,7 @@ import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
 import RegistrationForm from './components/registration/RegistrationForm'
+import EmployeeRegForm from './components/registration/EmployeeRegForm'
 import RentalRegistration from './components/rental/RentalRegistration'
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
@@ -60,6 +61,7 @@ const AppRouter = () => {
             <Route path="/rental-registration" element={<RentalRegistration />} />
             <Route path="/branches" element={<BranchesList />} />
             <Route path="/add-packages/:id" element={<AddPackages />} />
+            <Route path="/employee-registration" element={<EmployeeRegForm />} />
           </Routes>
         </Box>
         <Footer />
