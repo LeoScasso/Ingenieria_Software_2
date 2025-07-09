@@ -134,6 +134,14 @@ export const Navbar = () => {
                   </Button>
                   <Button
                     component={Link}
+                    to="/employee-registration"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Registrar Empleado
+                  </Button>
+                  <Button
+                    component={Link}
                     to="/branches"
                     variant="contained"
                     sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
