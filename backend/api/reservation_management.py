@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, delete, update
+from sqlalchemy import Table, select, insert, delete, update, and_, not_
 from app.db import engine, metadata
 from datetime import datetime
 
@@ -10,6 +10,7 @@ reservations = Table('reservations',  metadata, autoload_with=engine)
 categories = Table('vehicle_categories', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
 branches = Table('branches', metadata, autoload_with=engine)
+rentals = Table('rentals', metadata, autoload_with=engine)
 
 
 @reservation_management_bp.route('/cancel_reservation', methods=['DELETE'])
@@ -112,3 +113,81 @@ def reserve():
         except Exception as e:
             print("Error al reservar:", e)
             return jsonify({'error': 'Error interno del servidor'}), 500
+
+@reservation_management_bp.route('/annul_reservation', methods=['POST'])
+def annul_reservation():
+    data = request.get_json()
+    reserve_id = data.get('reservation_id')
+
+    stmt = select(reservations).where(reservations.c.reservation_id == reserve_id)
+
+    with engine.begin() as conn:
+        result = conn.execute(stmt).fetchone()
+
+        if not result:
+            return jsonify({'message': 'La reserva no existe'}), 404
+
+        category_id = result.category_id
+        cost = result.cost
+        pickup_date = result.pickup_datetime
+        return_date = result.return_datetime
+        branch_id_pickup = result.branch_id_pickup
+
+        # Vehículos ya reservados en ese período
+        reserved_vehicles_subq = select(rentals.c.vehicle_id).select_from(
+            rentals.join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
+        ).where(
+            and_(
+                reservations.c.pickup_datetime <= return_date,
+                reservations.c.return_datetime >= pickup_date
+            )
+        ).subquery()
+
+        # Intentamos con la categoría original
+        stmt = select(vehicles).where(
+            and_(
+                vehicles.c.category_id == category_id,
+                vehicles.c.branch_id == branch_id_pickup,
+                vehicles.c.condition_id == 1,
+                not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
+            )
+        )
+        available_vehicles = conn.execute(stmt).fetchall()
+
+        # Si no hay disponibles, buscar en categorías de mayor prioridad
+        if not available_vehicles:
+            stmt = select(categories.c.priority).where(categories.c.category_id == category_id)
+            current_priority_row = conn.execute(stmt).fetchone()
+
+            if not current_priority_row:
+                return jsonify({'message': 'Error al obtener prioridad de categoría'}), 500
+
+            current_priority = current_priority_row.priority
+
+            stmt = select(categories.c.category_id).where(
+                categories.c.priority < current_priority
+            ).order_by(categories.c.priority.asc())
+            higher_categories = conn.execute(stmt).fetchall()
+
+            # Buscar en las categorías superiores
+            for cat in higher_categories:
+                stmt = select(vehicles).where(
+                    and_(
+                        vehicles.c.category_id == cat.category_id,
+                        vehicles.c.branch_id == branch_id_pickup,
+                        vehicles.c.condition_id == 1,
+                        not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
+                    )
+                )
+                vehicles_in_higher = conn.execute(stmt).fetchall()
+                if vehicles_in_higher:
+                    return jsonify({'message': 'Hay vehículos disponibles para dar de alta esta reserva'}), 400
+
+        # Si no hay vehículos disponibles en ninguna categoría
+        conn.execute(
+            update(reservations)
+            .where(reservations.c.reservation_id == reserve_id)
+            .values(is_rented=2)
+        )
+
+        return jsonify({'message': 'La reserva fue anulada', 'refund': cost}), 200
