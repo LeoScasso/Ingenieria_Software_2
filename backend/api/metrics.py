@@ -42,7 +42,8 @@ def income():
                             .join(categories, reservations.c.category_id == categories.c.category_id)
                             .join(policies, categories.c.cancelation_policy_id == policies.c.policy_id)
                             ).where(and_(reservations.c.pickup_datetime >= first_date,
-                                        reservations.c.return_datetime <= second_date)
+                                        reservations.c.return_datetime <= second_date,
+                                        reservations.c.is_rented == 2)
                             ).group_by(policies.c.policy_id)
         
         result = conn.execute(stmt).fetchall()
@@ -56,7 +57,27 @@ def income():
                 canceled_total += refund * 0.8
             elif policy_id == 3:
                 canceled_total += refund
+
+        if not all_income and canceled_total == 0:
+            return jsonify({'message': 'No hubo ingresos entre las fechas especificadas'}), 200
                 
         all_income.append({'name': 'Cancelados', 'category_income': round(canceled_total, 2)})
         return jsonify(all_income)
 
+@metrics_bp.route('/registered', methods=['POST'])
+def registered():
+
+    data = request.get_json()
+    first_date = datetime.strptime(data.get('first_date'), '%Y-%m-%d').date()
+    second_date = datetime.strptime(data.get('second_date'), '%Y-%m-%d').date()
+
+    stmt = select(users).where(and_(users.c.registration_date >= first_date,
+                                    users.c.registration_date <=second_date))
+    
+    with engine.begin() as conn:
+        result = conn.execute(stmt).fetchall()
+
+        if not result:
+            return jsonify({'message' : 'No hubieron registros entre las fechas solicitadas'}),200
+        
+        return jsonify([dict(row._mapping) for row in result])
