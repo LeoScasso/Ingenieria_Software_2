@@ -1,87 +1,70 @@
-import React, { useState } from 'react'
-import { Typography } from '@mui/material'
-import apiClient from '../../middleware/axios'
-import Form from '../common/Form'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Typography } from '@mui/material';
+import apiClient from '../../middleware/axios';
+import Form from '../common/Form';
+import { useNavigate } from 'react-router-dom';
 
 const EmployeeRegForm = () => {
-  const navigate = useNavigate()
-  const userRole = sessionStorage.getItem('role')
+  const navigate = useNavigate();
 
-  const isEmployee = userRole === 'employee'
+  const [branches, setBranches] = useState([]);
 
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    confirmPassword: '',
     name: '',
     last_name: '',
     dni: '',
     phone_number: '',
-    showPassword: false,
-  })
+    branch: '',
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const branchesRes = await apiClient.get('/get_branches');
+        setBranches(branchesRes.data);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const togglePassword = () => {
-    setFormData((prev) => ({ ...prev, showPassword: !prev.showPassword }))
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!isEmployee) {
-      if (formData.password !== formData.confirmPassword) {
-        alert('Las contraseñas no coinciden')
-        return
-      }
-
-      if (formData.password.length < 8) {
-        alert('La contraseña debe tener al menos 8 caracteres')
-        return
-      }
-    }
-
-    // Crear objeto sin campos innecesarios
-    const {
-      confirmPassword,
-      showPassword,
-      ...dataToSend
-    } = formData
-
-    if (isEmployee) {
-      delete dataToSend.password
-    }
+    e.preventDefault();
 
     try {
-      const response = await apiClient.post('/registration', dataToSend)
+      const response = await apiClient.post('/registration', formData);
 
       if (response.status === 200) {
-        if (isEmployee && response.data.password) {
-          alert(`${response.data.message}\nContraseña generada: ${response.data.password}`)
-        } else {
-          alert(response.data.message)
-        }
-        navigate('/')
+        const msg = response.data.password
+          ? `${response.data.message}\nContraseña generada: ${response.data.password}`
+          : response.data.message;
+
+        alert(msg);
+        navigate('/');
       } else {
-        alert('Registro fallido: Respuesta inesperada del servidor')
-        console.warn('Respuesta inesperada:', response)
+        alert('Registro fallido: Respuesta inesperada del servidor');
+        console.warn('Respuesta inesperada:', response);
       }
     } catch (error) {
       if (error.response) {
-        console.error('Registro fallido - Respuesta del servidor:', error.response.data)
-        alert('Registro fallido: ' + (error.response.data.message || 'Error del servidor'))
+        console.error('Registro fallido - Respuesta del servidor:', error.response.data);
+        alert('Registro fallido: ' + (error.response.data.message || 'Error del servidor'));
       } else if (error.request) {
-        console.error('Registro fallido - No hubo respuesta:', error.request)
-        alert('Error de registro: No hubo respuesta del servidor.')
+        console.error('Registro fallido - No hubo respuesta:', error.request);
+        alert('Error de registro: No hubo respuesta del servidor.');
       } else {
-        console.error('Error en el registro - Setup:', error.message)
-        alert('Error en el registro: ' + error.message)
+        console.error('Error en el registro - Setup:', error.message);
+        alert('Error en el registro: ' + error.message);
       }
     }
-  }
+  };
 
   const fields = [
     {
@@ -130,7 +113,19 @@ const EmployeeRegForm = () => {
       required: true,
       autoComplete: 'tel',
     },
-  ].filter(Boolean)
+    {
+      name: 'branch',
+      label: 'Sucursal',
+      type: 'select',
+      value: formData.branch,
+      onChange: handleChange,
+      required: true,
+      options: branches.map(branch => ({
+        value: branch.name,
+        label: `${branch.name} - ${branch.address}`,
+      })),
+    },
+  ];
 
   return (
     <Form
@@ -143,7 +138,7 @@ const EmployeeRegForm = () => {
         Todos los campos son obligatorios
       </Typography>
     </Form>
-  )
-}
+  );
+};
 
-export default EmployeeRegForm
+export default EmployeeRegForm;
