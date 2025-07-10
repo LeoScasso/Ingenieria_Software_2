@@ -12,7 +12,7 @@ from api.reservation_management import reservation_management_bp
 from api.rental_management import rental_management_bp
 from api.packages import packages_bp
 from api.metrics import metrics_bp
-
+from api.branches_management import branches_management_bp
 
 app = Flask(__name__)
 app.secret_key = 'grupo57'
@@ -40,6 +40,7 @@ app.register_blueprint(reservation_management_bp, url_prefix='/api')
 app.register_blueprint(rental_management_bp,url_prefix='/api')
 app.register_blueprint(packages_bp, url_prefix='/api')
 app.register_blueprint(metrics_bp,url_prefix='/api')
+app.register_blueprint(branches_management_bp, url_prefix='/api')
 
 
 if __name__ == '__main__':
