@@ -11,6 +11,9 @@ rentals = Table('rentals', metadata, autoload_with=engine)
 users = Table('users', metadata, autoload_with=engine)
 reservations = Table('reservations',  metadata, autoload_with=engine)
 policies = Table('cancelation_policies', metadata, autoload_with=engine)
+models = Table('vehicle_models', metadata, autoload_with=engine)
+brands = Table('vehicle_brands', metadata, autoload_with=engine)
+
 
 @metrics_bp.route('/income', methods=['POST'])
 def income():
@@ -81,3 +84,28 @@ def registered():
             return jsonify({'message' : 'No hubieron registros entre las fechas solicitadas'}),200
         
         return jsonify([dict(row._mapping) for row in result])
+    
+
+
+@metrics_bp.route('/rented_vehicles', methods=['POST'])
+def rented_vehicles():
+    data = request.get_json()
+    first_date = datetime.strptime(data.get('first_date'), '%Y-%m-%d').date()
+    second_date = datetime.strptime(data.get('second_date'), '%Y-%m-%d').date()
+
+    stmt = select(categories.c.name.label('categoria'),
+                func.count().label('total')
+                ).select_from(
+                rentals
+                .join(vehicles, rentals.c.vehicle_id == vehicles.c.vehicle_id)
+                .join(categories, vehicles.c.category_id == categories.c.category_id)
+                .join(reservations, reservations.c.reservation_id == rentals.c.reservation_id)
+            .where(and_(reservations.c.pickup_datetime >= first_date,
+                reservations.c.return_datetime <= second_date)
+            ).group_by(categories.c.name)
+            )
+    
+    with engine.connect() as conn:
+        result = conn.execute(stmt).fetchall()
+        data_to_send = [{'categoria': row.name, 'total': row.total} for row in result]
+    return jsonify(data_to_send)

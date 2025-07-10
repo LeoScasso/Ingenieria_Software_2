@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import Table, select, insert, delete, update, exists, or_, and_
+from sqlalchemy.exc import IntegrityError
 from app.db import engine, metadata
-
+from .functions import check_values
 
 branches_management_bp = Blueprint('branches_management', __name__)
 
@@ -11,9 +12,9 @@ reservations = Table('reservations',  metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
 employees = metadata.tables.get('employees')
 
+# Funcion (no endpoint)
 def set_branch_status(new_status, branch_id):
     stmt = update(branches).where(branches.c.branch_id == branch_id).values(status=new_status)
-
 
 @branches_management_bp.route('/logical_branch_deletion', methods=['DELETE'])
 def logical_branch_deletion():
@@ -43,3 +44,66 @@ def logical_branch_deletion():
     # Si no se encuentra ninguna relación
     set_branch_status(2,branch_id)
     return jsonify({'message': 'Se eliminó la sucursal'}),200
+
+
+@branches_management_bp.route('/branch_edition', methods=['UPDATE'])
+def branch_edition():
+    data = request.get_json()
+   
+    # Se guarda el nombre antes de cambiarlo
+    old_branch_name = data.get('old_branch_name')
+    new_branch_name = data.get('branch_name')
+
+    try:
+        with engine.connect as conn:
+            # Si se cambio el nombre, se verifica que no este cargado
+            if new_branch_name != old_branch_name:
+                stmt_check_name = select(branches).where(branches.c.name == new_branch_name)
+                existing_name = conn.execute(stmt_check_name)
+                if existing_name:
+                    return jsonify({'message' : 'El nombre ingresado ya se encuentra cargado'}),400
+            branch_data = {
+                'name' : data.get('name'),
+                'address' : data.get('address'),
+                'locality' : data.get('locality')
+            }
+            if check_values(branch_data):
+                stmt = update(branches).where(branches.c.branch_id == data.get('branch_id')).values(branch_data)
+                conn.execute(stmt)
+                return jsonify({'message': 'Sucursal editada con exito'}),200
+            else:
+                return jsonify({'message':'Debe ingresar todos los campos'}),400
+    except IntegrityError:
+        return jsonify({'message': 'Error de integridad en la base de datos'}), 400
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+@branches_management_bp.route('/branch_registration', methods=['POST'])
+def branch_registration():
+    data = request.get_json();
+    branch_data = {
+        'name' : data.get('name'),
+        'address' : data.get('address'),
+        'locality' : data.get('locality'),
+        'status' : 0
+    }
+    # Checkea si faltan campos
+    if any (value is None for value in branch_data):
+        return jsonify({'message' : 'Error faltan campos que completar'})
+    
+    stmt = select(branches).where(branches.c.name == data.get('name')).fetchone()
+    
+    try:
+        with engine.connect as conn:
+            result = conn.execute(stmt)
+            if result:
+                return jsonify({'message' : 'Error el nombre ya se encuentra registrado'}),400
+            else:
+                stmt = insert(branches).values(branch_data)
+                conn.execute(stmt)
+                return jsonify({'message': 'Sucursal registrada con exito'}),200
+            
+    except IntegrityError:
+        return jsonify({'message': 'Error de integridad en la base de datos'}), 400
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
