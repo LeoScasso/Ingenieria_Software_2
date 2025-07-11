@@ -36,6 +36,8 @@ const RentalRegistration = () => {
   const theme = useTheme();
   const [reservations, setReservations] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [branchName, setBranchName] = useState('');
   const [loading, setLoading] = useState(true);
 
   const InfoPaper = ({ children }) => (
@@ -56,21 +58,26 @@ const RentalRegistration = () => {
 
   const fetchData = async () => {
     try {
-      const [reservationRes, categoriesRes] = await Promise.all([
+      const [reservationRes, categoriesRes, branchesRes, employeeRes] = await Promise.all([
         apiClient.get('/today_reservations'),
         apiClient.get('/get_categories'),
+        apiClient.get('/get_branches'),
+        apiClient.post('/employee_detail', {
+          employee_id: sessionStorage.getItem('userId')
+        }),
       ]);
 
-      if (Array.isArray(reservationRes.data)) {
-        setReservations(reservationRes.data);
-      } else {
-        setReservations([]);
-      }
+      setReservations(Array.isArray(reservationRes.data) ? reservationRes.data : []);
+      setCategories(categoriesRes.data || []);
+      setBranches(branchesRes.data || []);
 
-      setCategories(categoriesRes.data);
+      const employeeBranchId = employeeRes.data.branch_id;
+      const branch = branchesRes.data.find(b => b.branch_id === employeeBranchId);
+      setBranchName(branch ? branch.name : 'Sucursal desconocida');
+
     } catch (error) {
       console.error('Error fetching data', error);
-      alert('Error al obtener reservas. Intente nuevamente más tarde.');
+      alert('Error al obtener información. Intente nuevamente más tarde.');
     } finally {
       setLoading(false);
     }
@@ -84,36 +91,6 @@ const RentalRegistration = () => {
     const category = categories.find(cat => cat.name === categoryName);
     const policyId = category?.cancelation_policy_id;
     return politicas_cancelacion[policyId] || 'No disponible';
-  };
-
-  const handleCancelReservation = async (reservation) => {
-    try {
-      const category = categories.find(cat => cat.name === reservation.vehicle_category);
-      const cancelation_policy_id = category?.cancelation_policy_id;
-
-      if (!cancelation_policy_id) {
-        alert("No se pudo determinar la política de cancelación para esta reserva.");
-        return;
-      }
-
-      const response = await apiClient.delete('/cancel_reservation', {
-        data: {
-          reservation_id: reservation.reservation_id,
-          cost: reservation.cost,
-          cancelation_policy_id: cancelation_policy_id
-        }
-      });
-
-      setReservations(prev =>
-        prev.filter(r => r.reservation_id !== reservation.reservation_id)
-      );
-
-      alert(response.data.message);
-
-    } catch (error) {
-      console.error('Error cancelando la reserva:', error);
-      alert('Error al cancelar la reserva. Por favor, intente nuevamente más tarde.');
-    }
   };
 
   const handleRental = async (reservationId) => {
@@ -151,6 +128,27 @@ const RentalRegistration = () => {
     }
   };
 
+  const handleAnnulReservation = async (reservation) => {
+    try {
+      const response = await apiClient.post('/annul_reservation', {
+        reservation_id: reservation.reservation_id,
+      });
+
+      alert(`${response.data.message}. Reembolso: $${response.data.refund || 0}`);
+      setReservations(prev =>
+        prev.filter(r => r.reservation_id !== reservation.reservation_id)
+      );
+    } catch (error) {
+      const msg = error.response?.data?.message;
+
+      if (msg && msg.includes('vehículos disponibles')) {
+        alert(msg); // NO anula, solo avisa
+      } else {
+        alert(msg || 'Error al intentar anular la reserva.');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -172,6 +170,16 @@ const RentalRegistration = () => {
       >
         <CardContent>
           <Typography
+            variant="h6"
+            fontWeight="bold"
+            textAlign="center"
+            color={theme.palette.darkBlue}
+            gutterBottom
+          >
+            Sucursal {branchName}
+          </Typography>
+
+          <Typography
             variant="h5"
             fontWeight="bold"
             textAlign="center"
@@ -180,6 +188,7 @@ const RentalRegistration = () => {
           >
             Reservas para procesar
           </Typography>
+
           <Divider sx={{ mb: 3, backgroundColor: theme.palette.charcoal, height: 2 }} />
 
           <Grid container spacing={2} direction="column">
@@ -239,14 +248,20 @@ const RentalRegistration = () => {
 
                       <Button
                         variant="contained"
-                        color="error"
                         onClick={() => {
-                          if (window.confirm('¿Estás seguro de que querés cancelar esta reserva?')) {
-                            handleCancelReservation(reservation);
+                          if (window.confirm('¿Querés anular esta reserva por falta de disponibilidad?')) {
+                            handleAnnulReservation(reservation);
                           }
                         }}
+                        sx={{
+                          backgroundColor: '#f57c00',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#ef6c00',
+                          },
+                        }}
                       >
-                        Cancelar reserva
+                        Anular reserva
                       </Button>
                     </Box>
                   </Paper>
