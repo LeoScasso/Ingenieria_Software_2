@@ -126,6 +126,14 @@ export const Navbar = () => {
                   > 
                     Historial Alquileres
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/rental-to-return"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  >
+                    Alquileres a devolver
+                  </Button>
                 </>
               )}
 
