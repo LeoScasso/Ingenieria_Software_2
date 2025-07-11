@@ -118,6 +118,14 @@ export const Navbar = () => {
                   >
                     Crear Reserva
                   </Button>
+                  <Button
+                    component={Link}
+                    to="/rental-history-emp"
+                    variant="contained"
+                    sx={{ backgroundColor: 'beanBlue', marginRight: 1 }}
+                  > 
+                    Historial Alquileres
+                  </Button>
                 </>
               )}
 
