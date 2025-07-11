@@ -200,7 +200,7 @@ export const AddPackages = () => {
           )}
           <Button
             variant="contained"
-            onClick={() => navigate('/rental_summary/' + rentalId)}
+            onClick={() => navigate('/rental-history-emp')}
             sx={{
               backgroundColor: theme.palette.beanBlue,
               color: theme.palette.beige,
