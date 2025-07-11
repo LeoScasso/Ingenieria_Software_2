@@ -137,6 +137,7 @@ def rentals_for_pickup_branch():
         stmt = select(rentals.c.final_cost,
                     reservations.c.pickup_datetime,
                     reservations.c.return_datetime,
+                    reservations.c.branch_id_return, 
                     vehicles.c.number_plate,
                     categories.c.name,
                     users.c.email,
@@ -228,7 +229,3 @@ def register_return():
         return jsonify({'message':'El vehiculo se entrego tarde',
                         'days' : days,
                         'aditional' : price.price_per_day * days * 1.5}),200
-
-
-
-
