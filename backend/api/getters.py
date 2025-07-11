@@ -115,7 +115,7 @@ def employee_detail():
     data = request.get_json()
     employee_id = data.get('employee_id')
 
-    stmt = select(employees,branches.c.name
+    stmt = select(employees,branches.c.name.label('branch_name')
                          ).select_from(employees.join(branches, employees.c.branch_id == branches.c.branch_id)
                                        ).where(employees.c.employee_id == employee_id)
     
