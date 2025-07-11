@@ -32,7 +32,8 @@ const InfoPaper = ({ children }) => {
   );
 };
 
-const safeFormatDate = (dateString) => {
+// Fecha completa con hora
+const formatDateWithTime = (dateString) => {
   if (!dateString) return 'Fecha no disponible';
   try {
     const date = new Date(dateString);
@@ -41,8 +42,25 @@ const safeFormatDate = (dateString) => {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+    }) + ' - ' + date.toLocaleTimeString('es-AR', {
       hour: '2-digit',
       minute: '2-digit',
+    });
+  } catch (error) {
+    return 'Fecha inválida';
+  }
+};
+
+// Solo fecha
+const formatDateOnly = (dateString) => {
+  if (!dateString) return 'Fecha no disponible';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    return date.toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   } catch (error) {
     return 'Fecha inválida';
@@ -63,7 +81,7 @@ const EmployeeRentals = () => {
         const employeeResponse = await apiClient.post('/employee_detail', {
           employee_id: sessionStorage.getItem('userId'),
         });
-        console.log('employeeResponse.data:', employeeResponse.data);
+
         if (!employeeResponse.data) {
           throw new Error('No se pudo obtener la información del empleado');
         }
@@ -201,10 +219,10 @@ const EmployeeRentals = () => {
                       <strong>Teléfono:</strong> {rental.phone_number}
                     </Typography>
                     <Typography variant="body2" paragraph>
-                      <strong>Retiro:</strong> {safeFormatDate(rental.pickup_datetime)}
+                      <strong>Retiro:</strong> {formatDateOnly(rental.pickup_datetime)}
                     </Typography>
                     <Typography variant="body2" paragraph>
-                      <strong>Devolución estimada:</strong> {safeFormatDate(rental.return_datetime)}
+                      <strong>Devolución estimada:</strong> {formatDateOnly(rental.return_datetime)}
                     </Typography>
                     <Typography variant="body2" paragraph>
                       <strong>Devolución en:</strong> {returnBranch.name} - {returnBranch.address}
