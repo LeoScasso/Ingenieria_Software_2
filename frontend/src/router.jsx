@@ -20,6 +20,7 @@ import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
+import RentalHistoriEmp from './components/employee/RentalHistoryEmp'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -62,6 +63,7 @@ const AppRouter = () => {
             <Route path="/branches" element={<BranchesList />} />
             <Route path="/add-packages/:id" element={<AddPackages />} />
             <Route path="/employee-registration" element={<EmployeeRegForm />} />
+            <Route path="/rental-history-emp" element={<RentalHistoriEmp />} />
           </Routes>
         </Box>
         <Footer />
