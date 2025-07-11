@@ -148,7 +148,7 @@ def rentals_for_pickup_branch():
                         .join(vehicles, rentals.c.vehicle_id == vehicles.c.vehicle_id)
                         .join(categories, vehicles.c.category_id == categories.c.category_id)
                         .join(users, reservations.c.user_id == users.c.user_id)
-                        ).where((reservations.c.branch_id_pickup == branch_id) & (vehicles.c.condition_id == 2)
+                        ).where((reservations.c.branch_id_pickup == branch_id)
                                 ).order_by(reservations.c.pickup_datetime.desc())
 
         result = conn.execute(stmt).fetchall()
@@ -169,6 +169,7 @@ def rentals_for_return_branch():
         branch_id = result.branch_id
 
         stmt = select(rentals.c.final_cost,
+                    rentals.c.rental_id,
                     reservations.c.pickup_datetime,
                     reservations.c.return_datetime,
                     vehicles.c.number_plate,

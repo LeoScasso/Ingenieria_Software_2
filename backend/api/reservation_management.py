@@ -154,40 +154,43 @@ def annul_reservation():
         )
         available_vehicles = conn.execute(stmt).fetchall()
 
+        # Si hay disponibles en la categoría original
+        if available_vehicles:
+            return jsonify({'message': 'Hay vehículos disponibles para dar de alta esta reserva'}), 400
+
         # Si no hay disponibles, buscar en categorías de mayor prioridad
-        if not available_vehicles:
-            stmt = select(categories.c.priority).where(categories.c.category_id == category_id)
-            current_priority_row = conn.execute(stmt).fetchone()
+        stmt = select(categories.c.priority).where(categories.c.category_id == category_id)
+        current_priority_row = conn.execute(stmt).fetchone()
 
-            if not current_priority_row:
-                return jsonify({'message': 'Error al obtener prioridad de categoría'}), 500
+        if not current_priority_row:
+            return jsonify({'message': 'Error al obtener prioridad de categoría'}), 500
 
-            current_priority = current_priority_row.priority
+        current_priority = current_priority_row.priority
 
-            stmt = select(categories.c.category_id).where(
-                categories.c.priority < current_priority
-            ).order_by(categories.c.priority.asc())
-            higher_categories = conn.execute(stmt).fetchall()
+        stmt = select(categories.c.category_id).where(
+            categories.c.priority < current_priority
+        ).order_by(categories.c.priority.asc())
+        higher_categories = conn.execute(stmt).fetchall()
 
-            # Buscar en las categorías superiores
-            for cat in higher_categories:
-                stmt = select(vehicles).where(
-                    and_(
-                        vehicles.c.category_id == cat.category_id,
-                        vehicles.c.branch_id == branch_id_pickup,
-                        vehicles.c.condition_id == 1,
-                        not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
-                    )
+        # Buscar en las categorías superiores
+        for cat in higher_categories:
+            stmt = select(vehicles).where(
+                and_(
+                    vehicles.c.category_id == cat.category_id,
+                    vehicles.c.branch_id == branch_id_pickup,
+                    vehicles.c.condition_id == 1,
+                    not_(vehicles.c.vehicle_id.in_(reserved_vehicles_subq))
                 )
-                vehicles_in_higher = conn.execute(stmt).fetchall()
-                if vehicles_in_higher:
-                    return jsonify({'message': 'Hay vehículos disponibles para dar de alta esta reserva'}), 400
+            )
+            vehicles_in_higher = conn.execute(stmt).fetchall()
+            if vehicles_in_higher:
+                return jsonify({'message': 'Hay vehículos disponibles en categorías superiores para dar de alta esta reserva'}), 400
 
-        # Si no hay vehículos disponibles en ninguna categoría
+        # Si llegamos aquí, no hay vehículos disponibles en ninguna categoría
         conn.execute(
             update(reservations)
             .where(reservations.c.reservation_id == reserve_id)
             .values(is_rented=2)
         )
 
-        return jsonify({'message': 'La reserva fue anulada', 'refund': cost}), 200
+        return jsonify({'message': 'La reserva fue anulada por falta de disponibilidad', 'refund': cost}), 200
