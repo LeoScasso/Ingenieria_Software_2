@@ -114,7 +114,7 @@ def reserve():
             print("Error al reservar:", e)
             return jsonify({'error': 'Error interno del servidor'}), 500
 
-@reservation_management_bp.route('/annul_reservation', methods=['POST'])
+@reservation_management_bp.route('/check_annulment', methods=['POST'])
 def annul_reservation():
     data = request.get_json()
     reserve_id = data.get('reservation_id')
@@ -181,13 +181,28 @@ def annul_reservation():
                 )
                 vehicles_in_higher = conn.execute(stmt).fetchall()
                 if vehicles_in_higher:
-                    return jsonify({'message': 'Hay vehículos disponibles para dar de alta esta reserva'}), 400
+                    return jsonify({'message': 'Hay vehículos disponibles para dar de alta esta reserva, esta seguro de anularla?'}), 200
 
         # Si no hay vehículos disponibles en ninguna categoría
+        return jsonify({'message': 'NO hay vehículos disponibles para esta reserva, desea anularla?'}), 200
+
+        
+
+@reservation_management_bp.route('/annul_reservation', methods=['POST'])
+def annul_reservation():
+    # Se busca nuevamente la reserva con la id y se saca el costo
+    data = request.get_json()
+    reserve_id = data.get('reservation_id')
+    stmt = select(reservations).where(reservations.c.reservation_id == reserve_id)    
+    with engine.begin() as conn:
+        result = conn.execute(stmt).fetchone()
+        if not result:
+            return jsonify({'message': 'La reserva no existe'}), 404
+        cost = result.cost;
+    # Se anula
         conn.execute(
             update(reservations)
             .where(reservations.c.reservation_id == reserve_id)
             .values(is_rented=2)
         )
-
-        return jsonify({'message': 'La reserva fue anulada', 'refund': cost}), 200
+    return jsonify({'message': 'La reserva fue anulada', 'refund': cost}), 200
