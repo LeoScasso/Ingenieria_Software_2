@@ -188,7 +188,9 @@ def update_vehicle():
 ## Se borró la cancelation policy de los vehiculos
 @fleet_bp.route('/get_vehicles',methods=['GET'])
 def get_vehicles():
-    stmt = select(vehicles.c.number_plate,
+    stmt = select(vehicles.c.vehicle_id,
+            vehicles.c.number_plate,
+            vehicles.c.condition_id,
             vehicle_categories.c.max_capacity,
             vehicle_categories.c.price_per_day,
             vehicle_categories.c.minimum_rental_days,
@@ -275,7 +277,15 @@ def change_vehicle_to_available():
 @fleet_bp.route('delete_vehicle', methods=['DELETE'])
 def delete_vehicle():
     data = request.get_json()
-    with engine.connect as conn:
-        stmt = update(vehicles).where(vehicles.c.vehicle_id == data.vehicle_id).values(condition_id= 4)
-        conn.execute(stmt)
-    return jsonify({'message' : 'Estado del vehículo cambiado a "eliminado" con exito'}),200
+    print(f"Datos recibidos para eliminación: {data}")  # DEBUG
+    
+    if not data or 'vehicle_id' not in data:
+        return jsonify({'message': 'Falta el ID del vehículo'}), 400
+
+    with engine.begin() as conn:
+        stmt = update(vehicles).where(vehicles.c.vehicle_id == data['vehicle_id']).values(condition_id=4)
+        result = conn.execute(stmt)
+        print(f"Filas afectadas: {result.rowcount}")  # DEBUG
+
+    return jsonify({'message': 'Estado del vehículo cambiado a "eliminado" con éxito'}), 200
+
