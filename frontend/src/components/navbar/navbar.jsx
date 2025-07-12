@@ -82,12 +82,14 @@ export const Navbar = () => {
         { text: 'Crear Reserva', path: '/reservation' },
         { text: 'Historial Alquileres', path: '/rental-history-emp' },
         { text: 'Devoluciones', path: '/rental-to-return' },
+        {text: 'Reservas Activas', path: '/reservations-by-branch'}
       ]
     } else if (role === 'admin') {
       return [
         { text: 'Agregar Vehículo', path: '/vehicles/new' },
         { text: 'Registrar Empleado', path: '/employee-registration' },
         { text: 'Ver Sucursales', path: '/branches' },
+        { text: 'Ver Empleados', path: '/employees' },
       ]
     }
     return []
