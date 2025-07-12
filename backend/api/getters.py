@@ -10,6 +10,8 @@ branches = Table('branches', metadata, autoload_with=engine)
 categories = Table('vehicle_categories', metadata, autoload_with=engine)
 employees = Table('employees', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
+reservations = Table('reservations', metadata, autoload_with=engine)
+users = Table('users', metadata, autoload_replace=engine)
 
 @getters_bp.route('get_models', methods=['GET'])
 def get_models():
@@ -127,3 +129,30 @@ def employee_detail():
             return jsonify({'message':'empleado no encontrado'})
 
         return jsonify(dict(result._mapping)),200
+    
+@getters_bp.route('/get_all_reserves', methods=['GET'])
+def get_all_reserves():
+    employee_id = session['user_id']
+    stmt = select(employees.c.branch_id).where(employees.c.employee_id == employee_id)
+
+    with engine.begin() as conn:
+        result = conn.execute(stmt).fetchone()
+
+        stmt = select(reservations,
+                      users.c.name.label('user_name'),
+                      users.c.last_name,
+                      users.c.email,
+                      users.c.dni,
+                      categories.c.name.label('category_name')
+                      ).select_from(reservations
+                                    .join(users, reservations.c.user_id == users.c.user_id)
+                                    .join(categories, reservations.c.category_id == categories.c.category_id)
+                                    ).where(and_(reservations.c.branch_id_pickup == result.branch_id,
+                                               reservations.c.is_rented == 0))
+
+        result = conn.execute(stmt).fetchall()
+        if not result:
+            return jsonify({'message': 'No hay reservas activas'})
+        
+        return jsonify([dict(row._mapping) for row in result])
+        
