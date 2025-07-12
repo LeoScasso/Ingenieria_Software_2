@@ -148,7 +148,7 @@ const EmployeeRentals = () => {
             color={theme.palette.darkBlue}
             gutterBottom
           >
-            Alquileres Activos - Sucursal {branchName}
+            Alquileres - Sucursal {branchName}
           </Typography>
           <Divider
             sx={{
@@ -228,7 +228,7 @@ const EmployeeRentals = () => {
                 width: '100%',
               }}
             >
-              <InfoPaper>No hay alquileres activos en esta sucursal.</InfoPaper>
+              <InfoPaper>No se realizaron alquileres en esta sucursal.</InfoPaper>
             </Box>
           )}
         </CardContent>
