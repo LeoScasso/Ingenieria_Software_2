@@ -87,13 +87,14 @@ const ReservationForm = () => {
       }
 
       if (userRole === 'employee') {
-        const response = await apiClient.post('/reserve', {
-          ...formData,
-          cost: totalCost
+        navigate('/reserve-detail', {
+          state: {
+            ...formData,
+            totalCost,
+            rentalDays,
+          },
         });
-
-        alert(response.data.message || 'Reserva creada con éxito');
-        navigate('/');
+        return;
       } else {
         navigate(`/payment/${method}`, {
           state: {
@@ -208,14 +209,10 @@ const ReservationForm = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => {
-              if (window.confirm('Confirme que desea crear la reserva')) {
-                handleSubmit();
-              }
-            }}
+            onClick={() => handleSubmit(null)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Procesando...' : 'Continuar Reserva'}
+            Continuar Reserva
           </Button>
         ) : (
           <>
