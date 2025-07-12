@@ -203,6 +203,7 @@ def register_return():
         reservations.c.return_datetime,
         reservations.c.reservation_id,
         reservations.c.category_id,
+        reservations.c.branch_id_return,
         rentals.c.final_cost
     ).select_from(
         vehicles
@@ -218,7 +219,7 @@ def register_return():
 
         conn.execute(update(vehicles)
                      .where(vehicles.c.vehicle_id == result.vehicle_id)
-                     .values(condition_id=3))
+                     .values(condition_id=3, branch_id = result.branch_id_return))
 
         conn.execute(update(reservations)
                      .where(reservations.c.reservation_id == result.reservation_id)
