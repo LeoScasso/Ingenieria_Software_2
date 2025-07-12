@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import Table, select, insert, delete, update, and_, not_
 from app.db import engine, metadata
-from datetime import datetime
+from datetime import datetime, date
 
 reservation_management_bp = Blueprint('reservation_management', __name__)
 

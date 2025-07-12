@@ -138,32 +138,58 @@ def update_profile():
 @profile_bp.route('/delete_employee', methods=['DELETE'])
 def delete_employee():
     employee = request.get_json()
-    stmt = delete(employees).where(employees.c.employee_id == employee.employee.id)
+    stmt = delete(employees).where(employees.c.employee_id == employee['employee_id'])
     with engine.connect() as conn:
         conn.execute(stmt)
         conn.commit()
         return jsonify({'message':'Empleado eliminado con exito'}),200
     
 
-
-@profile_bp.route('/edit_employee', methods=['UPDATE'])
+@profile_bp.route('/edit_employee', methods=['PUT'])
 def edit_employee():
     data = request.get_json()
+    
+    # Verificar que el employee_id está presente
+    if not data.get('employee_id'):
+        return jsonify({'message': 'ID de empleado no proporcionado'}), 400
+
     with engine.connect() as conn:
+        # Verificar sucursal
         stmt = select(branches).where(branches.c.name == data.get('branch'))
         result = conn.execute(stmt).fetchone()
+
+        if not result:
+            return jsonify({'message': 'Sucursal no encontrada'}), 404
+        
+        # Preparar datos
         data_employee = {
-            'name' : data.get('name'),
-            'last_name' : data.get('last_name'),
-            'dni' : data.get('dni'),
-            'email' : data.get('email'),
-            'phone_number' : data.get('phone_number'),
-            'password' : data.get('password'),
-            'branch_id' : result.branch_id
-            }         
-        if check_values(data_employee):
-            stmt = update(employees).where(employees.c.employee_id == data.get('employee_id')).values(data_employee)
-            conn.execute(stmt)
-            return jsonify({'message': 'Empleado editado con exito'}),200
-        else:
-            return jsonify({'message': 'Debe ingresar todos los campos'}),400
+            'name': data.get('name'),
+            'last_name': data.get('last_name'),
+            'dni': data.get('dni'),
+            'email': data.get('email'),
+            'phone_number': data.get('phone_number'),
+            'password': data.get('password'),
+            'branch_id': result.branch_id,
+        }
+
+        if not check_values(data_employee):
+            return jsonify({'message': 'Debe ingresar todos los campos'}), 400
+
+        # Verificar si el empleado existe
+        stmt_check = select(employees).where(employees.c.employee_id == data.get('employee_id'))
+        if not conn.execute(stmt_check).fetchone():
+            return jsonify({'message': 'Empleado no encontrado'}), 404
+
+        # Actualizar
+        stmt_update = (
+            update(employees)
+            .where(employees.c.employee_id == data.get('employee_id'))
+            .values(data_employee)
+        )
+        result = conn.execute(stmt_update)
+        conn.commit()  # ¡Importante hacer commit!
+        
+        if result.rowcount == 0:
+            return jsonify({'message': 'No se realizaron cambios'}), 400
+            
+        return jsonify({'message': 'Empleado editado con éxito'}), 200
