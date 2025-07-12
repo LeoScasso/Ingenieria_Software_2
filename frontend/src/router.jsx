@@ -22,6 +22,7 @@ import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
 import RentalHistoriEmp from './components/employee/RentalHistoryEmp'
 import RentalToReturn from './components/employee/RentalToReturn'
+import ReservationDetail from './components/reservation/ReservationDetail'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -66,6 +67,7 @@ const AppRouter = () => {
             <Route path="/employee-registration" element={<EmployeeRegForm />} />
             <Route path="/rental-history-emp" element={<RentalHistoriEmp />} />
             <Route path="/rental-to-return" element={<RentalToReturn />} />
+            <Route path="/reserve-detail" element={<ReservationDetail />} />
           </Routes>
         </Box>
         <Footer />
