@@ -81,7 +81,7 @@ export const Navbar = () => {
         { text: 'Registrar cliente', path: '/register' },
         { text: 'Crear Reserva', path: '/reservation' },
         { text: 'Historial Alquileres', path: '/rental-history-emp' },
-        { text: 'Alquileres a devolver', path: '/rental-to-return' },
+        { text: 'Devoluciones', path: '/rental-to-return' },
       ]
     } else if (role === 'admin') {
       return [
