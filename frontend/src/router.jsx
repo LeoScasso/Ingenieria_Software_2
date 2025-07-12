@@ -20,9 +20,13 @@ import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
-import RentalHistoriEmp from './components/employee/RentalHistoryEmp'
-import RentalToReturn from './components/employee/RentalToReturn'
+import RentalHistoriEmp from './components/rental/RentalHistoryEmp'
+import RentalToReturn from './components/rental/RentalToReturn'
 import ReservationDetail from './components/reservation/ReservationDetail'
+import { EmployeesList } from './components/employee/EmployeesList'
+import EmployeeDetail from './components/employee/EmployeeDetail'
+import EmployeeEdit from './components/employee/employeeEdit'
+import PendingReservationsByBranch from './components/reservation/PendingReservationsByBranch'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -68,6 +72,10 @@ const AppRouter = () => {
             <Route path="/rental-history-emp" element={<RentalHistoriEmp />} />
             <Route path="/rental-to-return" element={<RentalToReturn />} />
             <Route path="/reserve-detail" element={<ReservationDetail />} />
+            <Route path="/employees" element={<EmployeesList />} />
+            <Route path="/employees/detail" element={<EmployeeDetail />} />
+            <Route path="/employees/edit" element={<EmployeeEdit />} />
+            <Route path="/reservations-by-branch" element={<PendingReservationsByBranch />} />
           </Routes>
         </Box>
         <Footer />
