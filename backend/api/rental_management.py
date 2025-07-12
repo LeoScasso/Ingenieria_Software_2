@@ -138,6 +138,7 @@ def rentals_for_pickup_branch():
                     reservations.c.pickup_datetime,
                     reservations.c.return_datetime,
                     reservations.c.branch_id_return, 
+                    reservations.c.is_rented,
                     vehicles.c.number_plate,
                     categories.c.name,
                     users.c.email,
@@ -172,6 +173,7 @@ def rentals_for_return_branch():
                     rentals.c.rental_id,
                     reservations.c.pickup_datetime,
                     reservations.c.return_datetime,
+                    reservations.c.is_rented,
                     vehicles.c.number_plate,
                     categories.c.name,
                     users.c.email,
@@ -196,37 +198,61 @@ def register_return():
     data = request.get_json()
     rental_id = data.get('rental_id')
 
-    stmt = select(vehicles.c.vehicle_id,
-                  reservations.c.return_datetime,
-                  reservations.c.reservation_id,
-                  reservations.c.category_id,
-                  rentals.c.final_cost
-                  ).select_from(
-                      vehicles
-                      .join(rentals, vehicles.c.vehicle_id == rentals.c.vehicle_id)
-                      .join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
-                  ).where(rentals.c.rental_id == rental_id)
-    
-    with engine.begin() as conn:
+    stmt = select(
+        vehicles.c.vehicle_id,
+        reservations.c.return_datetime,
+        reservations.c.reservation_id,
+        reservations.c.category_id,
+        rentals.c.final_cost
+    ).select_from(
+        vehicles
+        .join(rentals, vehicles.c.vehicle_id == rentals.c.vehicle_id)
+        .join(reservations, rentals.c.reservation_id == reservations.c.reservation_id)
+    ).where(rentals.c.rental_id == rental_id)
 
+    with engine.begin() as conn:
         result = conn.execute(stmt).fetchone()
 
+        if not result:
+            return jsonify({'message': 'No se encontró información para este alquiler'}), 404
 
-        conn.execute(update(vehicles).where(vehicles.c.vehicle_id == result.vehicle_id).values(condition_id = 3))
-        conn.execute(update(reservations).where(reservations.c.reservation_id == result.reservation_id).values(is_rented = 3))
+        conn.execute(update(vehicles)
+                     .where(vehicles.c.vehicle_id == result.vehicle_id)
+                     .values(condition_id=3))
 
-        return_date = datetime.strptime(result.return_datetime, "%Y-%m-%d").date()
+        conn.execute(update(reservations)
+                     .where(reservations.c.reservation_id == result.reservation_id)
+                     .values(is_rented=3))
+
+        return_date = result.return_datetime
+        if isinstance(return_date, str):
+            return_date = datetime.strptime(return_date, "%Y-%m-%d").date()
+        else:
+            return_date = return_date.date()
+
         today = datetime.now().date()
         days = (today - return_date).days
-        
-        if(days == 0):
-            return jsonify({'message': 'Devolucion registrada exitosamente'}),200
-        
-        price = conn.execute(select(categories.c.price_per_day).where(categories.c.category_id == result.category_id)).fetchone()
-        new_cost = result.final_cost + price.price_per_day * days * 1.5
-        conn.execute(update(rentals).where(rentals.c.rental_id == rental_id
-                                           ).values(final_cost = new_cost))
-        
-        return jsonify({'message':'El vehiculo se entrego tarde',
-                        'days' : days,
-                        'aditional' : price.price_per_day * days * 1.5}),200
+        late_days = max(days, 0)
+
+        if late_days == 0:
+            return jsonify({'message': 'Devolución registrada exitosamente'}), 200
+
+        price = conn.execute(
+            select(categories.c.price_per_day)
+            .where(categories.c.category_id == result.category_id)
+        ).fetchone()
+
+        additional_charge = price.price_per_day * late_days * 1.5
+        new_cost = result.final_cost + additional_charge
+
+        conn.execute(
+            update(rentals)
+            .where(rentals.c.rental_id == rental_id)
+            .values(final_cost=new_cost)
+        )
+
+        return jsonify({
+            'message': 'El vehículo se entregó tarde',
+            'days': late_days,
+            'aditional': additional_charge
+        }), 200
