@@ -9,21 +9,18 @@ import {
   Divider,
   Button,
   Chip,
-  Snackbar,
-  Alert,
   useTheme,
 } from '@mui/material';
 import apiClient from '../../middleware/axios';
 
+// formatDate igual que antes, sin timezone bugs
 const formatDate = (dateString) => {
   if (!dateString) return 'Fecha no disponible';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'Fecha inválida';
-  return date.toLocaleDateString('es-AR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+
+  const [year, month, day] = dateString.split('T')[0].split('-'); 
+  const monthName = new Date(`${year}-${month}-01`).toLocaleString('es-AR', { month: 'long' });
+
+  return `${parseInt(day)} de ${monthName} de ${year}`;
 };
 
 const ReturnRentals = () => {
@@ -31,11 +28,6 @@ const ReturnRentals = () => {
   const [rentals, setRentals] = useState([]);
   const [branchName, setBranchName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-
-  const showMessage = (message, severity = 'info') => {
-    setSnackbar({ open: true, message, severity });
-  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -49,7 +41,7 @@ const ReturnRentals = () => {
       setRentals(res.data?.message ? [] : res.data);
     } catch (err) {
       console.error(err);
-      showMessage('Error al cargar los datos', 'error');
+      window.alert('Error al cargar los datos');
     } finally {
       setLoading(false);
     }
@@ -64,15 +56,15 @@ const ReturnRentals = () => {
       const res = await apiClient.post('/register_return', { rental_id: rentalId });
 
       if (res.data?.days) {
-        showMessage(`Vehículo entregado tarde. Días de atraso: ${res.data.days}, recargo: $${res.data.aditional}`, 'warning');
+        window.alert(`Vehículo entregado tarde. Días de atraso: ${res.data.days}, recargo: $${res.data.aditional}`);
       } else {
-        showMessage(res.data.message || 'Devolución registrada exitosamente', 'success');
+        window.alert(res.data.message || 'Devolución registrada exitosamente');
       }
 
-      fetchData(); // Refresh rentals
+      fetchData(); // refresca lista
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al registrar la devolución';
-      showMessage(msg, 'error');
+      window.alert(msg);
     }
   };
 
@@ -132,17 +124,6 @@ const ReturnRentals = () => {
           )}
         </CardContent>
       </Card>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

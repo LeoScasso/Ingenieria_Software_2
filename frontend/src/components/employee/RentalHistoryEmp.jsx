@@ -32,37 +32,18 @@ const InfoPaper = ({ children }) => {
   );
 };
 
-// Fecha completa con hora
-const formatDateWithTime = (dateString) => {
-  if (!dateString) return 'Fecha no disponible';
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Fecha inválida';
-    return date.toLocaleDateString('es-AR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }) + ' - ' + date.toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch (error) {
-    return 'Fecha inválida';
-  }
-};
-
-// Solo fecha
+// Nueva función para formatear fecha SIN corrimiento de día por timezone
 const formatDateOnly = (dateString) => {
   if (!dateString) return 'Fecha no disponible';
+
   try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Fecha inválida';
-    return date.toLocaleDateString('es-AR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
+    // dateString esperado: "yyyy-mm-ddTHH:mm:ss" o similar
+    // Solo agarramos la parte yyyy-mm-dd y la parseamos como local sin zona horaria
+    const [year, month, day] = dateString.split('T')[0].split('-');
+    const monthName = new Date(`${year}-${month}-01`).toLocaleString('es-AR', { month: 'long' });
+
+    return `${parseInt(day)} de ${monthName} de ${year}`;
+  } catch {
     return 'Fecha inválida';
   }
 };
@@ -106,6 +87,9 @@ const EmployeeRentals = () => {
   }, []);
 
   const getRentalStatus = (rental) => {
+    if (rental.is_rented == 3) {
+      return { text: 'Devuelto', color: 'info' };
+    }
     return { text: 'Activo', color: 'success' };
   };
 
