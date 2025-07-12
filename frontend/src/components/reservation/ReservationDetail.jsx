@@ -11,9 +11,10 @@ import {
 } from '@mui/material';
 import apiClient from '../../middleware/axios';
 
+// Solución: forzar hora local con T00:00:00
 const formatDateLong = (dateString) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
-  const date = new Date(dateString);
+  const date = new Date(`${dateString}T00:00:00`);
   return date.toLocaleDateString('es-AR', options);
 };
 
@@ -99,7 +100,7 @@ const ReservationDetail = () => {
           gutterBottom
           sx={{ color: theme.palette.beige, textAlign: 'center' }}
         >
-            Detalle de Reserva
+          Detalle de Reserva
         </Typography>
 
         <Divider sx={{ my: 2, borderColor: theme.palette.ming }} />
@@ -131,34 +132,34 @@ const ReservationDetail = () => {
         </Box>
 
         <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ mt: 4 }}>
-            <Button
+          <Button
             variant="outlined"
             onClick={() => navigate('/reservation', { state: reservationData })}
             sx={{
-                borderColor: theme.palette.ming,
-                color: theme.palette.beige,
-                '&:hover': {
+              borderColor: theme.palette.ming,
+              color: theme.palette.beige,
+              '&:hover': {
                 borderColor: theme.palette.beige,
                 backgroundColor: theme.palette.ming,
-                },
+              },
             }}
-            >
+          >
             Volver
-            </Button>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleConfirm}
-                sx={{
-                backgroundColor: theme.palette.beanBlue,
-                color: theme.palette.beige,
-                '&:hover': {
-                    backgroundColor: theme.palette.ming,
-                },
-                }}
-            >
-                Confirmar Reserva
-            </Button>
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirm}
+            sx={{
+              backgroundColor: theme.palette.beanBlue,
+              color: theme.palette.beige,
+              '&:hover': {
+                backgroundColor: theme.palette.ming,
+              },
+            }}
+          >
+            Confirmar Reserva
+          </Button>
         </Stack>
       </Paper>
     </Box>
