@@ -10,26 +10,26 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
   useTheme,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Typography,
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 
 // Función para obtener el rol del usuario
-const getUserRole = () => {
-  return sessionStorage.getItem('role')
-}
+const getUserRole = () => sessionStorage.getItem('role')
 
 // Componente para las celdas del encabezado
-const HeaderCell = ({ children }) => {
-  return (
-    <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
-      {children}
-    </TableCell>
-  )
-}
+const HeaderCell = ({ children }) => (
+  <TableCell sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
+    {children}
+  </TableCell>
+)
 
 // Función para determinar color de política
 const getPolicyColor = (policyName, theme) => {
@@ -41,7 +41,7 @@ const getPolicyColor = (policyName, theme) => {
       }
     case '20% de devolucion':
       return {
-        backgroundColor: `${theme.palette.ming}`,
+        backgroundColor: theme.palette.ming,
         color: theme.palette.beige,
       }
     case '100% de devolucion':
@@ -77,6 +77,7 @@ const BodyCell = ({ children }) => {
 export const Vehicles = () => {
   const [vehicles, setVehicles] = useState([])
   const [userRole, setUserRole] = useState('guest')
+  const [filterConditions, setFilterConditions] = useState([1, 2, 3])
   const navigate = useNavigate()
   const theme = useTheme()
 
@@ -97,6 +98,34 @@ export const Vehicles = () => {
     getVehicles()
   }, [])
 
+  const handleConditionChange = (conditionId) => {
+    setFilterConditions((prev) =>
+      prev.includes(conditionId)
+        ? prev.filter((id) => id !== conditionId)
+        : [...prev, conditionId]
+    )
+  }
+
+  const handleDelete = async (vehicle_id) => {
+    const vehicle = vehicles.find((v) => v.vehicle_id === vehicle_id)
+
+    if (!window.confirm('¿Estás seguro que querés eliminar este vehículo?')) return
+
+    if (vehicle.condition_id === 2) {
+      alert('No se puede eliminar un vehículo que está actualmente en alquiler.')
+      return
+    }
+
+    try {
+      await apiClient.delete('/delete_vehicle', { data: { vehicle_id } })
+      alert('Vehículo eliminado con éxito')
+      getVehicles()
+    } catch (error) {
+      console.error('Error al eliminar vehículo:', error)
+      alert('No se pudo eliminar el vehículo')
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -109,6 +138,76 @@ export const Vehicles = () => {
         padding: 2,
       }}
     >
+      <FormGroup
+        row
+        sx={{
+          mb: 2,
+          gap: 2,
+          backgroundColor: theme.palette.beige,
+          borderRadius: 2,
+          padding: 1,
+          boxShadow: `inset 0 0 5px ${theme.palette.slateGray}50`,
+        }}
+      >
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filterConditions.includes(1)}
+              onChange={() => handleConditionChange(1)}
+              sx={{
+                color: theme.palette.charcoal,
+                '&.Mui-checked': {
+                  color: theme.palette.beanBlue,
+                },
+              }}
+            />
+          }
+          label={
+            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
+              Disponible
+            </Typography>
+          }
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filterConditions.includes(2)}
+              onChange={() => handleConditionChange(2)}
+              sx={{
+                color: theme.palette.charcoal,
+                '&.Mui-checked': {
+                  color: theme.palette.beanBlue,
+                },
+              }}
+            />
+          }
+          label={
+            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
+              Alquilado
+            </Typography>
+          }
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filterConditions.includes(3)}
+              onChange={() => handleConditionChange(3)}
+              sx={{
+                color: theme.palette.charcoal,
+                '&.Mui-checked': {
+                  color: theme.palette.beanBlue,
+                },
+              }}
+            />
+          }
+          label={
+            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
+              En Mantenimiento
+            </Typography>
+          }
+        />
+      </FormGroup>
+
       <TableContainer
         component={Paper}
         sx={{
@@ -140,63 +239,82 @@ export const Vehicles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {vehicles.map((vehicle) => (
-              <TableRow
-                key={vehicle.number_plate}
-                sx={{
-                  backgroundColor: theme.palette.beige,
-                  '&:hover': {
-                    backgroundColor: `${theme.palette.beanBlue}30`,
-                  },
-                }}
-              >
-                <BodyCell>{vehicle.number_plate}</BodyCell>
-                <BodyCell>{vehicle.brand}</BodyCell>
-                <BodyCell>{vehicle.model}</BodyCell>
-                <BodyCell>{vehicle.year}</BodyCell>
-                <BodyCell>{vehicle.category}</BodyCell>
-                <BodyCell>{vehicle.price_per_day}</BodyCell>
-                <BodyCell>{vehicle.max_capacity}</BodyCell>
-                <BodyCell>{vehicle.minimum_rental_days}</BodyCell>
-                <BodyCell>
-                  <Chip
-                    label={vehicle.name}
-                    sx={{
-                      ...getPolicyColor(vehicle.name, theme),
-                      fontWeight: 'bold',
-                      fontSize: '0.875rem',
-                      '&:hover': {
-                        opacity: 0.8,
-                      },
-                    }}
-                  />
-                </BodyCell>
-                <BodyCell>{vehicle.condition}</BodyCell>
-                {userRole === 'admin' && (
+            {vehicles
+              .filter(
+                (vehicle) =>
+                  vehicle.condition_id !== 4 &&
+                  filterConditions.includes(vehicle.condition_id)
+              )
+              .map((vehicle) => (
+                <TableRow
+                  key={vehicle.number_plate}
+                  sx={{
+                    backgroundColor: theme.palette.beige,
+                    '&:hover': {
+                      backgroundColor: `${theme.palette.beanBlue}30`,
+                    },
+                  }}
+                >
+                  <BodyCell>{vehicle.number_plate}</BodyCell>
+                  <BodyCell>{vehicle.brand}</BodyCell>
+                  <BodyCell>{vehicle.model}</BodyCell>
+                  <BodyCell>{vehicle.year}</BodyCell>
+                  <BodyCell>{vehicle.category}</BodyCell>
+                  <BodyCell>{vehicle.price_per_day}</BodyCell>
+                  <BodyCell>{vehicle.max_capacity}</BodyCell>
+                  <BodyCell>{vehicle.minimum_rental_days}</BodyCell>
                   <BodyCell>
-                    <IconButton
-                      onClick={() => {
-                        navigate('/vehicles/edit', { state: { vehicle } })
-                      }}
-                      variant="contained"
+                    <Chip
+                      label={vehicle.name}
                       sx={{
-                        borderRadius: '10px',
-                        backgroundColor: theme.palette.slateGray,
-                        color: theme.palette.beige,
+                        ...getPolicyColor(vehicle.name, theme),
+                        fontWeight: 'bold',
+                        fontSize: '0.875rem',
                         '&:hover': {
-                          backgroundColor: theme.palette.beanBlue,
+                          opacity: 0.8,
                         },
                       }}
-                    >
-                      <Typography variant="body1" sx={{ marginRight: '5px' }}>
-                        Editar
-                      </Typography>
-                      <EditIcon />
-                    </IconButton>
+                    />
                   </BodyCell>
-                )}
-              </TableRow>
-            ))}
+                  <BodyCell>{vehicle.condition}</BodyCell>
+                  {userRole === 'admin' && (
+                    <BodyCell>
+                      <IconButton
+                        onClick={() =>
+                          navigate('/vehicles/edit', { state: { vehicle } })
+                        }
+                        sx={{
+                          borderRadius: '10px',
+                          backgroundColor: theme.palette.slateGray,
+                          color: theme.palette.beige,
+                          '&:hover': {
+                            backgroundColor: theme.palette.beanBlue,
+                          },
+                          mr: 1,
+                        }}
+                        title="Editar vehículo"
+                      >
+                        <EditIcon />
+                      </IconButton>
+
+                      <IconButton
+                        onClick={() => handleDelete(vehicle.vehicle_id)}
+                        sx={{
+                          borderRadius: '10px',
+                          backgroundColor: theme.palette.error.main,
+                          color: theme.palette.beige,
+                          '&:hover': {
+                            backgroundColor: theme.palette.error.dark,
+                          },
+                        }}
+                        title="Eliminar vehículo"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </BodyCell>
+                  )}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
