@@ -114,7 +114,7 @@ def reserve():
             print("Error al reservar:", e)
             return jsonify({'error': 'Error interno del servidor'}), 500
 
-@reservation_management_bp.route('/annul_reservation', methods=['POST'])
+@reservation_management_bp.route('/check_annulment', methods=['POST'])
 def annul_reservation():
     data = request.get_json()
     reserve_id = data.get('reservation_id')

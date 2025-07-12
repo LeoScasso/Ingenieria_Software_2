@@ -264,3 +264,18 @@ def get_avaible_vehicles():
         vehicles_list = [dict(row._mapping) for row in results]
         return jsonify(vehicles_list)
 
+@fleet_bp.route('change_vehicle_to_available', methods=['POST'])
+def change_vehicle_to_available():
+    data = request.get_json()
+    with engine.connect as conn:
+        stmt = update(vehicles).where(vehicles.c.vehicle_id == data.vehicle_id).values(condition_id= 1)
+        conn.execute(stmt)
+    return jsonify({'message' : 'Estado del vehículo cambiado a "disponible" con exito'}),200
+
+@fleet_bp.route('delete_vehicle', methods=['DELETE'])
+def delete_vehicle():
+    data = request.get_json()
+    with engine.connect as conn:
+        stmt = update(vehicles).where(vehicles.c.vehicle_id == data.vehicle_id).values(condition_id= 4)
+        conn.execute(stmt)
+    return jsonify({'message' : 'Estado del vehículo cambiado a "eliminado" con exito'}),200
