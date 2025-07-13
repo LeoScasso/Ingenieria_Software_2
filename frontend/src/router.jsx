@@ -7,26 +7,27 @@ import Home from './components/Home/Home'
 import Login from './components/auth/Login'
 import { LoginAdmin } from './components/auth/LoginAdmin'
 import BackgroundLogo from './components/bgLogo/bgLogo'
+import { BranchDetail } from './components/branches/BranchDetail'
 import { BranchesList } from './components/branches/BranchesList'
 import CarForm from './components/carForm/CarForm'
 import EditCarForm from './components/carForm/EditCarForm'
+import EmployeeDetail from './components/employee/EmployeeDetail'
+import EmployeeEdit from './components/employee/EmployeeEdit'
+import { EmployeesList } from './components/employee/EmployeesList'
 import Footer from './components/footer/footer'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
-import RegistrationForm from './components/registration/RegistrationForm'
 import EmployeeRegForm from './components/registration/EmployeeRegForm'
+import RegistrationForm from './components/registration/RegistrationForm'
+import RentalHistoriEmp from './components/rental/RentalHistoryEmp'
 import RentalRegistration from './components/rental/RentalRegistration'
+import RentalToReturn from './components/rental/RentalToReturn'
+import UserActiveReservations from './components/reservation/UserActiveReservations'
+import ReservationDetail from './components/reservation/ReservationDetail'
 import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
-import RentalHistoriEmp from './components/rental/RentalHistoryEmp'
-import RentalToReturn from './components/rental/RentalToReturn'
-import ReservationDetail from './components/reservation/ReservationDetail'
-import { EmployeesList } from './components/employee/EmployeesList'
-import EmployeeDetail from './components/employee/EmployeeDetail'
-import EmployeeEdit from './components/employee/employeeEdit'
-import UserActiveReservations from './components/reservation/UserActiveReservations'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -65,10 +66,17 @@ const AppRouter = () => {
             <Route path="/historial-alquileres" element={<RentalHistory />} />
             <Route path="/vehicles/edit" element={<EditCarForm />} />
             <Route path="/vehicles" element={<Vehicles />} />
-            <Route path="/rental-registration" element={<RentalRegistration />} />
+            <Route
+              path="/rental-registration"
+              element={<RentalRegistration />}
+            />
             <Route path="/branches" element={<BranchesList />} />
+            <Route path="/branches/:branchId" element={<BranchDetail />} />
             <Route path="/add-packages/:id" element={<AddPackages />} />
-            <Route path="/employee-registration" element={<EmployeeRegForm />} />
+            <Route
+              path="/employee-registration"
+              element={<EmployeeRegForm />}
+            />
             <Route path="/rental-history-emp" element={<RentalHistoriEmp />} />
             <Route path="/rental-to-return" element={<RentalToReturn />} />
             <Route path="/reserve-detail" element={<ReservationDetail />} />

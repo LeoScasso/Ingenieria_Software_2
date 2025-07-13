@@ -73,6 +73,7 @@ export const Navbar = () => {
         { text: 'Mi Perfil', path: '/mi-perfil' },
         { text: 'Reservar', path: '/reservation' },
         { text: 'Mis Reservas', path: '/historial-alquileres' },
+        { text: 'Ver Sucursales', path: '/branches' },
       ]
     } else if (role === 'employee') {
       return [
@@ -310,6 +311,12 @@ export const Navbar = () => {
         onClose={handleDrawerToggle}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            backgroundColor: 'beige',
+            color: 'black',
+          },
         }}
       >
         {drawer}

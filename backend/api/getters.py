@@ -8,6 +8,7 @@ vehicle_models = Table('vehicle_models', metadata, autoload_with=engine)
 vehicle_brands = Table('vehicle_brands', metadata, autoload_with=engine)
 branches = Table('branches', metadata, autoload_with=engine)
 categories = Table('vehicle_categories', metadata, autoload_with=engine)
+vehicle_conditions = Table('vehicle_conditions', metadata, autoload_with=engine)
 employees = Table('employees', metadata, autoload_with=engine)
 vehicles = Table('vehicles', metadata, autoload_with=engine)
 reservations = Table('reservations', metadata, autoload_with=engine)
@@ -148,11 +149,83 @@ def get_all_reserves():
                                     .join(users, reservations.c.user_id == users.c.user_id)
                                     .join(categories, reservations.c.category_id == categories.c.category_id)
                                     ).where(and_(reservations.c.branch_id_pickup == result.branch_id,
-                                               reservations.c.is_rented == 0))
+                                                reservations.c.is_rented == 0))
 
         result = conn.execute(stmt).fetchall()
         if not result:
             return jsonify({'message': 'No hay reservas activas'})
         
         return jsonify([dict(row._mapping) for row in result])
+
+@getters_bp.route('/get_branch_detail/<int:branch_id>', methods=['GET'])
+def get_branch_detail(branch_id):
+    # Verificar que el usuario sea administrador
+    if session.get('user_role') != 'admin':
+        return jsonify({'error': 'Acceso denegado. Solo administradores pueden acceder a este endpoint'}), 403
+    
+    with engine.connect() as conn:
+        # Obtener información básica de la sucursal
+        stmt = select(branches).where(branches.c.branch_id == branch_id)
+        branch_result = conn.execute(stmt).fetchone()
+        
+        if not branch_result:
+            return jsonify({'error': 'Sucursal no encontrada'}), 404
+        
+        # Obtener empleados de la sucursal (información limitada)
+        employees_stmt = select(
+            employees.c.employee_id,
+            employees.c.name,
+            employees.c.last_name,
+            employees.c.email,
+            employees.c.phone_number
+        ).where(employees.c.branch_id == branch_id).order_by(employees.c.name)
+        
+        employees_result = conn.execute(employees_stmt).fetchall()
+        employees_list = [
+            {
+                'employee_id': row.employee_id,
+                'name': row.name,
+                'last_name': row.last_name,
+                'email': row.email,
+                'phone_number': row.phone_number
+            }
+            for row in employees_result
+        ]
+        
+        # Obtener vehículos de la sucursal (patente, categoría y condición)
+        vehicles_stmt = select(
+            vehicles.c.number_plate,
+            categories.c.name.label('category_name'),
+            vehicle_conditions.c.name.label('condition_name')
+        ).select_from(
+            vehicles.join(categories, vehicles.c.category_id == categories.c.category_id)
+            .join(vehicle_conditions, vehicles.c.condition_id == vehicle_conditions.c.condition_id)
+        ).where(vehicles.c.branch_id == branch_id).order_by(vehicles.c.number_plate)
+        
+        vehicles_result = conn.execute(vehicles_stmt).fetchall()
+        vehicles_list = [
+            {
+                'number_plate': row.number_plate,
+                'category_name': row.category_name,
+                'condition_name': row.condition_name
+            }
+            for row in vehicles_result
+        ]
+        
+        # Contar estadísticas
+        employee_count = len(employees_list)
+        fleet_size = len(vehicles_list)
+        
+        branch_detail = {
+            'branch_id': branch_result.branch_id,
+            'name': branch_result.name,
+            'address': branch_result.address,
+            'locality': branch_result.locality,
+            'employee_count': employee_count,
+            'fleet_size': fleet_size,
+            'employees': employees_list,
+            'vehicles': vehicles_list
+        }
+        
+        return jsonify(branch_detail), 200
         
