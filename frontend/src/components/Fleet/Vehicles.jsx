@@ -74,6 +74,8 @@ const BodyCell = ({ children }) => {
   )
 }
 
+// ...importaciones...
+
 export const Vehicles = () => {
   const [vehicles, setVehicles] = useState([])
   const [userRole, setUserRole] = useState('guest')
@@ -126,6 +128,12 @@ export const Vehicles = () => {
     }
   }
 
+  const filteredVehicles = vehicles.filter(
+    (vehicle) =>
+      vehicle.condition_id !== 4 &&
+      filterConditions.includes(vehicle.condition_id)
+  )
+
   return (
     <Box
       sx={{
@@ -149,103 +157,86 @@ export const Vehicles = () => {
           boxShadow: `inset 0 0 5px ${theme.palette.slateGray}50`,
         }}
       >
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filterConditions.includes(1)}
-              onChange={() => handleConditionChange(1)}
-              sx={{
-                color: theme.palette.charcoal,
-                '&.Mui-checked': {
-                  color: theme.palette.beanBlue,
-                },
-              }}
-            />
-          }
-          label={
-            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
-              Disponible
-            </Typography>
-          }
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filterConditions.includes(2)}
-              onChange={() => handleConditionChange(2)}
-              sx={{
-                color: theme.palette.charcoal,
-                '&.Mui-checked': {
-                  color: theme.palette.beanBlue,
-                },
-              }}
-            />
-          }
-          label={
-            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
-              Alquilado
-            </Typography>
-          }
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={filterConditions.includes(3)}
-              onChange={() => handleConditionChange(3)}
-              sx={{
-                color: theme.palette.charcoal,
-                '&.Mui-checked': {
-                  color: theme.palette.beanBlue,
-                },
-              }}
-            />
-          }
-          label={
-            <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
-              En Mantenimiento
-            </Typography>
-          }
-        />
+        {/* Checkboxes */}
+        {[1, 2, 3].map((id) => (
+          <FormControlLabel
+            key={id}
+            control={
+              <Checkbox
+                checked={filterConditions.includes(id)}
+                onChange={() => handleConditionChange(id)}
+                sx={{
+                  color: theme.palette.charcoal,
+                  '&.Mui-checked': {
+                    color: theme.palette.beanBlue,
+                  },
+                }}
+              />
+            }
+            label={
+              <Typography sx={{ fontWeight: 'bold', color: theme.palette.charcoal }}>
+                {{
+                  1: 'Disponible',
+                  2: 'Alquilado',
+                  3: 'En Mantenimiento',
+                }[id]}
+              </Typography>
+            }
+          />
+        ))}
       </FormGroup>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          maxWidth: 'fit-content',
-          maxHeight: '70vh',
-          overflow: 'auto',
-          backgroundColor: theme.palette.beige,
-          boxShadow: `0 4px 8px ${theme.palette.slateGray}40`,
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: theme.palette.charcoal,
-              }}
-            >
-              <HeaderCell>Patente</HeaderCell>
-              <HeaderCell>Marca</HeaderCell>
-              <HeaderCell>Modelo</HeaderCell>
-              <HeaderCell>Año</HeaderCell>
-              <HeaderCell>Categoría</HeaderCell>
-              <HeaderCell>Precio/Día</HeaderCell>
-              <HeaderCell>Capacidad</HeaderCell>
-              <HeaderCell>Días mín. alq.</HeaderCell>
-              <HeaderCell>Política de cancelación</HeaderCell>
-              <HeaderCell>Condición</HeaderCell>
-              {userRole === 'admin' && <HeaderCell>Acciones</HeaderCell>}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {vehicles
-              .filter(
-                (vehicle) =>
-                  vehicle.condition_id !== 4 &&
-                  filterConditions.includes(vehicle.condition_id)
-              )
-              .map((vehicle) => (
+      {filteredVehicles.length === 0 ? (
+        <Paper
+          elevation={3}
+          sx={{
+            backgroundColor: theme.palette.beige,
+            padding: 4,
+            mt: 2,
+            maxWidth: 600,
+            textAlign: 'center',
+            boxShadow: `0 4px 8px ${theme.palette.slateGray}40`,
+          }}
+        >
+          <Typography
+            sx={{
+              color: theme.palette.charcoal,
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+            }}
+          >
+            No hay vehículos para mostrar con los filtros seleccionados.
+          </Typography>
+        </Paper>
+      ) : (
+        <TableContainer
+          component={Paper}
+          sx={{
+            maxWidth: 'fit-content',
+            maxHeight: '70vh',
+            overflow: 'auto',
+            backgroundColor: theme.palette.beige,
+            boxShadow: `0 4px 8px ${theme.palette.slateGray}40`,
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: theme.palette.charcoal }}>
+                <HeaderCell>Patente</HeaderCell>
+                <HeaderCell>Marca</HeaderCell>
+                <HeaderCell>Modelo</HeaderCell>
+                <HeaderCell>Año</HeaderCell>
+                <HeaderCell>Categoría</HeaderCell>
+                <HeaderCell>Precio/Día</HeaderCell>
+                <HeaderCell>Capacidad</HeaderCell>
+                <HeaderCell>Días mín. alq.</HeaderCell>
+                <HeaderCell>Política de cancelación</HeaderCell>
+                <HeaderCell>Condición</HeaderCell>
+                {userRole === 'admin' && <HeaderCell>Acciones</HeaderCell>}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredVehicles.map((vehicle) => (
                 <TableRow
                   key={vehicle.number_plate}
                   sx={{
@@ -315,9 +306,10 @@ export const Vehicles = () => {
                   )}
                 </TableRow>
               ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   )
 }
