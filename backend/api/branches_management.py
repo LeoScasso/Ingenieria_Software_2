@@ -13,8 +13,10 @@ vehicles = Table('vehicles', metadata, autoload_with=engine)
 employees = metadata.tables.get('employees')
 
 # Funcion (no endpoint)
-def set_branch_status(new_status, branch_id):
+def set_branch_status(new_status, branch_id, conn):
     stmt = update(branches).where(branches.c.branch_id == branch_id).values(status=new_status)
+    conn.execute(stmt)
+    conn.commit()
 
 @branches_management_bp.route('/logical_branch_deletion', methods=['DELETE'])
 def logical_branch_deletion():
@@ -45,12 +47,12 @@ def logical_branch_deletion():
     with engine.connect() as conn:
         for stmt in conditions:
             if conn.execute(stmt).scalar():
-                set_branch_status(1,branch_id)
+                set_branch_status(1,branch_id,conn)
                 return jsonify({'message': 'La sucursal ahora esta en estado de eliminación'}),200
     
-    # Si no se encuentra ninguna relación
-    set_branch_status(2,branch_id)
-    return jsonify({'message': 'Se eliminó la sucursal'}),200
+        # Si no se encuentra ninguna relación
+        set_branch_status(2,branch_id,conn)
+        return jsonify({'message': 'Se eliminó la sucursal'}),200
 
 
 @branches_management_bp.route('/branch_edition', methods=['PUT'])
