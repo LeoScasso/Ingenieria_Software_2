@@ -38,33 +38,19 @@ def income():
         result = conn.execute(stmt).fetchall()
         all_income = [dict(row._mapping) for row in result]
 
-        stmt = select(policies.c.policy_id,
-                      func.sum(reservations.c.cost).label('refund')
-                        ).select_from(
-                            reservations
-                            .join(categories, reservations.c.category_id == categories.c.category_id)
-                            .join(policies, categories.c.cancelation_policy_id == policies.c.policy_id)
+        stmt = select(func.sum(reservations.c.cost).label('refund')
                             ).where(and_(reservations.c.pickup_datetime >= first_date,
                                         reservations.c.return_datetime <= second_date,
-                                        reservations.c.is_rented == 2)
-                            ).group_by(policies.c.policy_id)
+                                        reservations.c.is_rented == 2))
         
-        result = conn.execute(stmt).fetchall()
-        canceled_total = 0
+        result = conn.execute(stmt).fetchone()
 
-        for row in result:
-            policy_id = row.policy_id
-            refund = row.refund
-
-            if policy_id == 2:
-                canceled_total += refund * 0.8
-            elif policy_id == 3:
-                canceled_total += refund
-
-        if not all_income and canceled_total == 0:
+        if not all_income and not result:
             return jsonify({'message': 'No hubo ingresos entre las fechas especificadas'}), 200
+        
+        refund = result.refund if result.refund is not None else 0
                 
-        all_income.append({'name': 'Cancelados', 'category_income': round(canceled_total, 2)})
+        all_income.append({'name': 'Cancelados', 'category_income': round(refund, 2)})
         return jsonify(all_income)
 
 @metrics_bp.route('/registered', methods=['POST'])
