@@ -197,7 +197,11 @@ const RegisteredUsersChart = () => {
                 y: {
                   beginAtZero: true,
                   stepSize: 1,
-                  ticks: { color: theme.palette.text.secondary },
+                  ticks: {
+                    color: theme.palette.text.secondary,
+                    stepSize: 1,
+                    precision: 0,
+                  },
                   grid: { color: theme.palette.divider },
                 },
                 x: {
