@@ -66,22 +66,18 @@ const IncomeChart = () => {
   const total =
     incomeData?.reduce((acc, curr) => acc + parseFloat(curr.category_income || 0), 0) || 0;
 
-  // Asignación de colores específicos para cada categoría
   const getCategoryColors = (categories) => {
-    // Mapeo exacto de colores para categorías conocidas
     const colorMap = {
-      'apto discapacitados': '#8e44ad',  // Violeta distintivo
-      'chico': '#3498db',                // Azul claro
-      'deportivo': '#e74c3c',            // Rojo vivo
-      'suv': '#f39c12',                  // Naranja
-      'van': '#16a085',                  // Verde turquesa
-      'medio': '#2ecc71',                // Verde brillante
-      'cancelado': '#7f8c8d',            // Gris neutro
+      'apto discapacitados': '#8e44ad',
+      'chico': '#3498db',
+      'deportivo': '#e74c3c',
+      'suv': '#f39c12',
+      'van': '#16a085',
+      'medio': '#2ecc71',
+      'cancelado': '#7f8c8d',
     };
 
     const result = {};
-    
-    // Primero asignamos colores específicos
     categories.forEach(category => {
       const normalizedName = category.toLowerCase().trim();
       if (colorMap[normalizedName]) {
@@ -89,15 +85,12 @@ const IncomeChart = () => {
       }
     });
 
-    // Paleta de respaldo con colores contrastantes
     const backupPalette = [
       '#1abc9c', '#d35400', '#34495e', '#9b59b6',
       '#e67e22', '#2c3e50', '#f1c40f', '#c0392b'
     ];
-    
+
     let backupIndex = 0;
-    
-    // Asignamos colores a categorías no mapeadas
     categories.forEach(category => {
       if (!result[category]) {
         result[category] = backupPalette[backupIndex % backupPalette.length];
@@ -178,7 +171,13 @@ const IncomeChart = () => {
         </Alert>
       )}
 
-      {incomeData && (
+      {incomeData && total === 0 && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          No hay datos de ingresos para el rango de fechas seleccionado.
+        </Alert>
+      )}
+
+      {incomeData && total > 0 && (
         <>
           <Box
             sx={{
@@ -187,7 +186,7 @@ const IncomeChart = () => {
               height: '400px',
               mx: 'auto',
               mb: 3,
-              position: 'relative'
+              position: 'relative',
             }}
           >
             <Pie
@@ -214,14 +213,14 @@ const IncomeChart = () => {
                       padding: 12,
                       font: {
                         size: 13,
-                        family: theme.typography.fontFamily
+                        family: theme.typography.fontFamily,
                       },
-                      usePointStyle: true
-                    }
+                      usePointStyle: true,
+                    },
                   },
                   tooltip: {
                     callbacks: {
-                      label: function(context) {
+                      label: function (context) {
                         const label = context.label || '';
                         const value = context.raw || 0;
                         const percentage = ((value / total) * 100).toFixed(2);
@@ -230,15 +229,15 @@ const IncomeChart = () => {
                     },
                     bodyFont: {
                       size: 13,
-                      family: theme.typography.fontFamily
-                    }
+                      family: theme.typography.fontFamily,
+                    },
                   },
                 },
                 cutout: '60%',
                 animation: {
                   animateScale: true,
-                  animateRotate: true
-                }
+                  animateRotate: true,
+                },
               }}
             />
           </Box>
@@ -264,15 +263,15 @@ const IncomeChart = () => {
                   return (
                     <TableRow key={idx} hover>
                       <TableCell sx={{ color: categoryColors[i.name] }}>
-                        <Box 
-                          component="span" 
+                        <Box
+                          component="span"
                           sx={{
                             display: 'inline-block',
                             width: 12,
                             height: 12,
                             backgroundColor: categoryColors[i.name],
                             mr: 1,
-                            borderRadius: '50%'
+                            borderRadius: '50%',
                           }}
                         />
                         {i.name}

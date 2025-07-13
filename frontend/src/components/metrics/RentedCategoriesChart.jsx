@@ -62,7 +62,6 @@ const RentedVehiclesChart = () => {
     }
   };
 
-  // Colores para las barras
   const barColors = [
     theme.palette.primary.main,
     theme.palette.secondary.main,
@@ -140,7 +139,13 @@ const RentedVehiclesChart = () => {
         </Alert>
       )}
 
-      {rentedData && (
+      {rentedData && rentedData.length === 0 && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          No hay vehículos alquilados para el rango de fechas seleccionado.
+        </Alert>
+      )}
+
+      {rentedData && rentedData.length > 0 && (
         <>
           <Box
             sx={{
