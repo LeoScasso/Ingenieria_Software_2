@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import Table, select, insert, and_, update, or_, distinct,func
 from app.db import engine, metadata
-import datetime
+from datetime import datetime
 
 metrics_bp = Blueprint('metrics', __name__)
 
@@ -84,7 +84,7 @@ def registered():
             return jsonify({'message' : 'No hubieron registros entre las fechas solicitadas'}),200
         
         return jsonify([dict(row._mapping) for row in result])
-    
+
 
 
 @metrics_bp.route('/rented_vehicles', methods=['POST'])
