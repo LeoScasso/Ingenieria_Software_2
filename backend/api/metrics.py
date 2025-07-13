@@ -93,19 +93,24 @@ def rented_vehicles():
     first_date = datetime.strptime(data.get('first_date'), '%Y-%m-%d').date()
     second_date = datetime.strptime(data.get('second_date'), '%Y-%m-%d').date()
 
-    stmt = select(categories.c.name.label('categoria'),
-                func.count().label('total')
-                ).select_from(
-                rentals
-                .join(vehicles, rentals.c.vehicle_id == vehicles.c.vehicle_id)
-                .join(categories, vehicles.c.category_id == categories.c.category_id)
-                .join(reservations, reservations.c.reservation_id == rentals.c.reservation_id)
-            .where(and_(reservations.c.pickup_datetime >= first_date,
-                reservations.c.return_datetime <= second_date)
-            ).group_by(categories.c.name)
-            )
+    stmt = select(
+        categories.c.name.label('categoria'),
+        func.count().label('total')
+    ).select_from(
+        rentals
+        .join(vehicles, rentals.c.vehicle_id == vehicles.c.vehicle_id)
+        .join(categories, vehicles.c.category_id == categories.c.category_id)
+        .join(reservations, reservations.c.reservation_id == rentals.c.reservation_id)
+    ).where(
+        and_(
+            reservations.c.pickup_datetime >= first_date,
+            reservations.c.return_datetime <= second_date
+        )
+    ).group_by(
+        categories.c.name
+    )
     
     with engine.connect() as conn:
         result = conn.execute(stmt).fetchall()
-        data_to_send = [{'categoria': row.name, 'total': row.total} for row in result]
+        data_to_send = [{'categoria': row.categoria, 'total': row.total} for row in result]
     return jsonify(data_to_send)
