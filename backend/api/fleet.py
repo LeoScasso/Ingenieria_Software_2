@@ -191,6 +191,7 @@ def get_vehicles():
     stmt = select(vehicles.c.vehicle_id,
             vehicles.c.number_plate,
             vehicles.c.condition_id,
+            vehicles.c.branch_id,
             vehicle_categories.c.max_capacity,
             vehicle_categories.c.price_per_day,
             vehicle_categories.c.minimum_rental_days,
@@ -269,10 +270,10 @@ def get_avaible_vehicles():
 @fleet_bp.route('change_vehicle_to_available', methods=['POST'])
 def change_vehicle_to_available():
     data = request.get_json()
-    with engine.connect as conn:
-        stmt = update(vehicles).where(vehicles.c.vehicle_id == data.vehicle_id).values(condition_id= 1)
+    with engine.begin() as conn:  # <-- FIX ACÁ
+        stmt = update(vehicles).where(vehicles.c.vehicle_id == data['vehicle_id']).values(condition_id=1)
         conn.execute(stmt)
-    return jsonify({'message' : 'Estado del vehículo cambiado a "disponible" con exito'}),200
+    return jsonify({'message' : 'Estado del vehículo cambiado a "disponible" con éxito'}), 200
 
 @fleet_bp.route('delete_vehicle', methods=['DELETE'])
 def delete_vehicle():
