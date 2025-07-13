@@ -28,6 +28,7 @@ import ReservationForm from './components/reservation/ReservationForm'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
+import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -84,6 +85,7 @@ const AppRouter = () => {
             <Route path="/employees/detail" element={<EmployeeDetail />} />
             <Route path="/employees/edit" element={<EmployeeEdit />} />
             <Route path="/user-reservations" element={<UserActiveReservations />} />
+            <Route path="/maintenance-vehicles" element={<EmployeeMaintenanceVehicles />} />
           </Routes>
         </Box>
         <Footer />
