@@ -31,6 +31,7 @@ import RentalHistory from './components/user/RentalHistory'
 import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
 import RegisteredUsersChart from './components/metrics/RegisteredUsersChart'
 import IncomeChart from './components/metrics/IncomeChart'
+import RentedVehiclesChart from './components/metrics/RentedCategoriesChart'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -90,6 +91,7 @@ const AppRouter = () => {
             <Route path="/maintenance-vehicles" element={<EmployeeMaintenanceVehicles />} />
             <Route path="/registered-users-metric" element={<RegisteredUsersChart />} />
             <Route path="/income-metric" element={<IncomeChart />} />
+            <Route path="/rented-vehicles-metric" element={<RentedVehiclesChart />} />
           </Routes>
         </Box>
         <Footer />
