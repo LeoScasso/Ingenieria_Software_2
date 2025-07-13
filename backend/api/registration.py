@@ -52,7 +52,7 @@ def registration():
                 user_data = {
                     **common_data,
                     'password': password,
-                    'registration_date': datetime.now()
+                    'registration_date': datetime.now().date()
                 }
                 
                 if check_values(user_data):
@@ -62,7 +62,7 @@ def registration():
         user_data = {
             **common_data,
             'password': data.get('password'),  # Contraseña proporcionada por el usuario
-            'registration_date': datetime.now()
+            'registration_date': datetime.now().date()
         }
         
         # Validar contraseña para usuarios normales
