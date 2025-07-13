@@ -97,6 +97,7 @@ const menuConfig = {
       items: [
         { to: '/registered-users-metric', icon: <InsightsIcon />, text: 'Usuarios Registrados' },
         { to: '/income-metric', icon: <InsightsIcon />, text: 'Ingresos por Categoría' },
+        { to: '/rented-vehicles-metric', icon: <InsightsIcon />, text: 'Vehículos Alquilados' },
       ],
     },
     {
