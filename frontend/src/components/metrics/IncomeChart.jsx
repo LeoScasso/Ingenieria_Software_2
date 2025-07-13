@@ -66,39 +66,35 @@ const IncomeChart = () => {
   const total =
     incomeData?.reduce((acc, curr) => acc + parseFloat(curr.category_income || 0), 0) || 0;
 
-  // Paleta extendida con colores únicos para categorías comunes
   const getCategoryColor = (categoryName) => {
     const colorMap = {
       'cancelados': theme.palette.error.main,
-      'apto discapacitados': '#8e44ad', // violeta
+      'apto discapacitados': '#8e44ad',
       'regular': theme.palette.success.main,
       'promocional': theme.palette.warning.main,
       'otros': theme.palette.info.main,
-      'deportivo': '#3498db', // azul brillante
-      'sub': '#2c3e50', // azul oscuro
+      'deportivo': '#3498db',
+      'sub': '#2c3e50',
     };
 
-    // Si la categoría está en el mapa, devuelve su color específico
     const lowerCaseName = categoryName.toLowerCase();
     if (colorMap[lowerCaseName]) {
       return colorMap[lowerCaseName];
     }
 
-    // Para categorías no mapeadas, usa una paleta rotativa
     const defaultPalette = [
       theme.palette.primary.main,
       theme.palette.secondary.main,
-      '#2ecc71', // verde claro
-      '#e67e22', // naranja
-      '#34495e', // azul grisáceo
-      '#16a085', // verde turquesa
-      '#c0392b', // rojo oscuro
-      '#7f8c8d', // gris
-      '#f39c12', // amarillo oscuro
-      '#d35400', // naranja oscuro
+      '#2ecc71',
+      '#e67e22',
+      '#34495e',
+      '#16a085',
+      '#c0392b',
+      '#7f8c8d',
+      '#f39c12',
+      '#d35400',
     ];
 
-    // Hash simple para asignar colores consistentes a categorías no mapeadas
     let hash = 0;
     for (let i = 0; i < categoryName.length; i++) {
       hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
@@ -130,7 +126,7 @@ const IncomeChart = () => {
           gap: 2,
           mb: 3,
           flexWrap: 'wrap',
-          justifyContent: 'flex-start',
+          justifyContent: 'center', // centrado
           alignItems: 'center',
         }}
       >
@@ -176,41 +172,58 @@ const IncomeChart = () => {
 
       {incomeData && (
         <>
-          <Pie
-            data={{
-              labels: incomeData.map((i) => i.name),
-              datasets: [
-                {
-                  label: 'Ingresos',
-                  data: incomeData.map((i) => i.category_income),
-                  backgroundColor: incomeData.map((i) => getCategoryColor(i.name)),
-                  borderColor: theme.palette.background.paper,
-                  borderWidth: 1,
-                },
-              ],
+          <Box
+            sx={{
+              width: '100%',         // más grande
+              maxWidth: '600px',
+              mx: 'auto',
+              mb: 3,
             }}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: { position: 'top' },
-                title: {
-                  display: true,
-                  color: theme.palette.text.primary,
-                  font: { weight: 'bold', size: 18 },
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      const label = context.label || '';
-                      const value = context.raw || 0;
-                      const percentage = ((value / total) * 100).toFixed(2);
-                      return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+          >
+            <Pie
+              data={{
+                labels: incomeData.map((i) => i.name),
+                datasets: [
+                  {
+                    label: 'Ingresos',
+                    data: incomeData.map((i) => i.category_income),
+                    backgroundColor: incomeData.map((i) => getCategoryColor(i.name)),
+                    borderColor: theme.palette.background.paper,
+                    borderWidth: 1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                    labels: {
+                      boxWidth: 12,
+                      padding: 10,
+                      font: { size: 12 },
+                    },
+                  },
+                  title: {
+                    display: true,
+                    color: theme.palette.text.primary,
+                    font: { weight: 'bold', size: 18 },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const percentage = ((value / total) * 100).toFixed(2);
+                        return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+                      },
                     },
                   },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </Box>
 
           <Divider sx={{ my: 3 }} />
 
