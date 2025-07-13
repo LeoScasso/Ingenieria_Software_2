@@ -26,7 +26,7 @@ import ReservationDetail from './components/reservation/ReservationDetail'
 import { EmployeesList } from './components/employee/EmployeesList'
 import EmployeeDetail from './components/employee/EmployeeDetail'
 import EmployeeEdit from './components/employee/employeeEdit'
-import PendingReservationsByBranch from './components/reservation/PendingReservationsByBranch'
+import UserActiveReservations from './components/reservation/UserActiveReservations'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -75,7 +75,7 @@ const AppRouter = () => {
             <Route path="/employees" element={<EmployeesList />} />
             <Route path="/employees/detail" element={<EmployeeDetail />} />
             <Route path="/employees/edit" element={<EmployeeEdit />} />
-            <Route path="/reservations-by-branch" element={<PendingReservationsByBranch />} />
+            <Route path="/user-reservations" element={<UserActiveReservations />} />
           </Routes>
         </Box>
         <Footer />
