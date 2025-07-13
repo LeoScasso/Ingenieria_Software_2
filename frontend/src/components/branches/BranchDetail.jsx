@@ -1,7 +1,9 @@
 import {
   ArrowBack,
   Business,
+  Delete,
   DirectionsCar,
+  Edit,
   Email,
   LocalShipping,
   LocationOn,
@@ -16,12 +18,19 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Paper,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -36,6 +45,8 @@ export const BranchDetail = () => {
   const [branchDetail, setBranchDetail] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const fetchBranchDetail = async () => {
@@ -67,6 +78,55 @@ export const BranchDetail = () => {
 
   const handleBack = () => {
     navigate('/branches')
+  }
+
+  const handleEdit = () => {
+    navigate(`/branches/edit/${branchId}`)
+  }
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      setDeleting(true)
+      const response = await apiClient.delete('/logical_branch_deletion', {
+        data: { branch_id: parseInt(branchId) },
+      })
+
+      if (response.status === 200) {
+        // Cerrar el modal y redirigir al listado de sucursales
+        setDeleteDialogOpen(false)
+        navigate('/branches', {
+          state: {
+            message: response.data.message || 'Sucursal eliminada exitosamente',
+            severity: 'success',
+          },
+        })
+      }
+    } catch (err) {
+      console.error('Error al eliminar sucursal:', err)
+      let errorMessage =
+        'Error al eliminar la sucursal. Por favor, inténtelo de nuevo.'
+
+      if (err.response?.status === 401) {
+        errorMessage = 'Debe iniciar sesión para realizar esta acción.'
+      } else if (err.response?.status === 403) {
+        errorMessage = 'Solo los administradores pueden eliminar sucursales.'
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message
+      }
+
+      // Mostrar error en el modal o como alerta
+      alert(errorMessage)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   if (loading) {
@@ -125,6 +185,58 @@ export const BranchDetail = () => {
         backgroundColor: theme.palette.ming,
       }}
     >
+      {/* Modal de confirmación de eliminación */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle
+          id="delete-dialog-title"
+          sx={{ color: theme.palette.darkBlue }}
+        >
+          Confirmar eliminación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            ¿Está seguro que desea eliminar la sucursal "{branchDetail?.name}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            disabled={deleting}
+            sx={{ color: theme.palette.charcoal }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            disabled={deleting}
+            variant="contained"
+            sx={{
+              backgroundColor: 'brown',
+              '&:hover': {
+                backgroundColor: 'DarkRed',
+              },
+              '&:disabled': {
+                backgroundColor: 'gray',
+              },
+            }}
+            startIcon={
+              deleting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Delete />
+              )
+            }
+          >
+            {deleting ? 'Eliminando...' : 'Eliminar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box
         sx={{
           display: 'flex',
@@ -143,57 +255,109 @@ export const BranchDetail = () => {
             mb: 4,
           }}
         >
-          <CardContent sx={{ p: 4 }}>
-            <Box display="flex" alignItems="center" mb={3}>
-              <Business
-                sx={{
-                  color: theme.palette.ming,
-                  mr: 2,
-                  fontSize: '3rem',
-                }}
-              />
-              <Box>
-                <Typography
-                  variant="h3"
-                  component="h1"
+          <CardContent sx={{ p: 2 }}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={3}
+            >
+              <Box display="flex" alignItems="center">
+                <Business
                   sx={{
-                    color: theme.palette.darkBlue,
-                    fontWeight: 'bold',
-                    mb: 1,
+                    color: theme.palette.ming,
+                    mr: 2,
+                    fontSize: '3rem',
                   }}
-                >
-                  {branchDetail.name}
-                </Typography>
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Chip
-                    icon={<People />}
-                    label={`${branchDetail.employee_count} empleado${
-                      branchDetail.employee_count === 1 ? '' : 's'
-                    }`}
+                />
+                <Box>
+                  <Typography
+                    variant="h3"
+                    component="h1"
+                    sx={{
+                      color: theme.palette.darkBlue,
+                      fontWeight: 'bold',
+                      mb: 1,
+                    }}
+                  >
+                    {branchDetail.name}
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Chip
+                      icon={<People />}
+                      label={`${branchDetail.employee_count} empleado${
+                        branchDetail.employee_count === 1 ? '' : 's'
+                      }`}
+                      sx={{
+                        backgroundColor: theme.palette.beanBlue,
+                        color: theme.palette.beige,
+                        fontWeight: 'bold',
+                        '& .MuiChip-icon': {
+                          color: theme.palette.beige,
+                        },
+                      }}
+                    />
+                    <Chip
+                      icon={<DirectionsCar />}
+                      label={`${branchDetail.fleet_size} vehículo${
+                        branchDetail.fleet_size === 1 ? '' : 's'
+                      }`}
+                      sx={{
+                        backgroundColor: theme.palette.charcoal,
+                        color: theme.palette.beige,
+                        fontWeight: 'bold',
+                        '& .MuiChip-icon': {
+                          color: theme.palette.beige,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ mb: 7, gap: 1 }}
+              >
+                <Tooltip title="Editar sucursal">
+                  <IconButton
+                    onClick={handleEdit}
                     sx={{
                       backgroundColor: theme.palette.beanBlue,
                       color: theme.palette.beige,
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: theme.palette.beige,
+                      '&:hover': {
+                        backgroundColor: theme.palette.darkBlue,
                       },
+                      borderRadius: '50%',
+                      boxShadow: 2,
+                      width: '2.5rem',
+                      height: '2.5rem',
                     }}
-                  />
-                  <Chip
-                    icon={<DirectionsCar />}
-                    label={`${branchDetail.fleet_size} vehículo${
-                      branchDetail.fleet_size === 1 ? '' : 's'
-                    }`}
+                    size="medium"
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Dar de baja sucursal">
+                  <IconButton
+                    onClick={handleDelete}
                     sx={{
-                      backgroundColor: theme.palette.charcoal,
+                      backgroundColor: 'brown',
                       color: theme.palette.beige,
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: theme.palette.beige,
+                      '&:hover': {
+                        backgroundColor: 'DarkRed',
                       },
+                      borderRadius: '50%',
+                      boxShadow: 2,
+                      width: '2.5rem',
+                      height: '2.5rem',
                     }}
-                  />
-                </Box>
+                    size="medium"
+                  >
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
 

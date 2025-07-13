@@ -19,6 +19,7 @@ const CustomForm = ({
   fields,
   onSubmit,
   submitButtonText,
+  submitButtonDisabled = false,
   paperStyles = {},
   formStyles = {},
   children,
@@ -115,6 +116,12 @@ const CustomForm = ({
             key={field.name}
             multiline
             rows={field.rows || 4}
+            sx={{
+              ...commonProps.sx,
+              '& .MuiInputBase-input': {
+                color: theme.palette.beige,
+              },
+            }}
           />
         )
 
@@ -210,6 +217,7 @@ const CustomForm = ({
               type="submit"
               fullWidth
               variant="contained"
+              disabled={submitButtonDisabled}
               sx={{
                 mt: 3,
                 mb: 2,
@@ -217,6 +225,11 @@ const CustomForm = ({
                 color: theme.palette.beige,
                 '&:hover': {
                   backgroundColor: theme.palette.ming,
+                },
+                '&:disabled': {
+                  backgroundColor: theme.palette.slateGray,
+                  color: theme.palette.beige,
+                  opacity: 0.6,
                 },
               }}
             >

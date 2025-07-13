@@ -56,13 +56,13 @@ def add_package_to_rental():
             if not package:
                 return jsonify({'message': 'El paquete especificado no existe'}), 404
             
-            # Agregar el paquete al alquiler (puede haber múltiples registros para diferentes cantidades)
-            stmt = insert(rental_packages).values({
-                'rental_id': rental_id,
-                'package_id': package_id,
-                'quantity': quantity
-            })
-            conn.execute(stmt)
+            # Agregar múltiples registros del paquete al alquiler (uno por cada unidad)
+            for _ in range(quantity):
+                stmt = insert(rental_packages).values({
+                    'rental_id': rental_id,
+                    'package_id': package_id
+                })
+                conn.execute(stmt)
             
             total_cost = package.price * quantity
 

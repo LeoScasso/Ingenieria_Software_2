@@ -2,19 +2,25 @@ import { Box } from '@mui/material'
 import React from 'react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import { AddPackages } from './components/AddPackages/AddPackages'
-import { Vehicles } from './components/Fleet/Vehicles'
-import Home from './components/Home/Home'
 import Login from './components/auth/Login'
 import { LoginAdmin } from './components/auth/LoginAdmin'
 import BackgroundLogo from './components/bgLogo/bgLogo'
 import { BranchDetail } from './components/branches/BranchDetail'
+import { BranchEdit } from './components/branches/BranchEdit'
 import { BranchesList } from './components/branches/BranchesList'
+import { BranchRegistration } from './components/branches/BranchRegistration'
 import CarForm from './components/carForm/CarForm'
 import EditCarForm from './components/carForm/EditCarForm'
 import EmployeeDetail from './components/employee/EmployeeDetail'
 import EmployeeEdit from './components/employee/EmployeeEdit'
 import { EmployeesList } from './components/employee/EmployeesList'
+import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
+import { Vehicles } from './components/Fleet/Vehicles'
 import Footer from './components/footer/footer'
+import Home from './components/Home/Home'
+import IncomeChart from './components/metrics/IncomeChart'
+import RegisteredUsersChart from './components/metrics/RegisteredUsersChart'
+import RentedVehiclesChart from './components/metrics/RentedCategoriesChart'
 import { Navbar } from './components/navbar/navbar'
 import { CardPaymentForm, WalletPaymentForm } from './components/paymentForms'
 import EmployeeRegForm from './components/registration/EmployeeRegForm'
@@ -22,16 +28,12 @@ import RegistrationForm from './components/registration/RegistrationForm'
 import RentalHistoriEmp from './components/rental/RentalHistoryEmp'
 import RentalRegistration from './components/rental/RentalRegistration'
 import RentalToReturn from './components/rental/RentalToReturn'
-import UserActiveReservations from './components/reservation/UserActiveReservations'
 import ReservationDetail from './components/reservation/ReservationDetail'
 import ReservationForm from './components/reservation/ReservationForm'
+import UserActiveReservations from './components/reservation/UserActiveReservations'
 import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
-import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
-import RegisteredUsersChart from './components/metrics/RegisteredUsersChart'
-import IncomeChart from './components/metrics/IncomeChart'
-import RentedVehiclesChart from './components/metrics/RentedCategoriesChart'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -75,7 +77,9 @@ const AppRouter = () => {
               element={<RentalRegistration />}
             />
             <Route path="/branches" element={<BranchesList />} />
+            <Route path="/branches/new" element={<BranchRegistration />} />
             <Route path="/branches/:branchId" element={<BranchDetail />} />
+            <Route path="/branches/edit/:branchId" element={<BranchEdit />} />
             <Route path="/add-packages/:id" element={<AddPackages />} />
             <Route
               path="/employee-registration"
@@ -87,11 +91,35 @@ const AppRouter = () => {
             <Route path="/employees" element={<EmployeesList />} />
             <Route path="/employees/detail" element={<EmployeeDetail />} />
             <Route path="/employees/edit" element={<EmployeeEdit />} />
-            <Route path="/user-reservations" element={<UserActiveReservations />} />
-            <Route path="/maintenance-vehicles" element={<EmployeeMaintenanceVehicles />} />
-            <Route path="/registered-users-metric" element={<RegisteredUsersChart />} />
+            <Route
+              path="/user-reservations"
+              element={<UserActiveReservations />}
+            />
+            <Route
+              path="/maintenance-vehicles"
+              element={<EmployeeMaintenanceVehicles />}
+            />
+            <Route
+              path="/registered-users-metric"
+              element={<RegisteredUsersChart />}
+            />
             <Route path="/income-metric" element={<IncomeChart />} />
-            <Route path="/rented-vehicles-metric" element={<RentedVehiclesChart />} />
+            <Route
+              path="/rented-vehicles-metric"
+              element={<RentedVehiclesChart />}
+            />
+            <Route
+              path="/user-reservations"
+              element={<UserActiveReservations />}
+            />
+            <Route
+              path="/maintenance-vehicles"
+              element={<EmployeeMaintenanceVehicles />}
+            />
+            <Route
+              path="/registered-users-metric"
+              element={<RegisteredUsersChart />}
+            />
           </Routes>
         </Box>
         <Footer />

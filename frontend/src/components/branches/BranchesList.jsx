@@ -1,4 +1,5 @@
 import {
+  Add as AddIcon,
   Business,
   DirectionsCar,
   LocationOn,
@@ -15,11 +16,12 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  Snackbar,
   Typography,
   useTheme,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 
 export const BranchesList = () => {
@@ -27,7 +29,13 @@ export const BranchesList = () => {
   const [branches, setBranches] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  })
   const navigate = useNavigate()
+  const location = useLocation()
   const role = sessionStorage.getItem('role')
 
   useEffect(() => {
@@ -49,6 +57,23 @@ export const BranchesList = () => {
 
     fetchBranches()
   }, [])
+
+  // Mostrar mensaje de éxito si viene del formulario de registro
+  useEffect(() => {
+    if (location.state?.message) {
+      setSnackbar({
+        open: true,
+        message: location.state.message,
+        severity: location.state.severity || 'success',
+      })
+      // Limpiar el estado para evitar que se muestre el mensaje nuevamente
+      navigate(location.pathname, { replace: true })
+    }
+  }, [location.state, navigate, location.pathname])
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false })
+  }
 
   if (loading) {
     return (
@@ -87,19 +112,44 @@ export const BranchesList = () => {
         backgroundColor: theme.palette.ming,
       }}
     >
-      <Typography
-        variant="h3"
-        component="h1"
-        sx={{
-          color: theme.palette.beige,
-          textAlign: 'center',
-          mb: 1,
-          fontWeight: 'bold',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-        }}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
       >
-        Nuestras Sucursales
-      </Typography>
+        <Typography
+          variant="h3"
+          component="h1"
+          sx={{
+            color: theme.palette.beige,
+            fontWeight: 'bold',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+          }}
+        >
+          Nuestras Sucursales
+        </Typography>
+
+        {role === 'admin' && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/branches/new')}
+            sx={{
+              backgroundColor: theme.palette.darkBlue,
+              color: theme.palette.beige,
+              px: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: theme.palette.ming,
+              },
+            }}
+          >
+            Agregar Sucursal
+          </Button>
+        )}
+      </Box>
       <Grid container spacing={3} justifyContent="center">
         {branches.map((branch) => (
           <Grid item xs={12} sm={6} md={4} key={branch.branch_id}>
@@ -253,6 +303,20 @@ export const BranchesList = () => {
           </Typography>
         </Box>
       )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
