@@ -82,7 +82,7 @@ export const Navbar = () => {
         { text: 'Crear Reserva', path: '/reservation' },
         { text: 'Historial Alquileres', path: '/rental-history-emp' },
         { text: 'Devoluciones', path: '/rental-to-return' },
-        {text: 'Reservas Activas', path: '/reservations-by-branch'}
+        {text: 'Reservas Activas', path: '/user-reservations'}
       ]
     } else if (role === 'admin') {
       return [
