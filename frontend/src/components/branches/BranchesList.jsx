@@ -1,22 +1,25 @@
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  useTheme,
-  CircularProgress,
-  Alert,
-  Divider,
-} from '@mui/material'
-import {
   Business,
+  DirectionsCar,
   LocationOn,
   People,
-  DirectionsCar,
+  Visibility,
 } from '@mui/icons-material'
-import { useState, useEffect } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  Typography,
+  useTheme,
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 
 export const BranchesList = () => {
@@ -24,6 +27,8 @@ export const BranchesList = () => {
   const [branches, setBranches] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
+  const role = sessionStorage.getItem('role')
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -204,6 +209,25 @@ export const BranchesList = () => {
                     }}
                   />
                 </Box>
+                {role === 'admin' && (
+                  <Box mt={2} display="flex" justifyContent="flex-end">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Visibility />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/branches/${branch.branch_id}`)
+                      }}
+                      sx={{
+                        color: theme.palette.darkBlue,
+                        borderColor: theme.palette.darkBlue,
+                      }}
+                    >
+                      Ver detalle
+                    </Button>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>

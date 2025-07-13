@@ -73,6 +73,7 @@ export const Navbar = () => {
         { text: 'Mi Perfil', path: '/mi-perfil' },
         { text: 'Reservar', path: '/reservation' },
         { text: 'Mis Reservas', path: '/historial-alquileres' },
+        { text: 'Ver Sucursales', path: '/branches' },
       ]
     } else if (role === 'employee') {
       return [
@@ -82,7 +83,8 @@ export const Navbar = () => {
         { text: 'Crear Reserva', path: '/reservation' },
         { text: 'Historial Alquileres', path: '/rental-history-emp' },
         { text: 'Devoluciones', path: '/rental-to-return' },
-        {text: 'Reservas Activas', path: '/reservations-by-branch'}
+        { text: 'Reservas Activas', path: '/reservations-by-branch' },
+        { text: 'Ver Sucursales', path: '/branches' },
       ]
     } else if (role === 'admin') {
       return [
@@ -310,6 +312,12 @@ export const Navbar = () => {
         onClose={handleDrawerToggle}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            backgroundColor: 'beige',
+            color: 'black',
+          },
         }}
       >
         {drawer}

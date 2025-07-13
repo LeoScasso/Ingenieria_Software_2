@@ -24,6 +24,7 @@ export const Profile = () => {
   const [loading, setLoading] = useState(true)
   const theme = useTheme()
   const navigate = useNavigate()
+  const role = sessionStorage.getItem('role')
 
   useEffect(() => {
     const getUser = async () => {
@@ -125,7 +126,7 @@ export const Profile = () => {
         }}
       >
         <CardContent sx={{ p: 4 }}>
-          {!user.branch_name && (
+          {!user.branch_name && role !== 'admin' && (
             <IconButton
               onClick={() => navigate('/editar-perfil')}
               sx={{
