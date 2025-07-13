@@ -30,6 +30,7 @@ import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
 import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
 import RegisteredUsersChart from './components/metrics/RegisteredUsersChart'
+import IncomeChart from './components/metrics/IncomeChart'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -88,6 +89,7 @@ const AppRouter = () => {
             <Route path="/user-reservations" element={<UserActiveReservations />} />
             <Route path="/maintenance-vehicles" element={<EmployeeMaintenanceVehicles />} />
             <Route path="/registered-users-metric" element={<RegisteredUsersChart />} />
+            <Route path="/income-metric" element={<IncomeChart />} />
           </Routes>
         </Box>
         <Footer />
