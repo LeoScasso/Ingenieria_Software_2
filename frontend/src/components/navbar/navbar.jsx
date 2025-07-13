@@ -92,6 +92,7 @@ export const Navbar = () => {
         { text: 'Registrar Empleado', path: '/employee-registration' },
         { text: 'Ver Sucursales', path: '/branches' },
         { text: 'Ver Empleados', path: '/employees' },
+        { text: 'Usuarios Registrados', path: '/registered-users-metric' },
       ]
     }
     return []
