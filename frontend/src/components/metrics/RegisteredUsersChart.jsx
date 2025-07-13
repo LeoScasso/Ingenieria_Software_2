@@ -134,7 +134,7 @@ const RegisteredUsersChart = () => {
           gap: 2,
           mb: 3,
           flexWrap: 'wrap',
-          justifyContent: 'flex-start',
+          justifyContent: 'center',
           alignItems: 'center',
         }}
       >
