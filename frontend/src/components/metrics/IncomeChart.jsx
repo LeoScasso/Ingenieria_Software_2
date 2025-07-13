@@ -66,41 +66,49 @@ const IncomeChart = () => {
   const total =
     incomeData?.reduce((acc, curr) => acc + parseFloat(curr.category_income || 0), 0) || 0;
 
-  const getCategoryColor = (categoryName) => {
+  // Asignación de colores específicos para cada categoría
+  const getCategoryColors = (categories) => {
+    // Mapeo exacto de colores para categorías conocidas
     const colorMap = {
-      'cancelados': theme.palette.error.main,
-      'apto discapacitados': '#8e44ad',
-      'regular': theme.palette.success.main,
-      'promocional': theme.palette.warning.main,
-      'otros': theme.palette.info.main,
-      'deportivo': '#3498db',
-      'sub': '#2c3e50',
+      'apto discapacitados': '#8e44ad',  // Violeta distintivo
+      'chico': '#3498db',                // Azul claro
+      'deportivo': '#e74c3c',            // Rojo vivo
+      'suv': '#f39c12',                  // Naranja
+      'van': '#16a085',                  // Verde turquesa
+      'medio': '#2ecc71',                // Verde brillante
+      'cancelado': '#7f8c8d',            // Gris neutro
     };
 
-    const lowerCaseName = categoryName.toLowerCase();
-    if (colorMap[lowerCaseName]) {
-      return colorMap[lowerCaseName];
-    }
+    const result = {};
+    
+    // Primero asignamos colores específicos
+    categories.forEach(category => {
+      const normalizedName = category.toLowerCase().trim();
+      if (colorMap[normalizedName]) {
+        result[category] = colorMap[normalizedName];
+      }
+    });
 
-    const defaultPalette = [
-      theme.palette.primary.main,
-      theme.palette.secondary.main,
-      '#2ecc71',
-      '#e67e22',
-      '#34495e',
-      '#16a085',
-      '#c0392b',
-      '#7f8c8d',
-      '#f39c12',
-      '#d35400',
+    // Paleta de respaldo con colores contrastantes
+    const backupPalette = [
+      '#1abc9c', '#d35400', '#34495e', '#9b59b6',
+      '#e67e22', '#2c3e50', '#f1c40f', '#c0392b'
     ];
+    
+    let backupIndex = 0;
+    
+    // Asignamos colores a categorías no mapeadas
+    categories.forEach(category => {
+      if (!result[category]) {
+        result[category] = backupPalette[backupIndex % backupPalette.length];
+        backupIndex++;
+      }
+    });
 
-    let hash = 0;
-    for (let i = 0; i < categoryName.length; i++) {
-      hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return defaultPalette[Math.abs(hash) % defaultPalette.length];
+    return result;
   };
+
+  const categoryColors = incomeData ? getCategoryColors(incomeData.map(i => i.name)) : {};
 
   return (
     <Paper
@@ -126,7 +134,7 @@ const IncomeChart = () => {
           gap: 2,
           mb: 3,
           flexWrap: 'wrap',
-          justifyContent: 'center', // centrado
+          justifyContent: 'center',
           alignItems: 'center',
         }}
       >
@@ -174,10 +182,12 @@ const IncomeChart = () => {
         <>
           <Box
             sx={{
-              width: '100%',         // más grande
-              maxWidth: '600px',
+              width: '100%',
+              maxWidth: '500px',
+              height: '400px',
               mx: 'auto',
               mb: 3,
+              position: 'relative'
             }}
           >
             <Pie
@@ -187,7 +197,7 @@ const IncomeChart = () => {
                   {
                     label: 'Ingresos',
                     data: incomeData.map((i) => i.category_income),
-                    backgroundColor: incomeData.map((i) => getCategoryColor(i.name)),
+                    backgroundColor: incomeData.map((i) => categoryColors[i.name]),
                     borderColor: theme.palette.background.paper,
                     borderWidth: 1,
                   },
@@ -195,32 +205,40 @@ const IncomeChart = () => {
               }}
               options={{
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'top',
+                    position: 'right',
                     labels: {
-                      boxWidth: 12,
-                      padding: 10,
-                      font: { size: 12 },
-                    },
-                  },
-                  title: {
-                    display: true,
-                    color: theme.palette.text.primary,
-                    font: { weight: 'bold', size: 18 },
+                      boxWidth: 15,
+                      padding: 12,
+                      font: {
+                        size: 13,
+                        family: theme.typography.fontFamily
+                      },
+                      usePointStyle: true
+                    }
                   },
                   tooltip: {
                     callbacks: {
-                      label: function (context) {
+                      label: function(context) {
                         const label = context.label || '';
                         const value = context.raw || 0;
                         const percentage = ((value / total) * 100).toFixed(2);
                         return `${label}: ${formatCurrency(value)} (${percentage}%)`;
                       },
                     },
+                    bodyFont: {
+                      size: 13,
+                      family: theme.typography.fontFamily
+                    }
                   },
                 },
+                cutout: '60%',
+                animation: {
+                  animateScale: true,
+                  animateRotate: true
+                }
               }}
             />
           </Box>
@@ -245,7 +263,20 @@ const IncomeChart = () => {
                   const percentage = ((i.category_income / total) * 100).toFixed(2);
                   return (
                     <TableRow key={idx} hover>
-                      <TableCell>{i.name}</TableCell>
+                      <TableCell sx={{ color: categoryColors[i.name] }}>
+                        <Box 
+                          component="span" 
+                          sx={{
+                            display: 'inline-block',
+                            width: 12,
+                            height: 12,
+                            backgroundColor: categoryColors[i.name],
+                            mr: 1,
+                            borderRadius: '50%'
+                          }}
+                        />
+                        {i.name}
+                      </TableCell>
                       <TableCell>{formatCurrency(i.category_income)}</TableCell>
                       <TableCell>{percentage}%</TableCell>
                     </TableRow>
