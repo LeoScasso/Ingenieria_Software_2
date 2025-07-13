@@ -129,6 +129,17 @@ const ReservationDetail = () => {
           <Typography>
             <strong>Costo estimado:</strong> ${totalCost}
           </Typography>
+          <Divider sx={{ my: 2, borderColor: theme.palette.ming }} />
+          <Typography
+            sx={{
+              mt: 2,
+              fontStyle: 'italic',
+              textAlign: 'center',
+              color: theme.palette.grey[300],
+            }}
+          >
+            Compruebe que los campos sean correctos antes de confirmar
+          </Typography>
         </Box>
 
         <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ mt: 4 }}>
