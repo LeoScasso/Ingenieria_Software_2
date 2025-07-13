@@ -155,6 +155,13 @@ def edit_employee():
 
     with engine.connect() as conn:
         # Verificar sucursal
+        stmt = select(employees.c.employee_id).where(employees.c.email == data.get('email'))
+
+        result = conn.execute(stmt).fetchone()
+
+        if result and result.employee_id != data.get('employee_id'):
+            return jsonify({'message':'El email ingresado ya se encuentra registrado'})
+
         stmt = select(branches).where(branches.c.name == data.get('branch'))
         result = conn.execute(stmt).fetchone()
 
