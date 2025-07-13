@@ -66,12 +66,21 @@ def user_rentals():
 def user_reservations_for_employee():
     data = request.get_json()
     email = data.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email no proporcionado'}), 400
+
     with engine.connect() as conn:
         stmt = select(users.c.user_id).where(users.c.email == email)
-        user_id = conn.execute(stmt).fetchone()
-        if user_id is None:
+        user_row = conn.execute(stmt).fetchone()
+
+        if user_row is None:
             return jsonify({'error': 'Usuario no encontrado'}), 400
+
+        user_id = user_row[0]  # 👈 Este es el fix
+
     return return_user_reservations(user_id)
+
 
 
 
