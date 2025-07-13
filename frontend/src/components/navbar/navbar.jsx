@@ -83,7 +83,8 @@ export const Navbar = () => {
         { text: 'Crear Reserva', path: '/reservation' },
         { text: 'Historial Alquileres', path: '/rental-history-emp' },
         { text: 'Devoluciones', path: '/rental-to-return' },
-        {text: 'Reservas Activas', path: '/user-reservations'}
+        { text: 'Reservas Activas', path: '/user-reservations' },
+        { text: 'Vehículos en Mantenimiento', path: '/maintenance-vehicles' }
       ]
     } else if (role === 'admin') {
       return [
