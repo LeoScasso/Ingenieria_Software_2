@@ -94,7 +94,10 @@ const menuConfig = {
     },
     {
       label: 'Métricas',
-      items: [{ to: '/registered-users-metric', icon: <InsightsIcon />, text: 'Usuarios Registrados' }],
+      items: [
+        { to: '/registered-users-metric', icon: <InsightsIcon />, text: 'Usuarios Registrados' },
+        { to: '/income-metric', icon: <InsightsIcon />, text: 'Ingresos por Categoría' },
+      ],
     },
     {
       items: [
