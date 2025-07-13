@@ -29,6 +29,7 @@ import { EditProfile } from './components/user/EditProfile'
 import { Profile } from './components/user/Profile'
 import RentalHistory from './components/user/RentalHistory'
 import { EmployeeMaintenanceVehicles } from './components/Fleet/MaintenanceVehicles'
+import RegisteredUsersChart from './components/metrics/RegisteredUsersChart'
 import { theme } from './theme/theme'
 
 const AppRouter = () => {
@@ -86,6 +87,7 @@ const AppRouter = () => {
             <Route path="/employees/edit" element={<EmployeeEdit />} />
             <Route path="/user-reservations" element={<UserActiveReservations />} />
             <Route path="/maintenance-vehicles" element={<EmployeeMaintenanceVehicles />} />
+            <Route path="/registered-users-metric" element={<RegisteredUsersChart />} />
           </Routes>
         </Box>
         <Footer />
