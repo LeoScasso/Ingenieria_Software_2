@@ -226,6 +226,21 @@ export const AddPackages = () => {
           <Typography variant="h6" gutterBottom>
             No se agregaron paquetes al alquiler
           </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/rental-history-emp')}
+            sx={{
+              backgroundColor: theme.palette.beanBlue,
+              color: theme.palette.beige,
+              fontWeight: 'bold',
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              '&:hover': { backgroundColor: theme.palette.charcoal },
+            }}
+          >
+            Continuar
+          </Button>
         </Alert>
       </Box>
     )

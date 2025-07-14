@@ -84,6 +84,12 @@ const ReservationForm = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
 
+    if(formData.category == 4) {
+      alert('No hay stock disponible para la categoría seleccionada');
+      setIsSubmitting(false)
+      return;
+    }
+
     try {
       if (requiredFields.some((field) => !formData[field])) {
         alert('Por favor complete todos los campos obligatorios')

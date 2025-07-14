@@ -1,13 +1,14 @@
 import { Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useEffect, useState  } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
+
 
 const EditEmployeeForm = () => {
   const location = useLocation()
   const employeeFromState = location.state?.employee
-
+  const navigate = useNavigate();
   const [branches, setBranches] = useState([])
 
   const [formData, setFormData] = useState({
@@ -61,6 +62,7 @@ const EditEmployeeForm = () => {
 
       const res = await apiClient.put('/edit_employee', payload)
       alert(res.data.message)
+      navigate('/employees')
     } catch (err) {
       if (err.response) {
         alert('Error: ' + (err.response.data.message || 'Error del servidor.'))
