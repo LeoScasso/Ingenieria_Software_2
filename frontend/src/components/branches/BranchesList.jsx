@@ -42,19 +42,19 @@ export const BranchesList = () => {
 
   // Función para verificar si una sucursal está en proceso de eliminación
   const isBranchDeleting = (branch) => {
-    return branch.branch_status === 1
+    return branch.status === 1
   }
 
   // Función para obtener el texto del estado de eliminación
   const getDeletionStatusText = (branch) => {
-    if (branch.branch_status === 1) {
+    if (branch.status === 1) {
       return 'En proceso de eliminación'
     }
     return ''
   }
 
   // Filtrar sucursales eliminadas (estado 2) del listado
-  const activeBranches = branches.filter((branch) => branch.branch_status !== 2)
+  const activeBranches = branches.filter((branch) => branch.status !== 2)
 
   useEffect(() => {
     const fetchBranches = async () => {
