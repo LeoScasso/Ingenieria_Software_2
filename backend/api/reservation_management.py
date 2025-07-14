@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, delete, update, and_, not_
+from sqlalchemy import Table, select, insert, delete, update, and_, not_, exists
 from app.db import engine, metadata
 from datetime import datetime, date
 
@@ -192,5 +192,18 @@ def annul_reservation():
             .where(reservations.c.reservation_id == reserve_id)
             .values(is_rented=2)
         )
-
+        
         return jsonify({'message': 'La reserva fue anulada por falta de disponibilidad', 'refund': cost}), 200
+
+
+@reservation_management_bp.route('/check_email', methods=['POST'])
+def check_email():
+    data = request.get_json()
+    email = data.get('email')
+
+    with engine.connect as conn:
+        stmt = select(exists().where(users.c.email== email))
+        # Si el email existe
+        if conn.execute(stmt).scalar():
+            return jsonify({'message':'El email de usuario existe'}),200
+        return jsonify({'message':'El email de usuario no existe'}),400

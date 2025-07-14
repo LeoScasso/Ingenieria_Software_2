@@ -76,6 +76,7 @@ def get_branches():
             
             branch_info = {
                 'branch_id': row.branch_id,
+                'branch_status': row.status,
                 'name': row.name,
                 'address': row.address,
                 'locality': row.locality,
