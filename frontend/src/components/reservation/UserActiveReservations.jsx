@@ -51,10 +51,12 @@ const UserActiveReservations = () => {
     try {
       const response = await apiClient.post('/user_reservations_for_employee', { email });
 
-      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const filtered = response.data.filter((r) => {
         const pickup = new Date(r.pickup_datetime);
-        return pickup.toDateString() >= now.toDateString();
+        return pickup >= today;
       });
 
       setReservations(filtered);

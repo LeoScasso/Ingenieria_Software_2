@@ -160,7 +160,7 @@ const RentedVehiclesChart = () => {
                 labels: rentedData.map((item) => item.categoria),
                 datasets: [
                   {
-                    label: 'Cantidad de Vehículos',
+                    label: '',
                     data: rentedData.map((item) => item.total),
                     backgroundColor: rentedData.map(
                       (_, idx) => barColors[idx % barColors.length]
