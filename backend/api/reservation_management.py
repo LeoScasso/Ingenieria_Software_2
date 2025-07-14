@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from sqlalchemy import Table, select, insert, delete, update, and_, not_, exists
+from sqlalchemy import Table, select, insert, delete, update, and_, not_, exists, func
 from app.db import engine, metadata
 from datetime import datetime, date
 
@@ -201,9 +201,10 @@ def check_email():
     data = request.get_json()
     email = data.get('email')
 
-    with engine.connect as conn:
-        stmt = select(exists().where(users.c.email== email))
-        # Si el email existe
-        if conn.execute(stmt).scalar():
-            return jsonify({'message':'El email de usuario existe'}),200
-        return jsonify({'message':'El email de usuario no existe'}),400
+    with engine.connect() as conn:
+        stmt = select(func.count()).select_from(users).where(users.c.email == email)
+        result = conn.execute(stmt).scalar()
+
+        if result > 0:
+            return jsonify({'message': 'El email de usuario existe'}), 200
+        return jsonify({'message': 'El email de usuario no existe'}), 400
