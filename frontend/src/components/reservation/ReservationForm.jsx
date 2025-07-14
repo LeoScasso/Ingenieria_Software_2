@@ -1,28 +1,31 @@
 import { Button, Stack, Typography, useTheme } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 
 const ReservationForm = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const theme = useTheme()
   const userRole = sessionStorage.getItem('role')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [formData, setFormData] = useState({
+  // Initialize formData with location state if available
+  const initialFormData = location.state || {
     ...(userRole === 'employee' && { email: '' }),
     pickup_datetime: '',
     return_datetime: '',
     category: '',
     pickup_branch: '',
     return_branch: '',
-  })
+  }
 
+  const [formData, setFormData] = useState(initialFormData)
   const [categories, setCategories] = useState([])
   const [branches, setBranches] = useState([])
-  const [totalCost, setTotalCost] = useState(null)
-  const [rentalDays, setRentalDays] = useState(0)
+  const [totalCost, setTotalCost] = useState(location.state?.totalCost || null)
+  const [rentalDays, setRentalDays] = useState(location.state?.rentalDays || 0)
 
   const activeBranches = branches.filter((branch) => branch.status === 0)
 
