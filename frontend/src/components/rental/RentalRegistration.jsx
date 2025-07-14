@@ -68,9 +68,7 @@ const RentalRegistration = () => {
           }),
         ])
 
-      setReservations(
-        Array.isArray(reservationRes.data) ? reservationRes.data : []
-      )
+      setReservations(Array.isArray(reservationRes.data) ? reservationRes.data : [])
       setCategories(categoriesRes.data || [])
       setBranches(branchesRes.data || [])
 
@@ -97,6 +95,11 @@ const RentalRegistration = () => {
     return politicas_cancelacion[policyId] || 'No disponible'
   }
 
+  const getBranchNameById = (id) => {
+    const branch = branches.find((b) => b.branch_id === id)
+    return branch?.name || 'Sucursal desconocida'
+  }
+
   const handleRental = async (reservationId) => {
     try {
       const response = await apiClient.post('/rental', { id: reservationId })
@@ -104,7 +107,6 @@ const RentalRegistration = () => {
         message,
         number_plate,
         rental_id,
-        category_name,
         category_changed,
       } = response.data
 
@@ -140,9 +142,8 @@ const RentalRegistration = () => {
         reservation_id: reservation.reservation_id,
       })
 
-      alert(
-        `${response.data.message}. Reembolso: $${response.data.refund || 0}`
-      )
+      alert(`${response.data.message}. Reembolso: $${response.data.refund || 0}`)
+
       setReservations((prev) =>
         prev.filter((r) => r.reservation_id !== reservation.reservation_id)
       )
@@ -150,7 +151,7 @@ const RentalRegistration = () => {
       const msg = error.response?.data?.message
 
       if (msg && msg.includes('vehículos disponibles')) {
-        alert(msg) // NO anula, solo avisa
+        alert(msg)
       } else {
         alert(msg || 'Error al intentar anular la reserva.')
       }
@@ -210,19 +211,18 @@ const RentalRegistration = () => {
 
           <Grid container spacing={2} direction="column">
             {reservations.length > 0 ? (
-              reservations.map((reservation, index) => (
-                <Grid item key={index}>
+              reservations.map((reservation) => (
+                <Grid item key={reservation.reservation_id}>
                   <Paper
                     sx={{
                       p: 2,
                       backgroundColor: theme.palette.beanBlue,
                       color: 'white',
                       borderRadius: 2,
-                      position: 'relative',
                     }}
                   >
                     <Typography variant="body1" textAlign="center">
-                      Cliente: {reservation.first_name} {reservation.last_name}
+                      Cliente: {reservation.name} {reservation.last_name}
                     </Typography>
                     <Typography variant="body1" textAlign="center">
                       Email: {reservation.email}
@@ -238,6 +238,10 @@ const RentalRegistration = () => {
                     </Typography>
                     <Typography variant="body1" textAlign="center">
                       Costo estimado: ${reservation.cost}
+                    </Typography>
+                    <Typography variant="body1" textAlign="center">
+                      Sucursal de devolución:{' '}
+                      {getBranchNameById(reservation.branch_id_return)}
                     </Typography>
                     <Typography variant="body1" textAlign="center">
                       Política de cancelación:{' '}
