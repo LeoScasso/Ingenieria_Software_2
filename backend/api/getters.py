@@ -59,7 +59,7 @@ def get_brands():
 def get_branches():
     with engine.connect() as conn:
         # Obtener información básica de sucursales
-        stmt = select(branches.c.branch_id, branches.c.name, branches.c.address, branches.c.locality).order_by(branches.c.name)
+        stmt = select(branches).order_by(branches.c.name)
         result = conn.execute(stmt).fetchall()
         
         branches_list = []
@@ -76,7 +76,7 @@ def get_branches():
             
             branch_info = {
                 'branch_id': row.branch_id,
-                'branch_status': row.status,
+                'status': row.status,
                 'name': row.name,
                 'address': row.address,
                 'locality': row.locality,
