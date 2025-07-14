@@ -9,6 +9,7 @@ const EditEmployeeForm = () => {
   const employeeFromState = location.state?.employee
   const navigate = useNavigate()
   const [branches, setBranches] = useState([])
+  const [showPassword, setShowPassword] = useState(false)
 
   // Filtrar sucursales activas (status 0) - excluir status 1 y 2
   const activeBranches = branches.filter((branch) => branch.status === 0)
@@ -126,6 +127,8 @@ const EditEmployeeForm = () => {
       type: 'password',
       value: formData.password,
       onChange: handleChange,
+      showPassword: showPassword,
+      onTogglePassword: () => setShowPassword(!showPassword),
       required: true,
     },
     {

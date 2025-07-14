@@ -131,19 +131,22 @@ const CustomForm = ({
             {...commonProps}
             key={field.name}
             type={getFieldType(field)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={field.onTogglePassword}
-                    edge="end"
-                    sx={{ color: theme.palette.beige }}
-                  >
-                    {field.showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={field.onTogglePassword}
+                      edge="end"
+                      sx={{ color: theme.palette.beige }}
+                    >
+                      {field.showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: { color: theme.palette.beige },
+              },
             }}
           />
         )
