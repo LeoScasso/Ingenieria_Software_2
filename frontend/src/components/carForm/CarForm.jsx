@@ -21,7 +21,7 @@ const CarForm = () => {
   const [branches, setBranches] = useState([])
 
   // Filtrar sucursales activas (status 0) - excluir status 1 y 2
-  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+  const activeBranches = branches.filter((branch) => branch.status === 0)
 
   const getBrands = async () => {
     try {

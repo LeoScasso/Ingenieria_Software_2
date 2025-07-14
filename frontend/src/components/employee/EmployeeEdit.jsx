@@ -1,18 +1,17 @@
 import { Typography } from '@mui/material'
-import React, { useEffect, useState  } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 
-
 const EditEmployeeForm = () => {
   const location = useLocation()
   const employeeFromState = location.state?.employee
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [branches, setBranches] = useState([])
 
   // Filtrar sucursales activas (status 0) - excluir status 1 y 2
-  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+  const activeBranches = branches.filter((branch) => branch.status === 0)
 
   const [formData, setFormData] = useState({
     employee_id: employeeFromState?.employee_id || '',

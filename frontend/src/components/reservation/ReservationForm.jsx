@@ -25,7 +25,7 @@ const ReservationForm = () => {
   const [rentalDays, setRentalDays] = useState(0)
 
   // Filtrar sucursales activas (status 0) - excluir status 1 y 2
-  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+  const activeBranches = branches.filter((branch) => branch.status === 0)
 
   const requiredFields =
     userRole === 'employee'
@@ -87,10 +87,10 @@ const ReservationForm = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    if(formData.category == 4) {
-      alert('No hay stock disponible para la categoría seleccionada');
+    if (formData.category == 4) {
+      alert('No hay stock disponible para la categoría seleccionada')
       setIsSubmitting(false)
-      return;
+      return
     }
 
     try {
