@@ -14,6 +14,9 @@ const EditCarForm = () => {
   const [carBrands, setCarBrands] = useState([])
   const [models, setModels] = useState([])
 
+  // Filtrar sucursales activas (status 0) - excluir status 1 y 2
+  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+
   const [formData, setFormData] = useState({
     vehicle_id: vehicleFromState?.vehicle_id || '',
     number_plate: vehicleFromState?.number_plate || '',
@@ -23,7 +26,7 @@ const EditCarForm = () => {
     model: vehicleFromState?.model || '',
     year: vehicleFromState?.year || '',
     brand: vehicleFromState?.brand || '',
-    branch: vehicleFromState?.branch?.name || '' // Asegúrate de acceder al nombre de la sucursal
+    branch: vehicleFromState?.branch?.name || '', // Asegúrate de acceder al nombre de la sucursal
   })
 
   const estados = ['Disponible', 'Alquilado', 'Mantenimiento']
@@ -51,12 +54,12 @@ const EditCarForm = () => {
       try {
         const response = await apiClient.get('/get_branches')
         setBranches(response.data)
-        
+
         // Si la sucursal no está establecida pero tenemos datos del vehículo
         if (vehicleFromState?.branch && !formData.branch) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            branch: vehicleFromState.branch.name || ''
+            branch: vehicleFromState.branch.name || '',
           }))
         }
       } catch (error) {
@@ -101,7 +104,9 @@ const EditCarForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const selectedBranch = branches.find(b => b.name === formData.branch)
+      const selectedBranch = activeBranches.find(
+        (b) => b.name === formData.branch
+      )
 
       if (!selectedBranch) {
         alert('Sucursal no válida seleccionada.')
@@ -110,7 +115,7 @@ const EditCarForm = () => {
 
       const payload = {
         ...formData,
-        branch: selectedBranch.branch_id // Convertimos nombre a ID
+        branch: selectedBranch.branch_id, // Convertimos nombre a ID
       }
 
       const response = await apiClient.put('/update_vehicle', payload)
@@ -200,11 +205,11 @@ const EditCarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'edit-branch',
-      options: branches.map(branch => ({
+      options: activeBranches.map((branch) => ({
         value: branch.name,
         label: `${branch.name} - ${branch.address}`,
       })),
-    }
+    },
   ]
 
   return (

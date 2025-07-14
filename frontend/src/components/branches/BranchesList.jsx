@@ -5,6 +5,7 @@ import {
   LocationOn,
   People,
   Visibility,
+  Warning,
 } from '@mui/icons-material'
 import {
   Alert,
@@ -17,6 +18,7 @@ import {
   Divider,
   Grid,
   Snackbar,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -37,6 +39,22 @@ export const BranchesList = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const role = sessionStorage.getItem('role')
+
+  // Función para verificar si una sucursal está en proceso de eliminación
+  const isBranchDeleting = (branch) => {
+    return branch.branch_status === 1
+  }
+
+  // Función para obtener el texto del estado de eliminación
+  const getDeletionStatusText = (branch) => {
+    if (branch.branch_status === 1) {
+      return 'En proceso de eliminación'
+    }
+    return ''
+  }
+
+  // Filtrar sucursales eliminadas (estado 2) del listado
+  const activeBranches = branches.filter((branch) => branch.branch_status !== 2)
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -151,20 +169,29 @@ export const BranchesList = () => {
         )}
       </Box>
       <Grid container spacing={3} justifyContent="center">
-        {branches.map((branch) => (
+        {activeBranches.map((branch) => (
           <Grid item xs={12} sm={6} md={4} key={branch.branch_id}>
             <Card
               elevation={8}
               sx={{
                 height: '100%',
                 backgroundColor: theme.palette.beige,
-                border: `3px solid ${theme.palette.ming}`,
+                border: `3px solid ${
+                  isBranchDeleting(branch) ? 'red' : theme.palette.ming
+                }`,
                 borderRadius: 3,
                 transition: 'all 0.3s ease',
+                opacity: isBranchDeleting(branch) ? 0.7 : 1,
                 '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 24px rgba(0,0,0,0.3)',
-                  borderColor: theme.palette.darkBlue,
+                  transform: isBranchDeleting(branch)
+                    ? 'none'
+                    : 'translateY(-8px)',
+                  boxShadow: isBranchDeleting(branch)
+                    ? '0 4px 8px rgba(0,0,0,0.2)'
+                    : '0 12px 24px rgba(0,0,0,0.3)',
+                  borderColor: isBranchDeleting(branch)
+                    ? 'red'
+                    : theme.palette.darkBlue,
                 },
               }}
             >
@@ -172,22 +199,42 @@ export const BranchesList = () => {
                 <Box display="flex" alignItems="center" mb={2}>
                   <Business
                     sx={{
-                      color: theme.palette.ming,
+                      color: isBranchDeleting(branch)
+                        ? 'red'
+                        : theme.palette.ming,
                       mr: 1,
                       fontSize: '2rem',
                     }}
                   />
-                  <Typography
-                    variant="h5"
-                    component="h2"
-                    sx={{
-                      color: theme.palette.darkBlue,
-                      fontWeight: 'bold',
-                      flex: 1,
-                    }}
-                  >
-                    {branch.name}
-                  </Typography>
+                  <Box display="flex" alignItems="center" flex={1}>
+                    <Typography
+                      variant="h5"
+                      component="h2"
+                      sx={{
+                        color: isBranchDeleting(branch)
+                          ? 'red'
+                          : theme.palette.darkBlue,
+                        fontWeight: 'bold',
+                        flex: 1,
+                        textDecoration: isBranchDeleting(branch)
+                          ? 'line-through'
+                          : 'none',
+                      }}
+                    >
+                      {branch.name}
+                    </Typography>
+                    {isBranchDeleting(branch) && (
+                      <Tooltip title={getDeletionStatusText(branch)}>
+                        <Warning
+                          sx={{
+                            color: 'red',
+                            ml: 1,
+                            fontSize: '1.5rem',
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </Box>
                 </Box>
 
                 <Box display="flex" alignItems="flex-start" mb={2}>
@@ -259,6 +306,22 @@ export const BranchesList = () => {
                     }}
                   />
                 </Box>
+                {isBranchDeleting(branch) && (
+                  <Box mt={2} display="flex" justifyContent="center">
+                    <Chip
+                      icon={<Warning />}
+                      label={getDeletionStatusText(branch)}
+                      sx={{
+                        backgroundColor: 'red',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        '& .MuiChip-icon': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Box>
+                )}
                 {role === 'admin' && (
                   <Box mt={2} display="flex" justifyContent="flex-end">
                     <Button
@@ -284,7 +347,7 @@ export const BranchesList = () => {
         ))}
       </Grid>
 
-      {branches.length === 0 && !loading && !error && (
+      {activeBranches.length === 0 && !loading && !error && (
         <Box
           display="flex"
           justifyContent="center"

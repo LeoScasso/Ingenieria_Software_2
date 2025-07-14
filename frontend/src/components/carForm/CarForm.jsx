@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
 import { Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react'
 import apiClient from '../../middleware/axios'
 import Form from '../common/Form'
 
@@ -12,13 +12,16 @@ const CarForm = () => {
     model: '',
     year: '',
     brand: '',
-    branch: ''
+    branch: '',
   })
 
   const [brands, setBrands] = useState([])
   const [models, setModels] = useState([])
   const [categories, setCategories] = useState([])
   const [branches, setBranches] = useState([])
+
+  // Filtrar sucursales activas (status 0) - excluir status 1 y 2
+  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
 
   const getBrands = async () => {
     try {
@@ -45,7 +48,7 @@ const CarForm = () => {
     }
     try {
       const response = await apiClient.get('/get_models_by_brand', {
-        params: { brand }
+        params: { brand },
       })
       setModels(response.data)
     } catch (error) {
@@ -70,18 +73,18 @@ const CarForm = () => {
   }, [])
 
   useEffect(() => {
-    setFormData(prev => ({ ...prev, model: '' }))
+    setFormData((prev) => ({ ...prev, model: '' }))
     getModelsByBrand(formData.brand)
   }, [formData.brand])
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleChangeBrand = (e) => {
     const selectedBrand = e.target.value
-    setFormData(prev => ({ ...prev, brand: selectedBrand, model: '' }))
+    setFormData((prev) => ({ ...prev, brand: selectedBrand, model: '' }))
   }
 
   const handleSubmit = async (e) => {
@@ -101,14 +104,10 @@ const CarForm = () => {
   const cancelationPolicies = [
     '100% de devolución',
     '20% de devolución',
-    'Sin devolución'
+    'Sin devolución',
   ]
 
-  const estados = [
-    "Disponible",
-    "Alquilado",
-    "Mantenimiento",
-  ]
+  const estados = ['Disponible', 'Alquilado', 'Mantenimiento']
 
   const fields = [
     {
@@ -119,7 +118,7 @@ const CarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'new-number_plate',
-      autoFocus: true
+      autoFocus: true,
     },
     {
       name: 'brand',
@@ -129,7 +128,7 @@ const CarForm = () => {
       onChange: handleChangeBrand,
       required: true,
       autoComplete: 'new-brand',
-      options: brands.map(brand => ({ value: brand, label: brand }))
+      options: brands.map((brand) => ({ value: brand, label: brand })),
     },
     {
       name: 'model',
@@ -139,9 +138,10 @@ const CarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'new-model',
-      options: models.length > 0
-        ? models.map(model => ({ value: model, label: model }))
-        : [{ value: '', label: 'Seleccione una marca primero' }]
+      options:
+        models.length > 0
+          ? models.map((model) => ({ value: model, label: model }))
+          : [{ value: '', label: 'Seleccione una marca primero' }],
     },
     {
       name: 'category',
@@ -151,7 +151,7 @@ const CarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'new-category',
-      options: categories.map(name => ({ value: name, label: name }))
+      options: categories.map((name) => ({ value: name, label: name })),
     },
     {
       name: 'year',
@@ -160,7 +160,7 @@ const CarForm = () => {
       value: formData.year,
       onChange: handleChange,
       required: true,
-      autoComplete: 'new-year'
+      autoComplete: 'new-year',
     },
     {
       name: 'condition',
@@ -170,7 +170,7 @@ const CarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'new-condition',
-      options: estados.map(estado => ({ value: estado, label: estado }))
+      options: estados.map((estado) => ({ value: estado, label: estado })),
     },
     {
       name: 'branch',
@@ -180,11 +180,11 @@ const CarForm = () => {
       onChange: handleChange,
       required: true,
       autoComplete: 'new-branch',
-      options: branches.map(branch => ({
+      options: activeBranches.map((branch) => ({
         value: branch.name,
         label: `${branch.name} - ${branch.address}`,
       })),
-    }
+    },
   ]
 
   return (
