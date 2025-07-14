@@ -64,7 +64,21 @@ export const EmployeesList = () => {
   }, []);
 
   const handleDelete = async (employee_id) => {
+    const empleado = employees.find((e) => e.employee_id === employee_id);
+    const empleadosMismaSucursal = employees.filter(
+      (e) => e.name_1 === empleado.name_1
+    );
+
+    // Confirmación base
     if (!window.confirm('¿Estás seguro que querés eliminar este empleado?')) return;
+
+    // Si es el único de su sucursal, mostrar alerta extra
+    if (empleadosMismaSucursal.length === 1) {
+      const confirmarUltimo = window.confirm(
+        `Este es el último empleado de la sucursal "${empleado.name_1}". ¿Querés continuar de todos modos?`
+      );
+      if (!confirmarUltimo) return;
+    }
 
     try {
       await apiClient.delete('/delete_employee', { data: { employee_id } });
