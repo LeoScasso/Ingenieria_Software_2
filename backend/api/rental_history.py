@@ -82,8 +82,6 @@ def user_reservations_for_employee():
     return return_user_reservations(user_id)
 
 
-
-
 @rental_history_bp.route('/user_reservations', methods=['GET'])
 def user_reservations():
     return return_user_reservations(session.get('user_id'))
@@ -98,6 +96,7 @@ def return_user_reservations(user_id):
         reservations.c.return_datetime,
         reservations.c.cost,
         reservations.c.is_rented,
+        reservations.c.branch_id_pickup,
         vehicle_categories.c.name.label('vehicle_category')
     ).select_from(
         reservations.join(vehicle_categories, reservations.c.category_id == vehicle_categories.c.category_id)
