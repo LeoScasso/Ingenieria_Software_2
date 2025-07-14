@@ -24,6 +24,9 @@ const ReservationForm = () => {
   const [totalCost, setTotalCost] = useState(null)
   const [rentalDays, setRentalDays] = useState(0)
 
+  // Filtrar sucursales activas (status 0) - excluir status 1 y 2
+  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+
   const requiredFields =
     userRole === 'employee'
       ? [
@@ -199,7 +202,7 @@ const ReservationForm = () => {
       value: formData.pickup_branch,
       onChange: handleChange,
       required: true,
-      options: branches.map((branch) => ({
+      options: activeBranches.map((branch) => ({
         value: branch.name,
         label: `${branch.name} - ${branch.address}`,
       })),
@@ -211,7 +214,7 @@ const ReservationForm = () => {
       value: formData.return_branch,
       onChange: handleChange,
       required: true,
-      options: branches.map((branch) => ({
+      options: activeBranches.map((branch) => ({
         value: branch.name,
         label: `${branch.name} - ${branch.address}`,
       })),

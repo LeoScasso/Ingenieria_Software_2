@@ -11,6 +11,9 @@ const EditEmployeeForm = () => {
   const navigate = useNavigate();
   const [branches, setBranches] = useState([])
 
+  // Filtrar sucursales activas (status 0) - excluir status 1 y 2
+  const activeBranches = branches.filter((branch) => branch.branch_status === 0)
+
   const [formData, setFormData] = useState({
     employee_id: employeeFromState?.employee_id || '',
     name: employeeFromState?.name || '',
@@ -49,7 +52,9 @@ const EditEmployeeForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const selectedBranch = branches.find((b) => b.name === formData.branch)
+      const selectedBranch = activeBranches.find(
+        (b) => b.name === formData.branch
+      )
       if (!selectedBranch) {
         alert('Sucursal seleccionada inválida.')
         return
@@ -131,7 +136,7 @@ const EditEmployeeForm = () => {
       value: formData.branch,
       onChange: handleChange,
       required: true,
-      options: branches.map((b) => ({
+      options: activeBranches.map((b) => ({
         value: b.name,
         label: `${b.name} - ${b.address}`,
       })),
@@ -145,7 +150,11 @@ const EditEmployeeForm = () => {
       onSubmit={handleSubmit}
       submitButtonText="Guardar Cambios"
     >
-      <Typography variant="body2" color="white" sx={{ textAlign: 'center', mt: 2 }}>
+      <Typography
+        variant="body2"
+        color="white"
+        sx={{ textAlign: 'center', mt: 2 }}
+      >
         Todos los campos son obligatorios
       </Typography>
     </Form>
