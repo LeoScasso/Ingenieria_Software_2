@@ -26,20 +26,25 @@ const UserActiveReservations = () => {
   const [email, setEmail] = useState('');
   const [reservations, setReservations] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await apiClient.get('/get_categories');
-        setCategories(response.data);
+        const [catRes, branchRes] = await Promise.all([
+          apiClient.get('/get_categories'),
+          apiClient.get('/get_branches'),
+        ]);
+        setCategories(catRes.data);
+        setBranches(branchRes.data);
       } catch (err) {
-        console.error('Error al cargar categorías', err);
+        console.error('Error al cargar categorías o sucursales', err);
       }
     };
-    fetchCategories();
+    fetchInitialData();
   }, []);
 
   const handleSearch = async () => {
@@ -86,6 +91,11 @@ const UserActiveReservations = () => {
     const category = categories.find(cat => cat.name === categoryName);
     const policyId = category?.cancelation_policy_id;
     return politicas_cancelacion[policyId] || 'No disponible';
+  };
+
+  const getBranchName = (branchId) => {
+    const branch = branches.find(b => b.branch_id === branchId);
+    return branch?.name || `Sucursal ID ${branchId}`;
   };
 
   const handleCancelReservation = async (reservation) => {
@@ -214,6 +224,7 @@ const UserActiveReservations = () => {
                   <Typography textAlign="center"><strong>Retiro:</strong> {formatDate(res.pickup_datetime)}</Typography>
                   <Typography textAlign="center"><strong>Devolución:</strong> {formatDate(res.return_datetime)}</Typography>
                   <Typography textAlign="center"><strong>Costo:</strong> ${res.cost}</Typography>
+                  <Typography textAlign="center"><strong>Sucursal de Retiro:</strong> {getBranchName(res.branch_id_pickup)}</Typography>
                   <Typography textAlign="center">
                     <strong>Política de cancelación:</strong>{' '}
                     {getCancelationPolicy(res.vehicle_category)}
