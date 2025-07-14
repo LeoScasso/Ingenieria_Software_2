@@ -3,11 +3,9 @@ import AddBusinessIcon from '@mui/icons-material/AddBusiness'
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import BuildIcon from '@mui/icons-material/Build'
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import HistoryIcon from '@mui/icons-material/History'
-import HomeWorkIcon from '@mui/icons-material/HomeWork'
 import InsightsIcon from '@mui/icons-material/Insights'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import LoginIcon from '@mui/icons-material/Login'
@@ -49,12 +47,12 @@ const menuConfig = {
         },
       ],
     },
-    {
+    /* {
       items: [
         { to: '/branches', icon: <HomeWorkIcon />, text: 'Ver Sucursales' },
         { to: '/vehicles', icon: <DirectionsCarIcon />, text: 'Ver Flota' },
       ],
-    },
+    }, */
   ],
   employee: [
     {
@@ -100,12 +98,12 @@ const menuConfig = {
         { to: '/register', icon: <GroupAddIcon />, text: 'Registrar cliente' },
       ],
     },
-    {
+    /* {
       items: [
         { to: '/branches', icon: <HomeWorkIcon />, text: 'Ver Sucursales' },
         { to: '/vehicles', icon: <DirectionsCarIcon />, text: 'Ver Flota' },
       ],
-    },
+    }, */
   ],
   admin: [
     {
@@ -148,12 +146,12 @@ const menuConfig = {
         },
       ],
     },
-    {
+    /* {
       items: [
         { to: '/branches', icon: <HomeWorkIcon />, text: 'Ver Sucursales' },
         { to: '/vehicles', icon: <DirectionsCarIcon />, text: 'Ver Flota' },
       ],
-    },
+    }, */
   ],
 }
 
@@ -338,6 +336,13 @@ export const Navbar = () => {
                     to="/vehicles"
                   >
                     Ver Flota
+                  </MenuItem>
+                  <MenuItem
+                    onClick={handleProfileMenuClose}
+                    component={Link}
+                    to="/branches"
+                  >
+                    Ver Sucursales
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
                 </Menu>
