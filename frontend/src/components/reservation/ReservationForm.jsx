@@ -24,26 +24,12 @@ const ReservationForm = () => {
   const [totalCost, setTotalCost] = useState(null)
   const [rentalDays, setRentalDays] = useState(0)
 
-  // Filtrar sucursales activas (status 0) - excluir status 1 y 2
   const activeBranches = branches.filter((branch) => branch.status === 0)
 
   const requiredFields =
     userRole === 'employee'
-      ? [
-          'email',
-          'pickup_datetime',
-          'return_datetime',
-          'category',
-          'pickup_branch',
-          'return_branch',
-        ]
-      : [
-          'pickup_datetime',
-          'return_datetime',
-          'category',
-          'pickup_branch',
-          'return_branch',
-        ]
+      ? ['email', 'pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch']
+      : ['pickup_datetime', 'return_datetime', 'category', 'pickup_branch', 'return_branch']
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -55,9 +41,7 @@ const ReservationForm = () => {
       const pickupDate = new Date(pickup_datetime)
       const returnDate = new Date(return_datetime)
       const days = Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24))
-      const categoryObj = categories.find(
-        (c) => c.category_id === parseInt(category)
-      )
+      const categoryObj = categories.find((c) => c.category_id === parseInt(category))
 
       if (pickupDate > returnDate) {
         setTotalCost(null)
@@ -100,25 +84,31 @@ const ReservationForm = () => {
         return
       }
 
+      if (userRole === 'employee') {
+        // Verificamos que el email del cliente exista
+        try {
+          const res = await apiClient.post('/check_email', { email: formData.email })
+          console.log('check_email success:', res)
+        } catch (err) {
+          alert('El email ingresado no corresponde a ningún cliente registrado')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
       const pickupDate = new Date(formData.pickup_datetime)
       const returnDate = new Date(formData.return_datetime)
       const days = Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24))
-      const categoryObj = categories.find(
-        (c) => c.category_id === parseInt(formData.category)
-      )
+      const categoryObj = categories.find((c) => c.category_id === parseInt(formData.category))
 
       if (pickupDate > returnDate) {
-        alert(
-          'La fecha de retiro no puede ser posterior a la fecha de devolución'
-        )
+        alert('La fecha de retiro no puede ser posterior a la fecha de devolución')
         setIsSubmitting(false)
         return
       }
 
       if (categoryObj && days < categoryObj.minimum_rental_days) {
-        alert(
-          `Debe alquilar al menos ${categoryObj.minimum_rental_days} día(s) para la categoría seleccionada`
-        )
+        alert(`Debe alquilar al menos ${categoryObj.minimum_rental_days} día(s) para la categoría seleccionada`)
         setIsSubmitting(false)
         return
       }
@@ -142,8 +132,7 @@ const ReservationForm = () => {
       }
     } catch (err) {
       console.error('Error:', err)
-      const errorMsg =
-        err?.response?.data?.error || 'Error interno del servidor'
+      const errorMsg = err?.response?.data?.error || 'Error interno del servidor'
       alert(errorMsg)
     } finally {
       setIsSubmitting(false)
